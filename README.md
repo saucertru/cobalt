@@ -6,7 +6,7 @@ A browser games site with games, Cobalt AI, music, a chat room, a coin shop and 
 
 1. Push this folder to a GitHub repo.
 2. In Vercel, import the repo. `vercel.json` already sets the build (`node scripts/build-games.js`, output folder `dist`).
-3. Every push rebuilds the site. Any new folder in `games/` appears on the games page (see `games/README.md`).
+3. Every push rebuilds the site. Any folder in `games/` (with an `index.html`) appears on the Games page. Optional `game.json` sets the name, description, controls and colour; optional `thumbnail.png` sets the card image.
 
 ## Turn on accounts, chat, the shop and game requests (Supabase, free plan)
 
@@ -20,6 +20,8 @@ A browser games site with games, Cobalt AI, music, a chat room, a coin shop and 
 Coins, the daily bonus and buying are handled by the database, so they can't be cheated from the browser.
 
 ## Notes
+
+- Flash games: anyone can play a .swf from their device on the Flash player page. You can also put .swf files in `games/` (loose, or in a folder) and they get a Ruffle player page automatically. Ruffle loads from unpkg.com.
 
 - Cobalt AI runs in the visitor's browser with an open model (SmolLM2 360M). The first start downloads about 250 MB.
 - Optional Google sign-in: turn on Authentication → Providers → Google in Supabase (needs a Google Cloud OAuth client), then set `google: true` in `supabase-config.js`.

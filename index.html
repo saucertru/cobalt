@@ -230,6 +230,12 @@ html[data-theme=light]{color-scheme:light}
 .aistart{max-width:470px;margin:24px auto 0;text-align:center}
 .aistart .d{color:var(--dim);font-size:13px;margin-top:6px;line-height:1.5}
 progress{width:100%;height:8px;accent-color:var(--mint);margin:14px 0 2px}
+.swfdrop{text-align:center;padding:42px 20px;border-style:dashed;border-width:1.5px}
+.swfdrop .d{color:var(--dim);margin:8px 0 12px;font-size:13px}
+.swfdrop.over{border-color:var(--mint)}
+.swfstage{display:none;width:100%;aspect-ratio:4/3;background:#000;border-radius:18px;overflow:hidden;border:1px solid var(--line)}
+.swfstage.on{display:block}
+.swfstage ruffle-player,.swfstage ruffle-object{width:100%;height:100%;display:block}
 /* purchasable effects */
 .fx-glow{text-shadow:0 0 6px currentColor,0 0 14px currentColor}
 .fx-rainbow{background:linear-gradient(90deg,#ff6b6b,#ffd166,#6ee7a8,#60a5fa,#c084fc,#ff6b6b);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent!important;animation:rb 3s linear infinite}
@@ -393,6 +399,23 @@ html[data-theme=green]{--p07050c:#050806;--p0a0712:#060c09;--p0b0814:#08100c;--p
           <p class="note" id="cnote"></p>
         </div>
       </section>
+      <section id="flash" class="view">
+        <div class="page">
+          <h1 class="logo small">flash player</h1>
+          <p class="sub">Play Flash games (.swf files) from your device. They run in your browser with Ruffle and aren't uploaded anywhere.</p>
+          <div class="panel swfdrop" id="swfDrop">
+            <div style="font-weight:700;font-size:16px">Drop a .swf file here</div>
+            <div class="d">or</div>
+            <label class="btnp" style="display:inline-block">Choose a file<input type="file" id="swfFile" accept=".swf,application/x-shockwave-flash" hidden></label>
+          </div>
+          <div class="sechead" id="swfBar" style="display:none">
+            <div style="font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="swfName"></div>
+            <div class="row"><button class="btng" id="swfFull">Fullscreen</button><button class="btng" id="swfOther">Play another</button></div>
+          </div>
+          <div class="swfstage" id="swfStage"></div>
+          <p class="note" id="swfNote"></p>
+        </div>
+      </section>
       <section id="shop" class="view"><div class="page" id="shopBody"></div></section>
       <section id="profile" class="view"><div class="page" id="profBody"></div></section>
       <section id="settings" class="view"><div class="page" id="setBody"></div></section>
@@ -430,6 +453,7 @@ const ICONS = {
   feather:'<path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/><path d="M16 8 2 22"/><path d="M17.5 15H9"/>',
   bricks:'<rect x="3" y="4" width="8" height="4" rx="1"/><rect x="13" y="4" width="8" height="4" rx="1"/><rect x="7" y="10" width="10" height="4" rx="1"/><circle cx="12" cy="19" r="2"/>',
   gamepad:'<path d="M6 11h4M8 9v4"/><circle cx="15.5" cy="12" r=".9" fill="currentColor"/><circle cx="18" cy="10" r=".9" fill="currentColor"/><path d="M17.3 5H6.7a4 4 0 0 0-3.9 3.4L2 14.6a2.6 2.6 0 0 0 4.6 2.2L8 15h8l1.4 1.8a2.6 2.6 0 0 0 4.6-2.2l-.8-6.2A4 4 0 0 0 17.3 5z"/>',
+  bolt:'<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',
   hash:'<path d="M9 3v18M15 3v18M3 9h18M3 15h18"/>',
   bot:'<rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 4v4"/><circle cx="12" cy="3.5" r="1"/><path d="M9 13v1.5M15 13v1.5"/><path d="M2 13v3M22 13v3"/>',
   music:'<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
@@ -448,7 +472,7 @@ const ICONS = {
 const svg = (n, s=20) => `<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONS[n]}</svg>`;
 document.querySelectorAll('[data-i]').forEach(el => { el.innerHTML = svg(el.dataset.i, +(el.dataset.s || 20)); });
 
-const THEMES=["cobalt", "purple", "black", "grey", "light", "green"];const GAME_MAP={"cobalt": {"#241c38": "#1b2739", "#cfc8e6": "#c7d4e7", "#07050c": "#05080c", "#18122a": "#111b2b", "#1b1530": "#142031", "#0f0b1a": "#0b111a", "#120c24": "#0b1525", "#211a35": "#192536", "#3a2a66": "#284268", "#7b5fc4": "#5c87c7", "#261d40": "#1c2b41", "#8b5cf6": "#5899fa", "#6366f1": "#5f9bf5", "#2d1f52": "#1e3353", "#f0ecfa": "#ecf2fa", "#2563eb": "#2073f0", "#120d20": "#0d1520", "#2a1f48": "#1e2f49", "#f6f3ff": "#f3f8ff", "#120a24": "#091425", "#2a1a55": "#193156", "#0b0814": "#080d14", "#2f2548": "#243349", "#bdb4d8": "#b3c2d9", "#d9c8ff": "#c8deff", "#d0c9e6": "#c8d4e7", "#e6e1f5": "#e1e9f5", "#0d0a16": "#0a0f16", "#100c1c": "#0c121c", "#2a2140": "#202d41", "#2c2248": "#213149", "#0a0712": "#070b12", "#171126": "#101927", "#130e22": "#0e1622", "#1e1734": "#162235", "#3a2e5c": "#2d405d", "#d6cfec": "#cedaed", "#151024": "#0f1825", "#ece8f7": "#e8eef7", "#231a3c": "#19273d", "#a78bfa": "#88b7fd", "#6a4fb0": "#4d75b2", "#c4b5fd": "#b3d1ff", "#9a90b8": "#8fa0b9", "#24163f": "#152640"}, "purple": {}, "black": {"#241c38": "#0d0d0d", "#cfc8e6": "#d7d7d7", "#07050c": "#030303", "#18122a": "#090909", "#1b1530": "#0a0a0a", "#0f0b1a": "#060606", "#120c24": "#070707", "#211a35": "#0c0c0c", "#3a2a66": "#484848", "#7b5fc4": "#929292", "#261d40": "#0e0e0e", "#8b5cf6": "#8b5cf6", "#6366f1": "#6366f1", "#2d1f52": "#111111", "#f0ecfa": "#f3f3f3", "#2563eb": "#2563eb", "#120d20": "#070707", "#2a1f48": "#0f0f0f", "#f6f3ff": "#f9f9f9", "#120a24": "#070707", "#2a1a55": "#111111", "#0b0814": "#040404", "#2f2548": "#101010", "#bdb4d8": "#c6c6c6", "#d9c8ff": "#e3e3e3", "#d0c9e6": "#d8d8d8", "#e6e1f5": "#ebebeb", "#0d0a16": "#050505", "#100c1c": "#060606", "#2a2140": "#0f0f0f", "#2c2248": "#101010", "#0a0712": "#040404", "#171126": "#080808", "#130e22": "#070707", "#1e1734": "#0b0b0b", "#3a2e5c": "#454545", "#d6cfec": "#dedede", "#151024": "#080808", "#ece8f7": "#f0f0f0", "#231a3c": "#0d0d0d", "#a78bfa": "#a78bfa", "#6a4fb0": "#808080", "#c4b5fd": "#c4b5fd", "#9a90b8": "#a4a4a4", "#24163f": "#0d0d0d"}, "grey": {"#241c38": "#2a292b", "#cfc8e6": "#d6d6d8", "#07050c": "#080809", "#18122a": "#1e1d1f", "#1b1530": "#222223", "#0f0b1a": "#121213", "#120c24": "#181719", "#211a35": "#272728", "#3a2a66": "#47464a", "#7b5fc4": "#908e95", "#261d40": "#2e2d30", "#8b5cf6": "#8b5cf6", "#6366f1": "#6366f1", "#2d1f52": "#38373a", "#f0ecfa": "#f3f3f3", "#2563eb": "#2563eb", "#120d20": "#161617", "#2a1f48": "#333235", "#f6f3ff": "#f9f9f9", "#120a24": "#171618", "#2a1a55": "#37353a", "#0b0814": "#0e0e0e", "#2f2548": "#363538", "#bdb4d8": "#c5c5c7", "#d9c8ff": "#e3e2e5", "#d0c9e6": "#d7d6d9", "#e6e1f5": "#ebeaec", "#0d0a16": "#101010", "#100c1c": "#141315", "#2a2140": "#302f32", "#2c2248": "#343436", "#0a0712": "#0c0c0d", "#171126": "#1b1b1c", "#130e22": "#181719", "#1e1734": "#252427", "#3a2e5c": "#444347", "#d6cfec": "#dddcdf", "#151024": "#1a191b", "#ece8f7": "#efeff0", "#231a3c": "#2a2a2c", "#a78bfa": "#a78bfa", "#6a4fb0": "#7e7c83", "#c4b5fd": "#c4b5fd", "#9a90b8": "#a3a3a5", "#24163f": "#2a292c"}, "light": {}, "green": {"#241c38": "#18261e", "#cfc8e6": "#c3d2ca", "#07050c": "#050806", "#18122a": "#111b16", "#1b1530": "#13201a", "#0f0b1a": "#0b1410", "#120c24": "#0c1a14", "#211a35": "#16241c", "#3a2a66": "#25453a", "#7b5fc4": "#5d8a74", "#261d40": "#1b2c23", "#8b5cf6": "#3fe0b0", "#6366f1": "#10b981", "#2d1f52": "#1d3b2e", "#f0ecfa": "#eaf3ee", "#2563eb": "#2f9e6b", "#120d20": "#0c1611", "#2a1f48": "#1d3328", "#f6f3ff": "#f4f8f5", "#120a24": "#06130c", "#2a1a55": "#0d3322", "#0b0814": "#08100c", "#2f2548": "#24352c", "#bdb4d8": "#b4c4bb", "#d9c8ff": "#bff5d9", "#d0c9e6": "#c7d4cd", "#e6e1f5": "#dfe9e3", "#0d0a16": "#09100c", "#100c1c": "#0b1510", "#2a2140": "#1c2a23", "#2c2248": "#1f3529", "#0a0712": "#060c09", "#171126": "#0f1a14", "#130e22": "#0d1712", "#1e1734": "#16261e", "#3a2e5c": "#2a4135", "#d6cfec": "#cfdcd5", "#151024": "#0e1712", "#ece8f7": "#e6efe9", "#231a3c": "#16291f", "#a78bfa": "#4fd6a0", "#6a4fb0": "#3f6b56", "#c4b5fd": "#7cf7c4", "#9a90b8": "#8aa597", "#24163f": "#13291f"}};const STARS={"cobalt": ["204,219,241", "138,172,222", "173,203,247"], "purple": ["215,205,240", "165,140,220", "195,175,245"], "black": ["222,222,222", "180,180,180", "210,210,210"], "grey": ["222,221,224", "179,177,183", "209,208,212"], "light": ["24,19,40", "24,19,40", "24,19,40"], "green": ["200,230,215", "140,190,165", "175,225,200"]};const ACC_AUTO={"cobalt": "#bcd3ff", "purple": "#d9c8ff", "green": "#bff5d9", "grey": "#e4e4e7", "black": "#fafafa", "light": "#5726c5"};const ACC_LIGHT={"lavender": "#5726c5", "pink": "#c52678", "sky": "#267cc5", "mint": "#26c572", "gold": "#c59b26"};const PREV={"cobalt": ["#0a0f16", "#bcd3ff"], "purple": ["#0d0a16", "#d9c8ff"], "black": ["#050505", "#fafafa"], "grey": ["#101010", "#e4e4e7"], "light": ["#ece9f5", "#5726c5"], "green": ["#09100c", "#bff5d9"]};
+const THEMES=["cobalt", "purple", "black", "grey", "light", "green"];const GAME_MAP={"cobalt": {"#ece8f7": "#e8eef7", "#2a1f48": "#1e2f49", "#2a2140": "#202d41", "#bdb4d8": "#b3c2d9", "#100c1c": "#0c121c", "#211a35": "#192536", "#2c2248": "#213149", "#3a2e5c": "#2d405d", "#0a0712": "#070b12", "#261d40": "#1c2b41", "#7b5fc4": "#5c87c7", "#8b5cf6": "#5899fa", "#120a24": "#091425", "#6366f1": "#5f9bf5", "#2563eb": "#2073f0", "#171126": "#101927", "#1e1734": "#162235", "#2f2548": "#243349", "#e6e1f5": "#e1e9f5", "#241c38": "#1b2739", "#151024": "#0f1825", "#9a90b8": "#8fa0b9", "#d0c9e6": "#c8d4e7", "#d9c8ff": "#c8deff", "#18122a": "#111b2b", "#f6f3ff": "#f3f8ff", "#0f0b1a": "#0b111a", "#24163f": "#152640", "#6a4fb0": "#4d75b2", "#3a2a66": "#284268", "#0b0814": "#080d14", "#cfc8e6": "#c7d4e7", "#0d0a16": "#0a0f16", "#2d1f52": "#1e3353", "#a78bfa": "#88b7fd", "#231a3c": "#19273d", "#07050c": "#05080c", "#120d20": "#0d1520", "#1b1530": "#142031", "#f0ecfa": "#ecf2fa", "#2a1a55": "#193156", "#130e22": "#0e1622", "#d6cfec": "#cedaed", "#120c24": "#0b1525", "#c4b5fd": "#b3d1ff"}, "purple": {}, "black": {"#ece8f7": "#f0f0f0", "#2a1f48": "#0f0f0f", "#2a2140": "#0f0f0f", "#bdb4d8": "#c6c6c6", "#100c1c": "#060606", "#211a35": "#0c0c0c", "#2c2248": "#101010", "#3a2e5c": "#454545", "#0a0712": "#040404", "#261d40": "#0e0e0e", "#7b5fc4": "#929292", "#8b5cf6": "#8b5cf6", "#120a24": "#070707", "#6366f1": "#6366f1", "#2563eb": "#2563eb", "#171126": "#080808", "#1e1734": "#0b0b0b", "#2f2548": "#101010", "#e6e1f5": "#ebebeb", "#241c38": "#0d0d0d", "#151024": "#080808", "#9a90b8": "#a4a4a4", "#d0c9e6": "#d8d8d8", "#d9c8ff": "#e3e3e3", "#18122a": "#090909", "#f6f3ff": "#f9f9f9", "#0f0b1a": "#060606", "#24163f": "#0d0d0d", "#6a4fb0": "#808080", "#3a2a66": "#484848", "#0b0814": "#040404", "#cfc8e6": "#d7d7d7", "#0d0a16": "#050505", "#2d1f52": "#111111", "#a78bfa": "#a78bfa", "#231a3c": "#0d0d0d", "#07050c": "#030303", "#120d20": "#070707", "#1b1530": "#0a0a0a", "#f0ecfa": "#f3f3f3", "#2a1a55": "#111111", "#130e22": "#070707", "#d6cfec": "#dedede", "#120c24": "#070707", "#c4b5fd": "#c4b5fd"}, "grey": {"#ece8f7": "#efeff0", "#2a1f48": "#333235", "#2a2140": "#302f32", "#bdb4d8": "#c5c5c7", "#100c1c": "#141315", "#211a35": "#272728", "#2c2248": "#343436", "#3a2e5c": "#444347", "#0a0712": "#0c0c0d", "#261d40": "#2e2d30", "#7b5fc4": "#908e95", "#8b5cf6": "#8b5cf6", "#120a24": "#171618", "#6366f1": "#6366f1", "#2563eb": "#2563eb", "#171126": "#1b1b1c", "#1e1734": "#252427", "#2f2548": "#363538", "#e6e1f5": "#ebeaec", "#241c38": "#2a292b", "#151024": "#1a191b", "#9a90b8": "#a3a3a5", "#d0c9e6": "#d7d6d9", "#d9c8ff": "#e3e2e5", "#18122a": "#1e1d1f", "#f6f3ff": "#f9f9f9", "#0f0b1a": "#121213", "#24163f": "#2a292c", "#6a4fb0": "#7e7c83", "#3a2a66": "#47464a", "#0b0814": "#0e0e0e", "#cfc8e6": "#d6d6d8", "#0d0a16": "#101010", "#2d1f52": "#38373a", "#a78bfa": "#a78bfa", "#231a3c": "#2a2a2c", "#07050c": "#080809", "#120d20": "#161617", "#1b1530": "#222223", "#f0ecfa": "#f3f3f3", "#2a1a55": "#37353a", "#130e22": "#181719", "#d6cfec": "#dddcdf", "#120c24": "#181719", "#c4b5fd": "#c4b5fd"}, "light": {}, "green": {"#ece8f7": "#e6efe9", "#2a1f48": "#1d3328", "#2a2140": "#1c2a23", "#bdb4d8": "#b4c4bb", "#100c1c": "#0b1510", "#211a35": "#16241c", "#2c2248": "#1f3529", "#3a2e5c": "#2a4135", "#0a0712": "#060c09", "#261d40": "#1b2c23", "#7b5fc4": "#5d8a74", "#8b5cf6": "#3fe0b0", "#120a24": "#06130c", "#6366f1": "#10b981", "#2563eb": "#2f9e6b", "#171126": "#0f1a14", "#1e1734": "#16261e", "#2f2548": "#24352c", "#e6e1f5": "#dfe9e3", "#241c38": "#18261e", "#151024": "#0e1712", "#9a90b8": "#8aa597", "#d0c9e6": "#c7d4cd", "#d9c8ff": "#bff5d9", "#18122a": "#111b16", "#f6f3ff": "#f4f8f5", "#0f0b1a": "#0b1410", "#24163f": "#13291f", "#6a4fb0": "#3f6b56", "#3a2a66": "#25453a", "#0b0814": "#08100c", "#cfc8e6": "#c3d2ca", "#0d0a16": "#09100c", "#2d1f52": "#1d3b2e", "#a78bfa": "#4fd6a0", "#231a3c": "#16291f", "#07050c": "#050806", "#120d20": "#0c1611", "#1b1530": "#13201a", "#f0ecfa": "#eaf3ee", "#2a1a55": "#0d3322", "#130e22": "#0d1712", "#d6cfec": "#cfdcd5", "#120c24": "#0c1a14", "#c4b5fd": "#7cf7c4"}};const STARS={"cobalt": ["204,219,241", "138,172,222", "173,203,247"], "purple": ["215,205,240", "165,140,220", "195,175,245"], "black": ["222,222,222", "180,180,180", "210,210,210"], "grey": ["222,221,224", "179,177,183", "209,208,212"], "light": ["24,19,40", "24,19,40", "24,19,40"], "green": ["200,230,215", "140,190,165", "175,225,200"]};const ACC_AUTO={"cobalt": "#bcd3ff", "purple": "#d9c8ff", "green": "#bff5d9", "grey": "#e4e4e7", "black": "#fafafa", "light": "#5726c5"};const ACC_LIGHT={"lavender": "#5726c5", "pink": "#c52678", "sky": "#267cc5", "mint": "#26c572", "gold": "#c59b26"};const PREV={"cobalt": ["#0a0f16", "#bcd3ff"], "purple": ["#0d0a16", "#d9c8ff"], "black": ["#050505", "#fafafa"], "grey": ["#101010", "#e4e4e7"], "light": ["#ece9f5", "#5726c5"], "green": ["#09100c", "#bff5d9"]};
 let THEME_PREF = store.get('set_theme', 'cobalt');
 if (THEME_PREF !== 'random' && !THEMES.includes(THEME_PREF)) THEME_PREF = 'cobalt';
 const randomTheme = (not) => { const pool = THEMES.filter(t => t !== not); return pool[Math.random()*pool.length|0]; };
@@ -515,6 +539,7 @@ function fixedLoop(update, draw){
 const GAMES = [];  // games come from the games/ folder (see GAMES FROM THE games/ FOLDER below)
 const APPS = [
   {id:'games', name:'Games', icon:'gamepad', color:'#2563eb'},
+  {id:'flash', name:'Flash player', icon:'bolt', color:'#e11d48'},
   {id:'ai', name:'Cobalt AI', icon:'bot', color:'#6366f1'},
   {id:'chat', name:'Chat room', icon:'chat', color:'#0ea5e9'},
   {id:'music', name:'Music', icon:'music', color:'#ec4899'},
@@ -593,7 +618,7 @@ function newGame(){
 }
 function show(v){
   view = v;
-  for (const id of ['home','play','ai','music','chat','shop','profile','settings','games']) $('#'+id).style.display = 'none';
+  for (const id of ['home','play','ai','music','chat','shop','profile','settings','games','flash']) $('#'+id).style.display = 'none';
   $('#'+v).style.display = v === 'play' ? 'block' : 'flex';
   $('#scroll').scrollTop = 0;
 }
@@ -885,6 +910,53 @@ $('#fullBtn').onclick = e => { e.currentTarget.blur(); const f = $('#gframe'); t
   if (view === 'games') renderGames();
   if (GAMES.find(x => x.id === location.hash.slice(1)) && view !== 'play') route();
 })();
+
+/* ---------------- FLASH PLAYER (Ruffle) ---------------- */
+// Plays a .swf the visitor picks from their own device. Nothing is uploaded.
+let rufflePromise = null, rPlayer = null;
+function loadRuffle(){
+  if (window.RufflePlayer && window.RufflePlayer.newest) return Promise.resolve();
+  if (rufflePromise) return rufflePromise;
+  window.RufflePlayer = window.RufflePlayer || {};
+  window.RufflePlayer.config = {autoplay: 'on', unmuteOverlay: 'hidden', letterbox: 'on', splashScreen: false, backgroundColor: '#000000', publicPath: 'https://unpkg.com/@ruffle-rs/ruffle/'};
+  rufflePromise = new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = 'https://unpkg.com/@ruffle-rs/ruffle';
+    s.onload = () => { const t = Date.now(); (function wait(){ if (window.RufflePlayer.newest) res(); else if (Date.now() - t > 8000) rej(); else setTimeout(wait, 100); })(); };
+    s.onerror = () => { rufflePromise = null; rej(); };
+    document.head.appendChild(s);
+  });
+  return rufflePromise;
+}
+const swfNote = t => { $('#swfNote').textContent = t; };
+function closeSwf(){
+  if (rPlayer){ try { rPlayer.remove(); } catch(e){} rPlayer = null; }
+  $('#swfStage').classList.remove('on'); $('#swfBar').style.display = 'none'; $('#swfDrop').style.display = '';
+}
+async function playSwf(file){
+  if (!file) return;
+  if (!/\.swf$/i.test(file.name)){ swfNote("That isn't a .swf file. Pick a Flash game file that ends in .swf."); return; }
+  if (file.size > 200 * 1048576){ swfNote('That file is too big (over 200 MB).'); return; }
+  swfNote('Loading the Flash player…');
+  try { await loadRuffle(); }
+  catch(e){ swfNote("Couldn't load the Flash player (Ruffle). Check your connection and try again. It works on your own website (like Vercel)."); return; }
+  closeSwf();
+  const data = new Uint8Array(await file.arrayBuffer());
+  rPlayer = window.RufflePlayer.newest().createPlayer();
+  $('#swfStage').appendChild(rPlayer); $('#swfStage').classList.add('on');
+  $('#swfDrop').style.display = 'none'; $('#swfBar').style.display = '';
+  $('#swfName').textContent = file.name.replace(/\.swf$/i, '');
+  const api = typeof rPlayer.ruffle === 'function' ? rPlayer.ruffle() : rPlayer;
+  try { await api.load({data}); swfNote('Click the game to give it keyboard control.'); }
+  catch(e){ console.warn(e); closeSwf(); swfNote("This Flash file couldn't be played. Some Flash games don't work in Ruffle yet."); }
+}
+$('#swfFile').addEventListener('change', e => { playSwf(e.target.files[0]); e.target.value = ''; });
+const sd = $('#swfDrop');
+sd.addEventListener('dragover', e => { e.preventDefault(); sd.classList.add('over'); });
+sd.addEventListener('dragleave', () => sd.classList.remove('over'));
+sd.addEventListener('drop', e => { e.preventDefault(); sd.classList.remove('over'); playSwf(e.dataTransfer.files[0]); });
+$('#swfOther').onclick = () => { closeSwf(); swfNote(''); $('#swfFile').click(); };
+$('#swfFull').onclick = () => { const st = $('#swfStage'); try { (st.requestFullscreen || st.webkitRequestFullscreen).call(st); } catch(e){} };
 
 /* ---------------- ACCOUNTS / CHAT / SHOP / SETTINGS ---------------- */
 const EMOJIS = ['😀','😎','🤖','👽','🛸','🐸','🐱','🦊','🐼','🐙','🦖','🍕','🍓','🔥','⚡','🌙','⭐','🎮','🎧','💀','👻','🌵','🍄','🐝'];
