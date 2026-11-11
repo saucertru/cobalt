@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>saucer</title>
+<title>cobalt</title>
 <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
 <style>
 :root{--bg:var(--p07050c);--panel:var(--p0d0a16);--field:var(--p151024);--line:var(--p241c38);--text:var(--pece8f7);--dim:var(--p9a90b8);--mint:var(--pd9c8ff);--ink:var(--p120a24);--btn:var(--p7b5fc4)}
@@ -288,10 +288,10 @@ html[data-theme=green]{--p07050c:#050806;--p0a0712:#060c09;--p0b0814:#08100c;--p
     <canvas id="bgfx"></canvas>
     <div class="scroll" id="scroll">
       <section id="home">
-        <h1 class="logo">saucer</h1>
+        <h1 class="logo">cobalt</h1>
         <form class="search" id="sform">
           <span data-i="search"></span>
-          <input id="search" placeholder="Search games" autocomplete="off">
+          <input id="search" placeholder="Search games or Google" autocomplete="off">
           <button class="go" type="submit" title="Play" data-i="right"></button>
         </form>
         <div class="dock" id="dock"></div>
@@ -324,14 +324,14 @@ html[data-theme=green]{--p07050c:#050806;--p0a0712:#060c09;--p0b0814:#08100c;--p
         <div class="chat">
           <div class="msgs" id="msgs">
             <div class="hello" id="hello">
-              <h1 class="logo small">saucer ai</h1>
+              <h1 class="logo small">cobalt ai</h1>
               <p>Ask me anything: homework help, game tips, ideas.</p>
               <div class="panel aistart" id="aiStartBox">
                 <div style="font-weight:700">Free AI that runs in your browser</div>
                 <div class="d">No account and no server: your messages never leave your device. The first start downloads the AI model (about 250 MB), then your browser keeps it.</div>
                 <progress id="aiProg" max="100" value="0" style="display:none"></progress>
                 <div class="d" id="aiStat"></div>
-                <button class="btnp" id="aiStart" style="margin-top:12px">Start Saucer AI</button>
+                <button class="btnp" id="aiStart" style="margin-top:12px">Start Cobalt AI</button>
               </div>
               <div class="sugs">
                 <button class="sug">Give me a tip for getting better at 2048</button>
@@ -342,7 +342,7 @@ html[data-theme=green]{--p07050c:#050806;--p0a0712:#060c09;--p0b0814:#08100c;--p
           </div>
           <form class="search chatbar" id="aform">
             <span data-i="bot"></span>
-            <input id="ainput" placeholder="Message Saucer AI" autocomplete="off">
+            <input id="ainput" placeholder="Message Cobalt AI" autocomplete="off">
             <button class="go" type="submit" title="Send" data-i="right"></button>
           </form>
           <p class="note" id="anote">Connecting…</p>
@@ -397,6 +397,7 @@ html[data-theme=green]{--p07050c:#050806;--p0a0712:#060c09;--p0b0814:#08100c;--p
 <div class="modal" id="modal"><div class="mbox" id="mbox"></div></div>
 <div class="toast" id="toast"></div>
 
+<script src="supabase-config.js"></script>
 <script>
 const $ = s => document.querySelector(s);
 const S = 400;
@@ -442,8 +443,11 @@ const ICONS = {
 const svg = (n, s=20) => `<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONS[n]}</svg>`;
 document.querySelectorAll('[data-i]').forEach(el => { el.innerHTML = svg(el.dataset.i, +(el.dataset.s || 20)); });
 
-const THEMES=["purple", "black", "grey", "light", "green"];const GAME_MAP={"purple": {}, "black": {"#7b5fc4": "#929292", "#2c2248": "#101010", "#2a1f48": "#0f0f0f", "#d6cfec": "#dedede", "#261d40": "#0e0e0e", "#f6f3ff": "#f9f9f9", "#0a0712": "#040404", "#120d20": "#070707", "#3a2e5c": "#454545", "#2a2140": "#0f0f0f", "#171126": "#080808", "#241c38": "#0d0d0d", "#120a24": "#070707", "#1b1530": "#0a0a0a", "#2a1a55": "#111111", "#2d1f52": "#111111", "#130e22": "#070707", "#d0c9e6": "#d8d8d8", "#d9c8ff": "#e3e3e3", "#0d0a16": "#050505", "#a78bfa": "#a78bfa", "#a855f7": "#a855f7", "#0b0814": "#040404", "#bdb4d8": "#c6c6c6", "#e6e1f5": "#ebebeb", "#ece8f7": "#f0f0f0", "#7c3aed": "#7c3aed", "#18122a": "#090909", "#1e1734": "#0b0b0b", "#2f2548": "#101010", "#9a90b8": "#a4a4a4", "#0f0b1a": "#060606", "#07050c": "#030303", "#211a35": "#0c0c0c", "#8b5cf6": "#8b5cf6", "#151024": "#080808", "#231a3c": "#0d0d0d", "#cfc8e6": "#d7d7d7", "#6a4fb0": "#808080", "#24163f": "#0d0d0d", "#100c1c": "#060606", "#120c24": "#070707", "#3a2a66": "#484848", "#f0ecfa": "#f3f3f3", "#c4b5fd": "#c4b5fd"}, "grey": {"#7b5fc4": "#908e95", "#2c2248": "#343436", "#2a1f48": "#333235", "#d6cfec": "#dddcdf", "#261d40": "#2e2d30", "#f6f3ff": "#f9f9f9", "#0a0712": "#0c0c0d", "#120d20": "#161617", "#3a2e5c": "#444347", "#2a2140": "#302f32", "#171126": "#1b1b1c", "#241c38": "#2a292b", "#120a24": "#171618", "#1b1530": "#222223", "#2a1a55": "#37353a", "#2d1f52": "#38373a", "#130e22": "#181719", "#d0c9e6": "#d7d6d9", "#d9c8ff": "#e3e2e5", "#0d0a16": "#101010", "#a78bfa": "#a78bfa", "#a855f7": "#a855f7", "#0b0814": "#0e0e0e", "#bdb4d8": "#c5c5c7", "#e6e1f5": "#ebeaec", "#ece8f7": "#efeff0", "#7c3aed": "#7c3aed", "#18122a": "#1e1d1f", "#1e1734": "#252427", "#2f2548": "#363538", "#9a90b8": "#a3a3a5", "#0f0b1a": "#121213", "#07050c": "#080809", "#211a35": "#272728", "#8b5cf6": "#8b5cf6", "#151024": "#1a191b", "#231a3c": "#2a2a2c", "#cfc8e6": "#d6d6d8", "#6a4fb0": "#7e7c83", "#24163f": "#2a292c", "#100c1c": "#141315", "#120c24": "#181719", "#3a2a66": "#47464a", "#f0ecfa": "#f3f3f3", "#c4b5fd": "#c4b5fd"}, "light": {}, "green": {"#7b5fc4": "#5d8a74", "#2c2248": "#1f3529", "#2a1f48": "#1d3328", "#d6cfec": "#cfdcd5", "#261d40": "#1b2c23", "#f6f3ff": "#f4f8f5", "#0a0712": "#060c09", "#120d20": "#0c1611", "#3a2e5c": "#2a4135", "#2a2140": "#1c2a23", "#171126": "#0f1a14", "#241c38": "#18261e", "#120a24": "#06130c", "#1b1530": "#13201a", "#2a1a55": "#0d3322", "#2d1f52": "#1d3b2e", "#130e22": "#0d1712", "#d0c9e6": "#c7d4cd", "#d9c8ff": "#bff5d9", "#0d0a16": "#09100c", "#a78bfa": "#4fd6a0", "#a855f7": "#10b981", "#0b0814": "#08100c", "#bdb4d8": "#b4c4bb", "#e6e1f5": "#dfe9e3", "#ece8f7": "#e6efe9", "#7c3aed": "#2f9e6b", "#18122a": "#111b16", "#1e1734": "#16261e", "#2f2548": "#24352c", "#9a90b8": "#8aa597", "#0f0b1a": "#0b1410", "#07050c": "#050806", "#211a35": "#16241c", "#8b5cf6": "#3fe0b0", "#151024": "#0e1712", "#231a3c": "#16291f", "#cfc8e6": "#c3d2ca", "#6a4fb0": "#3f6b56", "#24163f": "#13291f", "#100c1c": "#0b1510", "#120c24": "#0c1a14", "#3a2a66": "#25453a", "#f0ecfa": "#eaf3ee", "#c4b5fd": "#7cf7c4"}};const STARS={"purple": ["215,205,240", "165,140,220", "195,175,245"], "black": ["222,222,222", "180,180,180", "210,210,210"], "grey": ["222,221,224", "179,177,183", "209,208,212"], "light": ["24,19,40", "24,19,40", "24,19,40"], "green": ["200,230,215", "140,190,165", "175,225,200"]};const ACC_AUTO={"purple": "#d9c8ff", "green": "#bff5d9", "grey": "#e4e4e7", "black": "#fafafa", "light": "#5726c5"};const ACC_LIGHT={"lavender": "#5726c5", "pink": "#c52678", "sky": "#267cc5", "mint": "#26c572", "gold": "#c59b26"};const PREV={"purple": ["#0d0a16", "#d9c8ff"], "black": ["#050505", "#fafafa"], "grey": ["#101010", "#e4e4e7"], "light": ["#ece9f5", "#5726c5"], "green": ["#09100c", "#bff5d9"]};
-let THEME = store.get('set_theme', 'purple'); if (!THEMES.includes(THEME)) THEME = 'purple';
+const THEMES=["purple", "black", "grey", "light", "green"];const GAME_MAP={"purple": {}, "black": {"#2a2140": "#0f0f0f", "#6a4fb0": "#808080", "#d0c9e6": "#d8d8d8", "#d6cfec": "#dedede", "#bdb4d8": "#c6c6c6", "#a855f7": "#a855f7", "#0a0712": "#040404", "#130e22": "#070707", "#3a2e5c": "#454545", "#f6f3ff": "#f9f9f9", "#120c24": "#070707", "#f0ecfa": "#f3f3f3", "#d9c8ff": "#e3e3e3", "#8b5cf6": "#8b5cf6", "#100c1c": "#060606", "#c4b5fd": "#c4b5fd", "#18122a": "#090909", "#120d20": "#070707", "#cfc8e6": "#d7d7d7", "#0f0b1a": "#060606", "#3a2a66": "#484848", "#171126": "#080808", "#2d1f52": "#111111", "#7b5fc4": "#929292", "#ece8f7": "#f0f0f0", "#0d0a16": "#050505", "#24163f": "#0d0d0d", "#7c3aed": "#7c3aed", "#2f2548": "#101010", "#241c38": "#0d0d0d", "#151024": "#080808", "#0b0814": "#040404", "#120a24": "#070707", "#07050c": "#030303", "#2a1f48": "#0f0f0f", "#e6e1f5": "#ebebeb", "#9a90b8": "#a4a4a4", "#261d40": "#0e0e0e", "#1b1530": "#0a0a0a", "#1e1734": "#0b0b0b", "#2a1a55": "#111111", "#2c2248": "#101010", "#211a35": "#0c0c0c", "#a78bfa": "#a78bfa", "#231a3c": "#0d0d0d"}, "grey": {"#2a2140": "#302f32", "#6a4fb0": "#7e7c83", "#d0c9e6": "#d7d6d9", "#d6cfec": "#dddcdf", "#bdb4d8": "#c5c5c7", "#a855f7": "#a855f7", "#0a0712": "#0c0c0d", "#130e22": "#181719", "#3a2e5c": "#444347", "#f6f3ff": "#f9f9f9", "#120c24": "#181719", "#f0ecfa": "#f3f3f3", "#d9c8ff": "#e3e2e5", "#8b5cf6": "#8b5cf6", "#100c1c": "#141315", "#c4b5fd": "#c4b5fd", "#18122a": "#1e1d1f", "#120d20": "#161617", "#cfc8e6": "#d6d6d8", "#0f0b1a": "#121213", "#3a2a66": "#47464a", "#171126": "#1b1b1c", "#2d1f52": "#38373a", "#7b5fc4": "#908e95", "#ece8f7": "#efeff0", "#0d0a16": "#101010", "#24163f": "#2a292c", "#7c3aed": "#7c3aed", "#2f2548": "#363538", "#241c38": "#2a292b", "#151024": "#1a191b", "#0b0814": "#0e0e0e", "#120a24": "#171618", "#07050c": "#080809", "#2a1f48": "#333235", "#e6e1f5": "#ebeaec", "#9a90b8": "#a3a3a5", "#261d40": "#2e2d30", "#1b1530": "#222223", "#1e1734": "#252427", "#2a1a55": "#37353a", "#2c2248": "#343436", "#211a35": "#272728", "#a78bfa": "#a78bfa", "#231a3c": "#2a2a2c"}, "light": {}, "green": {"#2a2140": "#1c2a23", "#6a4fb0": "#3f6b56", "#d0c9e6": "#c7d4cd", "#d6cfec": "#cfdcd5", "#bdb4d8": "#b4c4bb", "#a855f7": "#10b981", "#0a0712": "#060c09", "#130e22": "#0d1712", "#3a2e5c": "#2a4135", "#f6f3ff": "#f4f8f5", "#120c24": "#0c1a14", "#f0ecfa": "#eaf3ee", "#d9c8ff": "#bff5d9", "#8b5cf6": "#3fe0b0", "#100c1c": "#0b1510", "#c4b5fd": "#7cf7c4", "#18122a": "#111b16", "#120d20": "#0c1611", "#cfc8e6": "#c3d2ca", "#0f0b1a": "#0b1410", "#3a2a66": "#25453a", "#171126": "#0f1a14", "#2d1f52": "#1d3b2e", "#7b5fc4": "#5d8a74", "#ece8f7": "#e6efe9", "#0d0a16": "#09100c", "#24163f": "#13291f", "#7c3aed": "#2f9e6b", "#2f2548": "#24352c", "#241c38": "#18261e", "#151024": "#0e1712", "#0b0814": "#08100c", "#120a24": "#06130c", "#07050c": "#050806", "#2a1f48": "#1d3328", "#e6e1f5": "#dfe9e3", "#9a90b8": "#8aa597", "#261d40": "#1b2c23", "#1b1530": "#13201a", "#1e1734": "#16261e", "#2a1a55": "#0d3322", "#2c2248": "#1f3529", "#211a35": "#16241c", "#a78bfa": "#4fd6a0", "#231a3c": "#16291f"}};const STARS={"purple": ["215,205,240", "165,140,220", "195,175,245"], "black": ["222,222,222", "180,180,180", "210,210,210"], "grey": ["222,221,224", "179,177,183", "209,208,212"], "light": ["24,19,40", "24,19,40", "24,19,40"], "green": ["200,230,215", "140,190,165", "175,225,200"]};const ACC_AUTO={"purple": "#d9c8ff", "green": "#bff5d9", "grey": "#e4e4e7", "black": "#fafafa", "light": "#5726c5"};const ACC_LIGHT={"lavender": "#5726c5", "pink": "#c52678", "sky": "#267cc5", "mint": "#26c572", "gold": "#c59b26"};const PREV={"purple": ["#0d0a16", "#d9c8ff"], "black": ["#050505", "#fafafa"], "grey": ["#101010", "#e4e4e7"], "light": ["#ece9f5", "#5726c5"], "green": ["#09100c", "#bff5d9"]};
+let THEME_PREF = store.get('set_theme', 'purple');
+if (THEME_PREF !== 'random' && !THEMES.includes(THEME_PREF)) THEME_PREF = 'purple';
+const randomTheme = (not) => { const pool = THEMES.filter(t => t !== not); return pool[Math.random()*pool.length|0]; };
+let THEME = THEME_PREF === 'random' ? randomTheme() : THEME_PREF;
 let STARC = STARS[THEME];
 const TC = hex => (GAME_MAP[THEME] && GAME_MAP[THEME][hex]) || hex;
 function setThemeAttr(){
@@ -757,7 +761,7 @@ const GAMES = [
   {id:'tictactoe', name:'Tic-Tac-Toe', desc:'Beat the CPU at X and O.', icon:'hash', color:'#3b82f6', help:'Click or tap a square. Score counts your wins this visit.', make:TTT},
 ];
 const APPS = [
-  {id:'ai', name:'Saucer AI', icon:'bot', color:'#a855f7'},
+  {id:'ai', name:'Cobalt AI', icon:'bot', color:'#a855f7'},
   {id:'chat', name:'Chat room', icon:'chat', color:'#0ea5e9'},
   {id:'music', name:'Music', icon:'music', color:'#ec4899'},
   {id:'shop', name:'Shop', icon:'bag', color:'#f59e0b'},
@@ -801,7 +805,9 @@ function renderHome(){
     const best = store.get(bestKey(g.id), 0);
     return `<button class="card" data-go="${g.id}">${g.thumb ? `<img class="thumbimg" src="${g.thumb}" alt="" loading="lazy">` : logo(g, 20)}<h3>${g.name}</h3><p>${g.desc}</p>${best ? `<div class="best">Best: ${best}</div>` : ''}</button>`;
   }).join('');
+  const q = $('#search').value.trim();
   $('#empty').style.display = list.length ? 'none' : 'block';
+  $('#empty').innerHTML = q ? `No games match that. <a id="webSearch" href="https://www.google.com/search?q=${encodeURIComponent(q)}" target="_blank" rel="noopener">Search Google for “${esc(q)}”</a>` : 'No games match that search.';
 }
 
 const curId = () => view === 'play' ? def.id : view;
@@ -817,7 +823,7 @@ function renderSide(){
   $('#acct').innerHTML = ACCT.map(item).join('');
 }
 
-function setAddr(){ if (document.activeElement !== $('#addr')) $('#addr').value = 'saucer://' + curId(); }
+function setAddr(){ if (document.activeElement !== $('#addr')) $('#addr').value = 'cobalt://' + curId(); }
 
 function stopGame(){ if (game && game.stop) game.stop(); game = null; }
 function newGame(){
@@ -842,17 +848,17 @@ function route(){
     $('#gname').innerHTML = logo(g, 18) + g.name;
     $('#help').textContent = g.help;
     $('#bestv').textContent = store.get(bestKey(g.id), 0);
-    document.title = g.name + ' · saucer';
+    document.title = g.name + ' · cobalt';
     newGame();
   } else {
     stopGame(); def = null;
     if (find(id)){
       openTab(id); show(id);
-      document.title = find(id).name + ' · saucer';
+      document.title = find(id).name + ' · cobalt';
       if (id === 'ai') setTimeout(() => $('#ainput').focus(), 50);
       onView(id);
     } else {
-      show('home'); document.title = 'saucer'; renderHome();
+      show('home'); document.title = 'cobalt'; renderHome();
     }
   }
   renderSide(); setAddr();
@@ -880,7 +886,7 @@ document.addEventListener('click', e => {
 });
 
 $('#search').addEventListener('input', renderHome);
-$('#sform').addEventListener('submit', e => { e.preventDefault(); const m = matches(); if (m.length) go(m[0].id); });
+$('#sform').addEventListener('submit', e => { e.preventDefault(); const m = matches(); if (m.length) go(m[0].id); else if ($('#webSearch')) $('#webSearch').click(); });
 $('#newTab').onclick = () => go('random');
 $('#tBack').onclick = () => history.back();
 $('#tFwd').onclick = () => history.forward();
@@ -895,7 +901,7 @@ addr.addEventListener('blur', setAddr);
 addr.addEventListener('keydown', e => {
   if (e.key === 'Escape'){ addr.blur(); return; }
   if (e.key !== 'Enter') return;
-  const q = addr.value.trim().toLowerCase().replace(/^saucer:\/\//, '').replace(/^#/, '');
+  const q = addr.value.trim().toLowerCase().replace(/^cobalt:\/\//, '').replace(/^#/, '');
   addr.blur();
   if (!q || q === 'home'){ go('home'); return; }
   const all = [...APPS, ...ACCT, ...GAMES];
@@ -936,9 +942,9 @@ cv.addEventListener('pointerup', e => {
   pd = null;
 });
 
-/* ---------------- SAUCER AI (free, runs in the browser) ---------------- */
+/* ---------------- COBALT AI (free, runs in the browser) ---------------- */
 // Uses Transformers.js to run a small open model (SmolLM2 360M Instruct) on the visitor's device.
-const SYS = 'You are Saucer AI, a friendly assistant on "saucer", a free games website. Answer clearly and briefly in plain text.';
+const SYS = 'You are Cobalt AI, a friendly assistant on "cobalt", a free games website. Answer clearly and briefly in plain text.';
 const AI_MODEL = 'HuggingFaceTB/SmolLM2-360M-Instruct';
 let gen = null, Streamer = null, aiLoading = false, chat = [], busy = false;
 const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -956,10 +962,10 @@ function addMsg(role, html){
 function scrollChat(){ const s = $('#scroll'); s.scrollTop = s.scrollHeight; }
 function aiState(){
   $('#ainput').disabled = !gen || busy;
-  $('#ainput').placeholder = gen ? 'Message Saucer AI' : 'Start Saucer AI to chat';
+  $('#ainput').placeholder = gen ? 'Message Cobalt AI' : 'Start Cobalt AI to chat';
   $('#aiStartBox').style.display = gen ? 'none' : '';
   $('#anote').textContent = gen
-    ? "Saucer AI runs on your device. It's a small model, so it makes mistakes. Check important info."
+    ? "Cobalt AI runs on your device. It's a small model, so it makes mistakes. Check important info."
     : 'Free and private: the AI runs in your browser and nothing is sent to a server.';
 }
 aiState();
@@ -989,7 +995,7 @@ async function loadAI(){
     st.textContent = '';
   } catch(e){
     console.warn(e);
-    st.textContent = "Couldn't download the AI here. It works when saucer is hosted on its own website (like Vercel), on a computer or phone with enough memory.";
+    st.textContent = "Couldn't download the AI here. It works when cobalt is hosted on its own website (like Vercel), on a computer or phone with enough memory.";
     btn.disabled = false; btn.textContent = 'Try again';
   }
   bar.style.display = 'none'; aiLoading = false; aiState();
@@ -1144,7 +1150,7 @@ const SHOP = [
   {id:'f-gold', cat:'frame', name:'Golden ring', price:350},
   {id:'b-gamer', cat:'badge', name:'Gamer', emoji:'🎮', price:50},
   {id:'b-music', cat:'badge', name:'Music lover', emoji:'🎧', price:50},
-  {id:'b-saucer', cat:'badge', name:'Saucer crew', emoji:'🛸', price:80},
+  {id:'b-cobalt', cat:'badge', name:'Cobalt crew', emoji:'💠', price:80},
   {id:'b-fire', cat:'badge', name:'On fire', emoji:'🔥', price:120},
   {id:'b-diamond', cat:'badge', name:'Diamond', emoji:'💎', price:300},
   {id:'b-crown', cat:'badge', name:'Royalty', emoji:'👑', price:500},
@@ -1156,7 +1162,7 @@ const SHOP = [
 ];
 const ACCENTS = {lavender:'#d9c8ff', pink:'#ffcbe6', sky:'#c4e4ff', mint:'#bff5d9', gold:'#ffe8a8'};
 const SET = {bg: store.get('set_bg', true), ts: store.get('set_ts', true), accent: store.get('set_accent', 'auto')};
-const THEME_NAMES = {purple:'Purple', black:'Black', grey:'Grey', light:'Light', green:'Green'};
+const THEME_NAMES = {purple:'Purple', black:'Black', grey:'Grey', light:'Light', green:'Green', random:'Random'};
 const accentOf = k => !ACCENTS[k] ? ACC_AUTO[THEME] : THEME === 'light' ? ACC_LIGHT[k] : ACCENTS[k];
 function applyAccent(){ document.documentElement.style.setProperty('--mint', accentOf(SET.accent)); }
 applyAccent();
@@ -1191,7 +1197,7 @@ function pcard(p){
     <div class="pstats"><div><b class="gold">${num(p && p.coins)}</b>coins</div><div><b>${num(p && p.msgCount)}</b>messages</div><div><b>${joined}</b>joined</div></div>
   </div></div>`;
 }
-const gateHTML = () => `<div class="panel gate">Accounts, chat and the shop work when this page is opened on claude.ai while signed in.</div>`;
+const gateHTML = () => `<div class="panel gate">Accounts, chat and the shop aren't set up on this copy of cobalt yet. The site owner needs to add their Supabase details (see supabase-config.js).</div>`;
 function fmtTime(t){
   const d = new Date(t), now = new Date();
   const time = d.toLocaleTimeString(undefined, {hour:'numeric', minute:'2-digit'});
@@ -1202,11 +1208,15 @@ function toast(t){ const el = $('#toast'); el.textContent = t; el.classList.add(
 
 // one write at a time per document
 const wq = {};
-function write(path, fn){
+function write(path, fn, quiet){
   if (!db) return Promise.resolve(false);
   const run = (wq[path] || Promise.resolve()).then(() => fn(db.doc(path))).then(() => true, e => {
     const c = e && e.code;
-    if (c === 'invalid_argument'){ readOnly = true; toast("You don't have permission to do that here"); renderSocial(); }
+    if (quiet) return false;
+    if (c === 'invalid_argument'){
+      if (EXT) toast("That wasn't allowed. Try again in a moment.");
+      else { readOnly = true; toast("You don't have permission to do that here"); renderSocial(); }
+    }
     else if (c === 'quota_exceeded') toast('Storage is full. Ask the owner to clear old data.');
     else if (c === 'resource_exhausted') toast('Slow down a little');
     else toast("Couldn't save. Try again.");
@@ -1217,7 +1227,109 @@ function write(path, fn){
 }
 
 /* ---- connect ---- */
+// On your own website (Vercel), cobalt uses Supabase when supabase-config.js has your project URL and key.
+// Inside claude.ai it uses claude.ai's storage instead.
+const EXT = window.COBALT_SUPABASE && window.COBALT_SUPABASE.url && window.COBALT_SUPABASE.anonKey ? window.COBALT_SUPABASE : null;
+let SERVER_NOW = () => Date.now();
+let needLogin = false, sb = null, extUser = null;
+
+function startListening(){
+  const timer = setTimeout(() => { if (dbState === 'loading'){ dbState = 'slow'; renderSocial(); } }, 10000);
+  db.collection('profiles').onSnapshot(s => {
+    const next = {}; s.docs.forEach(d => { next[d.id] = d.data(); });
+    profiles = next; me = (myId && profiles[myId]) || null;
+    if (!s.metadata.fromCache){ clearTimeout(timer); dbState = 'ready'; }
+    else if (s.size && dbState !== 'ready') dbState = 'ready';
+    renderSocial();
+  }, () => { clearTimeout(timer); dbState = 'error'; renderSocial(); });
+  db.collection('chat').onSnapshot(s => {
+    const next = {}; s.docs.forEach(d => { next[d.id] = d.data(); });
+    chats = next; renderChatMsgs();
+  }, () => {});
+}
+
+// Same doc/collection interface as claude.ai storage, on one Supabase table ("docs") with live updates.
+function supabaseAdapter(client){
+  const err = e => ({code: e && (e.code === '42501' || /row-level security|permission|not found/i.test(e.message || '')) ? 'invalid_argument' : 'unavailable', message: String(e && e.message)});
+  const live = new Set();
+  const refresh = () => live.forEach(f => f());
+  const chk = res => { if (res.error) throw err(res.error); refresh(); };
+  const watch = (col, id, load) => {
+    const ch = client.channel('docs-' + col + '-' + (id || 'all') + '-' + Math.random().toString(36).slice(2, 8))
+      .on('postgres_changes', {event: '*', schema: 'public', table: 'docs', filter: 'collection=eq.' + col}, p => {
+        const row = p.new && p.new.id ? p.new : p.old;
+        if (!id || (row && row.id === id)) load();
+      })
+      .subscribe();
+    live.add(load);
+    return () => { live.delete(load); client.removeChannel(ch); };
+  };
+  return {
+    refresh,
+    doc(path){
+      const [col, id] = path.split('/');
+      return {
+        set: async d => chk(await client.from('docs').upsert({collection: col, id, data: d})),
+        update: async d => chk(await client.rpc('merge_doc', {p_collection: col, p_id: id, p_patch: d})),
+        delete: async () => chk(await client.from('docs').delete().eq('collection', col).eq('id', id)),
+        onSnapshot(next, bad){
+          let alive = true;
+          const load = async () => {
+            const {data, error} = await client.from('docs').select('id,data').eq('collection', col).eq('id', id).maybeSingle();
+            if (!alive) return;
+            if (error){ bad && bad(err(error)); return; }
+            next({id, exists: !!data, data: () => data ? data.data : undefined, metadata: {fromCache: false, hasPendingWrites: false}});
+          };
+          const stop = watch(col, id, load); load();
+          return () => { alive = false; stop(); };
+        }
+      };
+    },
+    collection(col){
+      return { onSnapshot(next, bad){
+        let alive = true;
+        const load = async () => {
+          const {data, error} = await client.from('docs').select('id,data').eq('collection', col);
+          if (!alive) return;
+          if (error){ bad && bad(err(error)); return; }
+          const docs = data.map(r => ({id: r.id, exists: true, data: () => r.data, metadata: {fromCache: false}}));
+          next({docs, size: docs.length, empty: !docs.length, metadata: {fromCache: false}});
+        };
+        const stop = watch(col, null, load); load();
+        return () => { alive = false; stop(); };
+      }};
+    }
+  };
+}
+
+async function connectSupabase(){
+  try {
+    const {createClient} = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+    sb = createClient(EXT.url, EXT.anonKey);
+    db = supabaseAdapter(sb);
+    needLogin = true;
+    startListening();
+    let lastId;
+    const apply = session => {
+      const u = session && session.user;
+      extUser = u || null; myId = u ? u.id : null; needLogin = !u; readOnly = false;
+      owner = !!(u && EXT.ownerUid && u.id === EXT.ownerUid);
+      me = (myId && profiles[myId]) || null;
+      if (myId !== lastId){ lastId = myId; startRequests(); profKey = ''; }
+      renderSocial();
+      if (view === 'chat') renderChat();
+    };
+    const {data} = await sb.auth.getSession();
+    apply(data.session);
+    sb.auth.onAuthStateChange((event, session) => {
+      apply(session);
+      if (event === 'PASSWORD_RECOVERY'){ location.hash = 'settings'; setTimeout(() => toast('Set a new password below'), 300); }
+    });
+  } catch(e){ console.warn(e); dbState = 'off'; renderSocial(); }
+}
+
 (async () => {
+  if (EXT){ connectSupabase(); return; }
   try {
     if (window.claude && window.claude.use) [db, ucap] = await Promise.all([window.claude.use('db'), window.claude.use('user')]);
   } catch(e){}
@@ -1228,18 +1340,7 @@ function write(path, fn){
     if ((await ucap.can('data.write')) === false) readOnly = true;
   } catch(e){}
   if (!myId){ dbState = 'off'; renderSocial(); return; }
-  const timer = setTimeout(() => { if (dbState === 'loading'){ dbState = 'slow'; renderSocial(); } }, 10000);
-  db.collection('profiles').onSnapshot(s => {
-    const next = {}; s.docs.forEach(d => { next[d.id] = d.data(); });
-    profiles = next; me = profiles[myId] || null;
-    if (!s.metadata.fromCache){ clearTimeout(timer); dbState = 'ready'; }
-    else if (s.size && dbState !== 'ready') dbState = 'ready';
-    renderSocial();
-  }, () => { clearTimeout(timer); dbState = 'error'; renderSocial(); });
-  db.collection('chat').onSnapshot(s => {
-    const next = {}; s.docs.forEach(d => { next[d.id] = d.data(); });
-    chats = next; renderChatMsgs();
-  }, () => {});
+  startListening();
   startRequests();
 })();
 
@@ -1257,21 +1358,22 @@ function onView(id){
 function renderMe(){
   $('#me').innerHTML = me
     ? `${avatar(me, 28)}<span class="nm">${esc(uname(me))}</span><span class="mcoins">${svg('coin', 13)}${num(me.coins)}</span>`
-    : `<span class="av" style="width:28px;height:28px;background:var(--ink);color:var(--mint)">${svg('user', 15)}</span><span class="nm">${dbState === 'off' ? 'Guest' : 'Sign up'}</span>`;
+    : `<span class="av" style="width:28px;height:28px;background:var(--ink);color:var(--mint)">${svg('user', 15)}</span><span class="nm">${dbState === 'off' ? 'Guest' : needLogin ? 'Sign in' : 'Sign up'}</span>`;
 }
 
 /* ---- chat ---- */
 function renderChat(){
   let msg = '', can = false;
-  if (dbState === 'off') msg = 'The chat room works when this page is opened on claude.ai while signed in.';
+  if (dbState === 'off') msg = "The chat room isn't set up on this copy of cobalt yet.";
   else if (dbState === 'error') msg = "Can't reach the chat right now.";
   else if (dbState !== 'ready') msg = dbState === 'slow' ? "Still connecting… the chat can't be reached yet." : 'Connecting…';
-  else if (!me) msg = '<a href="#profile">Create an account</a> to start chatting and earning coins.';
+  else if (needLogin) msg = '<a href="#profile">Sign in</a> to start chatting and earning coins.';
+  else if (!me) msg = '<a href="#profile">Create your profile</a> to start chatting and earning coins.';
   else if (readOnly) msg = 'You can read the chat, but posting needs edit access. Ask the owner to invite you.';
   else { can = true; msg = 'You earn 5 coins per message (at most once every 15 seconds). Be nice!'; }
   $('#cinput').disabled = !can; $('#cnote').innerHTML = msg;
   const n = Object.keys(profiles).length;
-  $('#roomSub').textContent = n ? `${n} member${n === 1 ? '' : 's'}` : 'The saucer chat room';
+  $('#roomSub').textContent = n ? `${n} member${n === 1 ? '' : 's'}` : 'The cobalt chat room';
   $('#coinTop').style.display = me ? '' : 'none';
   $('#coinTop').innerHTML = me ? svg('coin', 15) + num(me.coins) : '';
   renderChatMsgs();
@@ -1315,9 +1417,15 @@ async function sendChat(text){
   renderChatMsgs(true);
   const ok = await write('chat/' + myId, r => r.set({msgs}));
   if (!ok) return;
+  if (EXT){
+    await write('profiles/' + myId, r => r.update({msgCount: num(me.msgCount) + 1}), true);
+    const {data: coins, error} = await sb.rpc('earn_coins');
+    if (!error && coins > 0){ toast('+5 coins'); db.refresh(); }
+    return;
+  }
   const upd = {msgCount: num(me.msgCount) + 1};
-  if (now - num(me.lastEarn) >= 15000){ upd.coins = num(me.coins) + 5; upd.lastEarn = now; }
-  const ok2 = await write('profiles/' + myId, r => r.update(upd));
+  if (now - num(me.lastEarn) >= 15000){ upd.coins = num(me.coins) + 5; upd.lastEarn = SERVER_NOW(); }
+  const ok2 = await write('profiles/' + myId, r => r.update(upd), true);
   if (ok2 && upd.coins) toast('+5 coins');
 }
 $('#cform').addEventListener('submit', e => { e.preventDefault(); const v = $('#cinput').value; $('#cinput').value = ''; sendChat(v); });
@@ -1344,10 +1452,10 @@ function renderShop(){
   let h = `<h1 class="logo small">shop</h1><p class="sub">Earn coins by chatting in the <a href="#chat">chat room</a>, then spend them on effects for your profile. Equip what you buy here or on your <a href="#profile">profile</a>.</p>`;
   if (dbState === 'off'){ b.innerHTML = h + gateHTML(); return; }
   if (!me){ b.innerHTML = h + `<div class="panel gate">${dbState === 'ready' ? 'You need an account to shop.<br><br><button class="btnp" data-go="profile">Create account</button>' : 'Connecting…'}</div>`; return; }
-  const today = new Date().toDateString(), claimed = me.lastDaily === today;
+  const waitMs = 20*3600e3 - (Date.now() - num(me.lastDailyAt)), claimed = waitMs > 0;
   h += `<div class="panel row" style="justify-content:space-between">
     <div class="row"><span class="gold">${svg('coin', 34)}</span><div><div style="font-weight:800;font-size:22px">${num(me.coins)} coins</div><div class="tg" style="padding:0;border:0"><span class="d">Your balance</span></div></div></div>
-    <button class="btnp" id="daily" ${claimed || readOnly ? 'disabled' : ''}>${claimed ? 'Daily bonus claimed' : 'Claim daily bonus +25'}</button></div>`;
+    <button class="btnp" id="daily" ${claimed || readOnly ? 'disabled' : ''}>${claimed ? `Next bonus in ${Math.max(1, Math.ceil(waitMs/3600e3))}h` : 'Claim daily bonus +25'}</button></div>`;
   h += `<div class="tabsrow">${CATS.map(c => `<button class="chip${shopCat === c.id ? ' on' : ''}" data-cat="${c.id}">${c.name}</button>`).join('')}</div><div class="shopgrid">`;
   for (const it of SHOP.filter(s => s.cat === shopCat)){
     const own = (me.owned || []).includes(it.id), on = own && me.equip && me.equip[it.cat] === it.id;
@@ -1364,6 +1472,12 @@ async function buy(id){
   const it = shopItem(id);
   if (!it || !me || (me.owned || []).includes(id)) return;
   if (num(me.coins) < it.price){ toast('Not enough coins yet. Keep chatting!'); return; }
+  if (EXT){
+    const {error} = await sb.rpc('buy_item', {item: id});
+    if (error) toast(/not enough/i.test(error.message) ? 'Not enough coins yet. Keep chatting!' : "Couldn't buy that. Try again.");
+    else { toast(`Bought ${it.name} and equipped it!`); db.refresh(); }
+    return;
+  }
   const ok = await write('profiles/' + myId, r => r.update({coins: num(me.coins) - it.price, owned: [...(me.owned || []), id], equip: {[it.cat]: id}}));
   if (ok) toast(`Bought ${it.name} and equipped it!`);
 }
@@ -1374,7 +1488,13 @@ $('#shopBody').addEventListener('click', async e => {
   if (eq){ const [cat, id] = eq.dataset.equip.split('|'); write('profiles/' + myId, r => r.update({equip: {[cat]: id}})); return; }
   if (e.target.id === 'daily' && me){
     e.target.disabled = true;
-    const ok = await write('profiles/' + myId, r => r.update({coins: num(me.coins) + 25, lastDaily: new Date().toDateString()}));
+    if (EXT){
+      const {error} = await sb.rpc('claim_daily');
+      if (error) toast(/already/i.test(error.message) ? 'Already claimed. Come back later!' : "Couldn't claim that. Try again.");
+      else { toast('+25 coins. Come back tomorrow for more!'); db.refresh(); }
+      return;
+    }
+    const ok = await write('profiles/' + myId, r => r.update({coins: num(me.coins) + 25, lastDaily: new Date().toDateString(), lastDailyAt: SERVER_NOW()}));
     if (ok) toast('+25 coins. Come back tomorrow for more!');
   }
 });
@@ -1382,14 +1502,26 @@ $('#shopBody').addEventListener('click', async e => {
 /* ---- profile ---- */
 let profKey = '', draft = null;
 function renderProfile(){
-  const key = dbState === 'off' ? 'off' : dbState === 'error' && !me ? 'error' : !me && dbState !== 'ready' ? dbState : me ? 'edit' : 'create';
+  const key = dbState === 'off' ? 'off' : EXT && needLogin ? 'login' : dbState === 'error' && !me ? 'error' : !me && dbState !== 'ready' ? dbState : me ? 'edit' : 'create';
   if (key !== profKey){ profKey = key; buildProfile(key); }
   else if (key === 'edit') updatePreview();
 }
 function buildProfile(key){
   const b = $('#profBody');
-  let h = `<h1 class="logo small">${key === 'edit' ? 'profile' : 'create account'}</h1>`;
+  let h = `<h1 class="logo small">${key === 'edit' ? 'profile' : key === 'login' ? 'sign in' : 'create account'}</h1>`;
   if (key === 'off'){ b.innerHTML = h + gateHTML(); return; }
+  if (key === 'login'){
+    b.innerHTML = h + `<p class="sub">Sign in to chat, earn coins, shop and customise your profile.</p>
+      <div class="panel" style="max-width:440px">
+        ${EXT && EXT.google ? `<button class="btnp" id="gLogin" style="width:100%;padding:12px">Continue with Google</button>
+        <div class="d" style="text-align:center;margin:16px 0;color:var(--dim);font-size:13px">or use your email</div>` : ''}
+        <div class="fld"><label for="lEmail">Email</label><input class="inp" id="lEmail" type="email" autocomplete="email"></div>
+        <div class="fld"><label for="lPass">Password</label><input class="inp" id="lPass" type="password" autocomplete="current-password" placeholder="At least 6 characters"></div>
+        <div class="row"><button class="btnp" id="eLogin">Log in</button><button class="btng" id="eSignup">Create account</button><button class="btng" id="eReset" style="border:0;background:none;color:var(--dim)">Forgot password?</button></div>
+        <p class="perr" id="lErr" style="margin:12px 0 0"></p>
+      </div>`;
+    return;
+  }
   if (key === 'loading'){ b.innerHTML = h + `<p class="sub">Connecting…</p>`; return; }
   if (key === 'slow' || key === 'error'){ b.innerHTML = h + `<p class="sub">Accounts can't be reached right now. Check your connection.</p>`; return; }
   const src = me || {};
@@ -1449,10 +1581,10 @@ async function saveProfile(){
   const btn = $('#psave'); btn.disabled = true;
   const creating = !me;
   const ok = creating
-    ? await write('profiles/' + myId, r => r.set({name, bio: '', avatar: draft.avatar, avColor: draft.avColor, coins: 50, owned: [], equip: {}, joined: Date.now(), msgCount: 0, lastEarn: 0, lastDaily: ''}))
+    ? await write('profiles/' + myId, r => r.set({name, bio: '', avatar: draft.avatar, avColor: draft.avColor, coins: 50, owned: [], equip: {}, joined: Date.now(), msgCount: 0, lastEarn: 0, lastDaily: '', lastDailyAt: 0}))
     : await write('profiles/' + myId, r => r.update({name, bio: draft.bio.trim().slice(0, 160), avatar: draft.avatar, avColor: draft.avColor, equip: draft.equip}));
   if ($('#psave')) $('#psave').disabled = false;
-  if (ok) toast(creating ? 'Welcome to saucer! +50 coins' : 'Profile saved');
+  if (ok) toast(creating ? 'Welcome to cobalt! +50 coins' : 'Profile saved');
 }
 
 /* ---- settings ---- */
@@ -1461,13 +1593,15 @@ let renderSettings = function(){
   let h = `<h1 class="logo small">settings</h1><p class="sub">These settings are saved in this browser.</p>
   <div class="panel"><h3>APPEARANCE</h3>
     ${tog('bg', 'Animated background', 'The moving constellation behind every page.')}
-    <div class="tg" style="display:block"><div style="font-weight:600">Theme</div><div class="d">Changes the colours of the whole site.</div>
-      <div class="themes">${THEMES.map(t => `<button class="th${THEME === t ? ' on' : ''}" data-theme="${t}"><i style="background:linear-gradient(135deg,${PREV[t][0]} 50%,${PREV[t][1]} 50%)"></i>${THEME_NAMES[t]}${t === 'purple' ? ' <small>default</small>' : ''}</button>`).join('')}</div></div>
+    <div class="tg" style="display:block"><div style="font-weight:600">Theme</div><div class="d">Changes the colours of the whole site. Random picks a new theme every time you open cobalt${THEME_PREF === 'random' ? ` (right now: ${THEME_NAMES[THEME]})` : ''}.</div>
+      <div class="themes">${[...THEMES, 'random'].map(t => `<button class="th${THEME_PREF === t ? ' on' : ''}" data-theme="${t}"><i style="background:${t === 'random' ? `conic-gradient(${THEMES.map(x => PREV[x][1]).join(',')},${PREV.purple[1]})` : `linear-gradient(135deg,${PREV[t][0]} 50%,${PREV[t][1]} 50%)`}"></i>${t === 'random' ? '🎲 ' : ''}${THEME_NAMES[t]}${t === 'purple' ? ' <small>default</small>' : ''}</button>`).join('')}</div></div>
     <div class="tg"><div><div style="font-weight:600">Accent colour</div><div class="d">Used for highlights and buttons. The first one matches your theme.</div></div>
       <div class="row">${['auto', ...Object.keys(ACCENTS)].map(k => `<button class="sw${(ACCENTS[k] ? SET.accent === k : !ACCENTS[SET.accent]) ? ' sel' : ''}" data-acc="${k}" style="background:${accentOf(k)}" title="${k === 'auto' ? 'Theme default' : k}"></button>`).join('')}</div></div>
   </div>
   <div class="panel"><h3>CHAT</h3>${tog('ts', 'Show timestamps', 'Show the time next to each message.')}</div>
   <div class="panel"><h3>GAMES</h3><div class="tg"><div><div style="font-weight:600">Reset best scores</div><div class="d">Clears the best score for every game in this browser.</div></div><button class="btng danger" id="rsBest">Reset</button></div></div>`;
+  if (EXT && extUser) h += `<div class="panel"><h3>SIGNED IN</h3><div class="tg"><div style="min-width:0"><div style="font-weight:600">${esc(extUser.email || 'Your account')}</div><div class="d">Your user ID: <code id="myUid">${esc(extUser.id)}</code>${owner ? ' · you are the site owner' : ''}</div></div><div class="row"><button class="btng" id="copyUid">Copy ID</button><button class="btng" id="signOut">Sign out</button></div></div>
+    <div class="tg"><div style="min-width:0;flex:1"><div style="font-weight:600">Change password</div><input class="inp" id="newPass" type="password" autocomplete="new-password" placeholder="New password (6+ characters)" style="margin-top:8px;max-width:320px"></div><button class="btng" id="setPass">Save</button></div></div>`;
   if (me) h += `<div class="panel"><h3>ACCOUNT</h3><div class="tg"><div><div style="font-weight:600">Delete account</div><div class="d">Removes your profile, coins, items and messages. This can't be undone.</div></div><button class="btng danger" id="delAcct">Delete</button></div></div>`;
   $('#setBody').innerHTML = h;
 };
@@ -1485,7 +1619,8 @@ $('#setBody').addEventListener('click', e => {
   }
   const th = e.target.closest('[data-theme]');
   if (th){
-    THEME = th.dataset.theme; store.set('set_theme', THEME);
+    THEME_PREF = th.dataset.theme; store.set('set_theme', THEME_PREF);
+    THEME = THEME_PREF === 'random' ? randomTheme(THEME) : THEME_PREF;
     setThemeAttr(); applyAccent(); bgCtl.redraw(); renderSettings();
     if (view === 'play' && def) newGame();
     return;
@@ -1517,10 +1652,16 @@ document.addEventListener('click', e => {
 renderMe();
 
 /* ---- game requests ---- */
-let requests = {};
+let requests = {}, reqUnsub = null;
 function startRequests(){
-  if (!db) return;
-  db.collection('requests').onSnapshot(s => {
+  if (reqUnsub){ reqUnsub(); reqUnsub = null; }
+  requests = {};
+  if (!db || !myId) return;
+  if (EXT && !owner){
+    reqUnsub = db.doc('requests/' + myId).onSnapshot(x => { requests = x.exists ? {[myId]: x.data()} : {}; }, () => {});
+    return;
+  }
+  reqUnsub = db.collection('requests').onSnapshot(s => {
     const next = {}; s.docs.forEach(d => { next[d.id] = d.data(); });
     requests = next;
     if (view === 'settings') renderSettings();
@@ -1530,7 +1671,7 @@ function myRequests(){ const r = requests[myId]; return r && Array.isArray(r.lis
 function openRequest(){
   let body;
   if (dbState === 'off') body = `<p class="sub" style="margin:0">Game requests work when this page is opened on claude.ai while signed in.</p>`;
-  else if (!me) body = `<p class="sub">You need an account to request games.</p><button class="btnp" data-go="profile" id="mgo">Create account</button>`;
+  else if (needLogin || !me) body = `<p class="sub">You need an account to request games.</p><button class="btnp" data-go="profile" id="mgo">Create account</button>`;
   else if (readOnly) body = `<p class="sub" style="margin:0">Sending requests needs edit access. Ask the owner to invite you.</p>`;
   else body = `<p class="sub">Tell us what game you'd like added. Only the site owner sees requests.</p>
     <div class="fld"><label for="rqName">Game name</label><input class="inp" id="rqName" maxlength="60" placeholder="e.g. Minesweeper" autocomplete="off"></div>
@@ -1573,6 +1714,49 @@ $('#setBody').addEventListener('click', e => {
   const list = ((requests[uid] && requests[uid].list) || []).filter(q => String(q.id) !== id);
   requests = {...requests, [uid]: {list}}; renderSettings();
   write('requests/' + uid, r => r.set({list}));
+});
+
+/* ---- sign-in (Supabase Auth) ---- */
+function authMsg(e){
+  const m = (e && e.message) || '';
+  if (/invalid login/i.test(m)) return 'Wrong email or password.';
+  if (/already registered/i.test(m)) return 'That email already has an account. Try Log in.';
+  if (/at least 6/i.test(m)) return 'Use at least 6 characters for your password.';
+  if (/not confirmed/i.test(m)) return 'Confirm your email first. Check your inbox for the link.';
+  if (/rate limit|too many/i.test(m)) return 'Too many tries. Wait a minute and try again.';
+  if (/valid email|invalid.*email/i.test(m)) return "That email doesn't look right.";
+  return m || 'Something went wrong. Try again.';
+}
+const home = () => location.origin + location.pathname;
+$('#profBody').addEventListener('click', async e => {
+  if (!sb) return;
+  const id = e.target.id;
+  if (!['gLogin', 'eLogin', 'eSignup', 'eReset'].includes(id)) return;
+  const email = ($('#lEmail').value || '').trim(), password = $('#lPass').value || '', out = $('#lErr');
+  out.textContent = ''; out.style.color = '';
+  let res;
+  if (id === 'gLogin') res = await sb.auth.signInWithOAuth({provider: 'google', options: {redirectTo: home()}});
+  if (id === 'eLogin') res = await sb.auth.signInWithPassword({email, password});
+  if (id === 'eSignup'){
+    res = await sb.auth.signUp({email, password, options: {emailRedirectTo: home()}});
+    if (!res.error && !res.data.session){ out.style.color = 'var(--mint)'; out.textContent = 'Check your email and click the link to confirm your account, then log in.'; return; }
+  }
+  if (id === 'eReset'){
+    if (!email){ out.textContent = 'Type your email first, then press Forgot password.'; return; }
+    res = await sb.auth.resetPasswordForEmail(email, {redirectTo: home()});
+    if (!res.error){ out.style.color = 'var(--mint)'; out.textContent = 'Password reset email sent. Follow the link, then set a new password in Settings.'; return; }
+  }
+  if (res && res.error) out.textContent = authMsg(res.error);
+});
+$('#setBody').addEventListener('click', async e => {
+  if (e.target.id === 'signOut' && sb){ await sb.auth.signOut(); toast('Signed out'); renderSettings(); }
+  if (e.target.id === 'copyUid' && extUser){ try { await navigator.clipboard.writeText(extUser.id); toast('User ID copied'); } catch(err){ toast('Select the ID and copy it'); } }
+  if (e.target.id === 'setPass' && sb){
+    const pw = $('#newPass').value || '';
+    if (pw.length < 6){ toast('Use at least 6 characters'); return; }
+    const {error} = await sb.auth.updateUser({password: pw});
+    toast(error ? authMsg(error) : 'Password changed'); if (!error) $('#newPass').value = '';
+  }
 });
 
 window.addEventListener('hashchange', route);

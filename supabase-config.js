@@ -1,0 +1,13 @@
+// cobalt: Supabase settings for accounts, chat, the shop and game requests.
+// Get these from Supabase → Project Settings → API (or "API Keys"):
+//   url      = Project URL
+//   anonKey  = the "anon" / "public" key (safe to publish; NEVER put the service_role / secret key here)
+// Leave url empty to turn accounts off.
+window.COBALT_SUPABASE = {
+  url: "",
+  anonKey: "",
+  // After you sign in on your site: Settings → Copy ID, paste it here AND into supabase.sql, then run supabase.sql again.
+  ownerUid: "",
+  // Set to true only after you turn on Google sign-in in Supabase (Authentication → Providers → Google).
+  google: false
+};
