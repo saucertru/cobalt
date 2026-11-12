@@ -5,6 +5,8 @@
 //   games/<folder>/index.html      an HTML game
 //   games/<folder>/<something>.swf a Flash game (played with Ruffle; a player page is made for you)
 //   games/<something>.swf          a Flash game dropped straight into games/
+//   games/<folder>/<rom>  or  games/<rom>   a console game (NES, SNES, GB, GBA, N64, DS, PS1, Sega...) played with EmulatorJS
+//                                  (for .zip/.bin/.iso/.md ROMs, set "system" in game.json, e.g. "nes", "gba", "psx", "segaMD")
 // Optional in a folder: game.json (name, description, controls, color, icon, entry, swf) and thumbnail.png/.jpg/.webp/.gif
 //   icon  = path of an image inside the folder to show on the game's card (e.g. "img/icon.png")
 //   entry = path of the game's main page if it isn't index.html at the top (found automatically one level down too)
@@ -69,6 +71,40 @@ function rufflePage(title, swfFile) {
 `;
 }
 
+// Console games: file extension -> EmulatorJS system
+const SYSTEMS = {nes: 'nes fds unf unif', snes: 'smc sfc fig swc bs gd3', n64: 'n64 z64 v64', gb: 'gb gbc dmg', gba: 'gba', nds: 'nds',
+  vb: 'vb vboy', segaMS: 'sms', segaMD: 'gen smd sgd 68k', segaGG: 'gg', psx: 'pbp chd', atari2600: 'a26', atari7800: 'a78',
+  lynx: 'lnx', pce: 'pce', ngp: 'ngp ngc', ws: 'ws wsc'};
+const romSystem = f => { const ext = (f.split('.').pop() || '').toLowerCase(); return Object.keys(SYSTEMS).find(k => SYSTEMS[k].split(' ').includes(ext)) || ''; };
+const SYSTEM_NAMES = {nes: 'NES', snes: 'SNES', n64: 'N64', gb: 'Game Boy', gba: 'GBA', nds: 'Nintendo DS', vb: 'Virtual Boy', segaMS: 'Master System',
+  segaMD: 'Sega Genesis', segaGG: 'Game Gear', psx: 'PlayStation', atari2600: 'Atari 2600', atari7800: 'Atari 7800', lynx: 'Atari Lynx', pce: 'PC Engine', ngp: 'Neo Geo Pocket', ws: 'WonderSwan'};
+function emulatorPage(title, romFile, system) {
+  const data = 'https://cdn.emulatorjs.org/stable/data/';
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${esc(title)}</title>
+<style>html,body{margin:0;height:100%;background:#000;overflow:hidden}#game{width:100%;height:100%}</style>
+</head>
+<body>
+<div id="game"></div>
+<script>
+  window.EJS_player = '#game';
+  window.EJS_core = ${JSON.stringify(system)};
+  window.EJS_gameUrl = ${JSON.stringify(encodeURI(romFile))};
+  window.EJS_gameName = ${JSON.stringify(title)};
+  window.EJS_pathtodata = ${JSON.stringify(data)};
+  window.EJS_startOnLoaded = true;
+  window.EJS_color = '#2563eb';
+</script>
+<script src="${data}loader.js"></script>
+</body>
+</html>
+`;
+}
+
 const list = [];
 const add = (id, meta, fallbackName, folder, thumb, page = 'index.html') => {
   if (list.some(g => g.id === id)) { console.warn(`Skipped ${folder}: another game already uses the id "${id}"`); return; }
@@ -98,6 +134,18 @@ if (fs.existsSync(gamesDir)) {
       fs.renameSync(path.join(outGames, entry), path.join(dir, 'game.swf'));
       fs.writeFileSync(path.join(dir, 'index.html'), rufflePage(nice(entry), 'game.swf'));
       add(id, { description: 'Flash game' }, nice(entry), id, '');
+      continue;
+    }
+    // A console ROM dropped straight into games/
+    if (stat.isFile() && romSystem(entry)) {
+      const id = slug(entry.replace(/\.[^.]+$/, ''));
+      if (fs.existsSync(path.join(gamesDir, id))) { console.warn(`Skipped games/${entry}: a folder named "${id}" already exists`); continue; }
+      const dir = path.join(outGames, id);
+      fs.mkdirSync(dir, { recursive: true });
+      fs.renameSync(path.join(outGames, entry), path.join(dir, entry));
+      const sys = romSystem(entry), title = nice(entry.replace(/\.[^.]+$/, ''));
+      fs.writeFileSync(path.join(dir, 'index.html'), emulatorPage(title, entry, sys));
+      add(id, { description: `${SYSTEM_NAMES[sys]} game` }, title, id, '');
       continue;
     }
     if (!stat.isDirectory()) continue;
@@ -131,7 +179,18 @@ if (fs.existsSync(gamesDir)) {
       add(slug(entry), { description: 'Flash game', ...meta }, nice(entry), entry, thumb);
       continue;
     }
-    console.warn(`Skipped games/${entry}: it has no index.html or .swf file`);
+    // A folder with a console ROM in it
+    const files = fs.readdirSync(full).filter(f => fs.statSync(path.join(full, f)).isFile());
+    const rom = (meta.rom && files.includes(meta.rom) ? meta.rom : '') || files.find(f => romSystem(f)) ||
+      (meta.system ? files.find(f => /\.(zip|7z|bin|iso|cue|md)$/i.test(f)) : '');
+    const sys = (meta.system && SYSTEM_NAMES[meta.system] ? meta.system : '') || (rom ? romSystem(rom) : '');
+    if (rom && sys) {
+      fs.writeFileSync(path.join(outGames, entry, 'index.html'), emulatorPage(meta.name || nice(entry), rom, sys));
+      add(slug(entry), { description: `${SYSTEM_NAMES[sys]} game`, ...meta }, nice(entry), entry, thumb);
+      continue;
+    }
+    if (rom && !sys) { console.warn(`Skipped games/${entry}: add "system" to its game.json (e.g. "nes", "gba", "psx")`); continue; }
+    console.warn(`Skipped games/${entry}: it has no index.html, .swf or ROM file`);
   }
 }
 list.sort((a, b) => a.name.localeCompare(b.name, undefined, {numeric: true}));

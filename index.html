@@ -233,6 +233,7 @@ progress{width:100%;height:8px;accent-color:var(--mint);margin:14px 0 2px}
 .swfdrop{text-align:center;padding:42px 20px;border-style:dashed;border-width:1.5px}
 .swfdrop .d{color:var(--dim);margin:8px 0 12px;font-size:13px}
 .swfdrop.over{border-color:var(--mint)}
+iframe.swfstage{border:0}
 .swfstage{display:none;width:100%;aspect-ratio:4/3;background:#000;border-radius:18px;overflow:hidden;border:1px solid var(--line)}
 .swfstage.on{display:block}
 .swfstage ruffle-player,.swfstage ruffle-object{width:100%;height:100%;display:block}
@@ -420,6 +421,26 @@ html[data-theme=green]{--p07050c:#050806;--p0a0712:#060c09;--p0b0814:#08100c;--p
           <p class="note" id="swfNote"></p>
         </div>
       </section>
+      <section id="emulator" class="view">
+        <div class="page">
+          <h1 class="logo small">emulator</h1>
+          <p class="sub">Play retro console games (ROM files) from your device: NES, SNES, Game Boy, GBA, N64, DS, PlayStation, Sega and more. They run in your browser with EmulatorJS and aren't uploaded anywhere.</p>
+          <div class="panel swfdrop" id="romDrop">
+            <div style="font-weight:700;font-size:16px">Drop a game file here</div>
+            <div class="d">or</div>
+            <label class="btnp" style="display:inline-block">Choose a file<input type="file" id="romFile" hidden></label>
+            <div class="d" style="margin-top:16px">System:
+              <select class="inp" id="romSys" style="display:inline-block;width:auto;padding:6px 10px;margin-left:6px"></select>
+            </div>
+          </div>
+          <div class="sechead" id="romBar" style="display:none">
+            <div style="font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="romName"></div>
+            <div class="row"><button class="btng" id="romFull">Fullscreen</button><button class="btng" id="romOther">Play another</button></div>
+          </div>
+          <iframe class="swfstage" id="romStage" title="Emulator" allow="fullscreen; gamepad; autoplay"></iframe>
+          <p class="note" id="romNote">Tip: the emulator has its own menu for save states, controls and settings.</p>
+        </div>
+      </section>
       <section id="shop" class="view"><div class="page" id="shopBody"></div></section>
       <section id="profile" class="view"><div class="page" id="profBody"></div></section>
       <section id="settings" class="view"><div class="page" id="setBody"></div></section>
@@ -457,6 +478,7 @@ const ICONS = {
   feather:'<path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/><path d="M16 8 2 22"/><path d="M17.5 15H9"/>',
   bricks:'<rect x="3" y="4" width="8" height="4" rx="1"/><rect x="13" y="4" width="8" height="4" rx="1"/><rect x="7" y="10" width="10" height="4" rx="1"/><circle cx="12" cy="19" r="2"/>',
   gamepad:'<path d="M6 11h4M8 9v4"/><circle cx="15.5" cy="12" r=".9" fill="currentColor"/><circle cx="18" cy="10" r=".9" fill="currentColor"/><path d="M17.3 5H6.7a4 4 0 0 0-3.9 3.4L2 14.6a2.6 2.6 0 0 0 4.6 2.2L8 15h8l1.4 1.8a2.6 2.6 0 0 0 4.6-2.2l-.8-6.2A4 4 0 0 0 17.3 5z"/>',
+  retro:'<rect x="2" y="6" width="20" height="12" rx="3"/><path d="M7 10v4M5 12h4"/><circle cx="15.5" cy="11" r="1" fill="currentColor"/><circle cx="18" cy="13.5" r="1" fill="currentColor"/>',
   bolt:'<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',
   hash:'<path d="M9 3v18M15 3v18M3 9h18M3 15h18"/>',
   bot:'<rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 4v4"/><circle cx="12" cy="3.5" r="1"/><path d="M9 13v1.5M15 13v1.5"/><path d="M2 13v3M22 13v3"/>',
@@ -476,7 +498,7 @@ const ICONS = {
 const svg = (n, s=20) => `<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONS[n]}</svg>`;
 document.querySelectorAll('[data-i]').forEach(el => { el.innerHTML = svg(el.dataset.i, +(el.dataset.s || 20)); });
 
-const THEMES=["cobalt", "purple", "black", "grey", "light", "green"];const GAME_MAP={"cobalt": {"#07050c": "#05080c", "#0a0712": "#070b12", "#d6cfec": "#cedaed", "#18122a": "#111b2b", "#0b0814": "#080d14", "#2f2548": "#243349", "#3a2a66": "#284268", "#7b5fc4": "#5c87c7", "#2d1f52": "#1e3353", "#2c2248": "#213149", "#1b1530": "#142031", "#c4b5fd": "#b3d1ff", "#f6f3ff": "#f3f8ff", "#120a24": "#091425", "#211a35": "#192536", "#130e22": "#0e1622", "#151024": "#0f1825", "#d0c9e6": "#c8d4e7", "#e6e1f5": "#e1e9f5", "#231a3c": "#19273d", "#9a90b8": "#8fa0b9", "#2a1a55": "#193156", "#d9c8ff": "#c8deff", "#f0ecfa": "#ecf2fa", "#6366f1": "#5f9bf5", "#2a1f48": "#1e2f49", "#2a2140": "#202d41", "#261d40": "#1c2b41", "#1e1734": "#162235", "#cfc8e6": "#c7d4e7", "#8b5cf6": "#5899fa", "#100c1c": "#0c121c", "#171126": "#101927", "#241c38": "#1b2739", "#3a2e5c": "#2d405d", "#0d0a16": "#0a0f16", "#a78bfa": "#88b7fd", "#ece8f7": "#e8eef7", "#2563eb": "#2073f0", "#120c24": "#0b1525", "#bdb4d8": "#b3c2d9", "#0f0b1a": "#0b111a", "#120d20": "#0d1520", "#6a4fb0": "#4d75b2", "#24163f": "#152640"}, "purple": {}, "black": {"#07050c": "#030303", "#0a0712": "#040404", "#d6cfec": "#dedede", "#18122a": "#090909", "#0b0814": "#040404", "#2f2548": "#101010", "#3a2a66": "#484848", "#7b5fc4": "#929292", "#2d1f52": "#111111", "#2c2248": "#101010", "#1b1530": "#0a0a0a", "#c4b5fd": "#c4b5fd", "#f6f3ff": "#f9f9f9", "#120a24": "#070707", "#211a35": "#0c0c0c", "#130e22": "#070707", "#151024": "#080808", "#d0c9e6": "#d8d8d8", "#e6e1f5": "#ebebeb", "#231a3c": "#0d0d0d", "#9a90b8": "#a4a4a4", "#2a1a55": "#111111", "#d9c8ff": "#e3e3e3", "#f0ecfa": "#f3f3f3", "#6366f1": "#6366f1", "#2a1f48": "#0f0f0f", "#2a2140": "#0f0f0f", "#261d40": "#0e0e0e", "#1e1734": "#0b0b0b", "#cfc8e6": "#d7d7d7", "#8b5cf6": "#8b5cf6", "#100c1c": "#060606", "#171126": "#080808", "#241c38": "#0d0d0d", "#3a2e5c": "#454545", "#0d0a16": "#050505", "#a78bfa": "#a78bfa", "#ece8f7": "#f0f0f0", "#2563eb": "#2563eb", "#120c24": "#070707", "#bdb4d8": "#c6c6c6", "#0f0b1a": "#060606", "#120d20": "#070707", "#6a4fb0": "#808080", "#24163f": "#0d0d0d"}, "grey": {"#07050c": "#080809", "#0a0712": "#0c0c0d", "#d6cfec": "#dddcdf", "#18122a": "#1e1d1f", "#0b0814": "#0e0e0e", "#2f2548": "#363538", "#3a2a66": "#47464a", "#7b5fc4": "#908e95", "#2d1f52": "#38373a", "#2c2248": "#343436", "#1b1530": "#222223", "#c4b5fd": "#c4b5fd", "#f6f3ff": "#f9f9f9", "#120a24": "#171618", "#211a35": "#272728", "#130e22": "#181719", "#151024": "#1a191b", "#d0c9e6": "#d7d6d9", "#e6e1f5": "#ebeaec", "#231a3c": "#2a2a2c", "#9a90b8": "#a3a3a5", "#2a1a55": "#37353a", "#d9c8ff": "#e3e2e5", "#f0ecfa": "#f3f3f3", "#6366f1": "#6366f1", "#2a1f48": "#333235", "#2a2140": "#302f32", "#261d40": "#2e2d30", "#1e1734": "#252427", "#cfc8e6": "#d6d6d8", "#8b5cf6": "#8b5cf6", "#100c1c": "#141315", "#171126": "#1b1b1c", "#241c38": "#2a292b", "#3a2e5c": "#444347", "#0d0a16": "#101010", "#a78bfa": "#a78bfa", "#ece8f7": "#efeff0", "#2563eb": "#2563eb", "#120c24": "#181719", "#bdb4d8": "#c5c5c7", "#0f0b1a": "#121213", "#120d20": "#161617", "#6a4fb0": "#7e7c83", "#24163f": "#2a292c"}, "light": {}, "green": {"#07050c": "#050806", "#0a0712": "#060c09", "#d6cfec": "#cfdcd5", "#18122a": "#111b16", "#0b0814": "#08100c", "#2f2548": "#24352c", "#3a2a66": "#25453a", "#7b5fc4": "#5d8a74", "#2d1f52": "#1d3b2e", "#2c2248": "#1f3529", "#1b1530": "#13201a", "#c4b5fd": "#7cf7c4", "#f6f3ff": "#f4f8f5", "#120a24": "#06130c", "#211a35": "#16241c", "#130e22": "#0d1712", "#151024": "#0e1712", "#d0c9e6": "#c7d4cd", "#e6e1f5": "#dfe9e3", "#231a3c": "#16291f", "#9a90b8": "#8aa597", "#2a1a55": "#0d3322", "#d9c8ff": "#bff5d9", "#f0ecfa": "#eaf3ee", "#6366f1": "#10b981", "#2a1f48": "#1d3328", "#2a2140": "#1c2a23", "#261d40": "#1b2c23", "#1e1734": "#16261e", "#cfc8e6": "#c3d2ca", "#8b5cf6": "#3fe0b0", "#100c1c": "#0b1510", "#171126": "#0f1a14", "#241c38": "#18261e", "#3a2e5c": "#2a4135", "#0d0a16": "#09100c", "#a78bfa": "#4fd6a0", "#ece8f7": "#e6efe9", "#2563eb": "#2f9e6b", "#120c24": "#0c1a14", "#bdb4d8": "#b4c4bb", "#0f0b1a": "#0b1410", "#120d20": "#0c1611", "#6a4fb0": "#3f6b56", "#24163f": "#13291f"}};const STARS={"cobalt": ["204,219,241", "138,172,222", "173,203,247"], "purple": ["215,205,240", "165,140,220", "195,175,245"], "black": ["222,222,222", "180,180,180", "210,210,210"], "grey": ["222,221,224", "179,177,183", "209,208,212"], "light": ["24,19,40", "24,19,40", "24,19,40"], "green": ["200,230,215", "140,190,165", "175,225,200"]};const ACC_AUTO={"cobalt": "#bcd3ff", "purple": "#d9c8ff", "green": "#bff5d9", "grey": "#e4e4e7", "black": "#fafafa", "light": "#5726c5"};const ACC_LIGHT={"lavender": "#5726c5", "pink": "#c52678", "sky": "#267cc5", "mint": "#26c572", "gold": "#c59b26"};const PREV={"cobalt": ["#0a0f16", "#bcd3ff"], "purple": ["#0d0a16", "#d9c8ff"], "black": ["#050505", "#fafafa"], "grey": ["#101010", "#e4e4e7"], "light": ["#ece9f5", "#5726c5"], "green": ["#09100c", "#bff5d9"]};
+const THEMES=["cobalt", "purple", "black", "grey", "light", "green"];const GAME_MAP={"cobalt": {"#151024": "#0f1825", "#bdb4d8": "#b3c2d9", "#07050c": "#05080c", "#3a2e5c": "#2d405d", "#120a24": "#091425", "#130e22": "#0e1622", "#0a0712": "#070b12", "#2d1f52": "#1e3353", "#120d20": "#0d1520", "#c4b5fd": "#b3d1ff", "#100c1c": "#0c121c", "#f6f3ff": "#f3f8ff", "#2563eb": "#2073f0", "#171126": "#101927", "#1e1734": "#162235", "#2a2140": "#202d41", "#d0c9e6": "#c8d4e7", "#0f0b1a": "#0b111a", "#d9c8ff": "#c8deff", "#ece8f7": "#e8eef7", "#261d40": "#1c2b41", "#cfc8e6": "#c7d4e7", "#120c24": "#0b1525", "#7b5fc4": "#5c87c7", "#241c38": "#1b2739", "#211a35": "#192536", "#9a90b8": "#8fa0b9", "#231a3c": "#19273d", "#a78bfa": "#88b7fd", "#2a1a55": "#193156", "#2c2248": "#213149", "#2a1f48": "#1e2f49", "#e6e1f5": "#e1e9f5", "#8b5cf6": "#5899fa", "#1b1530": "#142031", "#24163f": "#152640", "#18122a": "#111b2b", "#3a2a66": "#284268", "#2f2548": "#243349", "#6366f1": "#5f9bf5", "#0b0814": "#080d14", "#f0ecfa": "#ecf2fa", "#d6cfec": "#cedaed", "#6a4fb0": "#4d75b2", "#0d0a16": "#0a0f16"}, "purple": {}, "black": {"#151024": "#080808", "#bdb4d8": "#c6c6c6", "#07050c": "#030303", "#3a2e5c": "#454545", "#120a24": "#070707", "#130e22": "#070707", "#0a0712": "#040404", "#2d1f52": "#111111", "#120d20": "#070707", "#c4b5fd": "#c4b5fd", "#100c1c": "#060606", "#f6f3ff": "#f9f9f9", "#2563eb": "#2563eb", "#171126": "#080808", "#1e1734": "#0b0b0b", "#2a2140": "#0f0f0f", "#d0c9e6": "#d8d8d8", "#0f0b1a": "#060606", "#d9c8ff": "#e3e3e3", "#ece8f7": "#f0f0f0", "#261d40": "#0e0e0e", "#cfc8e6": "#d7d7d7", "#120c24": "#070707", "#7b5fc4": "#929292", "#241c38": "#0d0d0d", "#211a35": "#0c0c0c", "#9a90b8": "#a4a4a4", "#231a3c": "#0d0d0d", "#a78bfa": "#a78bfa", "#2a1a55": "#111111", "#2c2248": "#101010", "#2a1f48": "#0f0f0f", "#e6e1f5": "#ebebeb", "#8b5cf6": "#8b5cf6", "#1b1530": "#0a0a0a", "#24163f": "#0d0d0d", "#18122a": "#090909", "#3a2a66": "#484848", "#2f2548": "#101010", "#6366f1": "#6366f1", "#0b0814": "#040404", "#f0ecfa": "#f3f3f3", "#d6cfec": "#dedede", "#6a4fb0": "#808080", "#0d0a16": "#050505"}, "grey": {"#151024": "#1a191b", "#bdb4d8": "#c5c5c7", "#07050c": "#080809", "#3a2e5c": "#444347", "#120a24": "#171618", "#130e22": "#181719", "#0a0712": "#0c0c0d", "#2d1f52": "#38373a", "#120d20": "#161617", "#c4b5fd": "#c4b5fd", "#100c1c": "#141315", "#f6f3ff": "#f9f9f9", "#2563eb": "#2563eb", "#171126": "#1b1b1c", "#1e1734": "#252427", "#2a2140": "#302f32", "#d0c9e6": "#d7d6d9", "#0f0b1a": "#121213", "#d9c8ff": "#e3e2e5", "#ece8f7": "#efeff0", "#261d40": "#2e2d30", "#cfc8e6": "#d6d6d8", "#120c24": "#181719", "#7b5fc4": "#908e95", "#241c38": "#2a292b", "#211a35": "#272728", "#9a90b8": "#a3a3a5", "#231a3c": "#2a2a2c", "#a78bfa": "#a78bfa", "#2a1a55": "#37353a", "#2c2248": "#343436", "#2a1f48": "#333235", "#e6e1f5": "#ebeaec", "#8b5cf6": "#8b5cf6", "#1b1530": "#222223", "#24163f": "#2a292c", "#18122a": "#1e1d1f", "#3a2a66": "#47464a", "#2f2548": "#363538", "#6366f1": "#6366f1", "#0b0814": "#0e0e0e", "#f0ecfa": "#f3f3f3", "#d6cfec": "#dddcdf", "#6a4fb0": "#7e7c83", "#0d0a16": "#101010"}, "light": {}, "green": {"#151024": "#0e1712", "#bdb4d8": "#b4c4bb", "#07050c": "#050806", "#3a2e5c": "#2a4135", "#120a24": "#06130c", "#130e22": "#0d1712", "#0a0712": "#060c09", "#2d1f52": "#1d3b2e", "#120d20": "#0c1611", "#c4b5fd": "#7cf7c4", "#100c1c": "#0b1510", "#f6f3ff": "#f4f8f5", "#2563eb": "#2f9e6b", "#171126": "#0f1a14", "#1e1734": "#16261e", "#2a2140": "#1c2a23", "#d0c9e6": "#c7d4cd", "#0f0b1a": "#0b1410", "#d9c8ff": "#bff5d9", "#ece8f7": "#e6efe9", "#261d40": "#1b2c23", "#cfc8e6": "#c3d2ca", "#120c24": "#0c1a14", "#7b5fc4": "#5d8a74", "#241c38": "#18261e", "#211a35": "#16241c", "#9a90b8": "#8aa597", "#231a3c": "#16291f", "#a78bfa": "#4fd6a0", "#2a1a55": "#0d3322", "#2c2248": "#1f3529", "#2a1f48": "#1d3328", "#e6e1f5": "#dfe9e3", "#8b5cf6": "#3fe0b0", "#1b1530": "#13201a", "#24163f": "#13291f", "#18122a": "#111b16", "#3a2a66": "#25453a", "#2f2548": "#24352c", "#6366f1": "#10b981", "#0b0814": "#08100c", "#f0ecfa": "#eaf3ee", "#d6cfec": "#cfdcd5", "#6a4fb0": "#3f6b56", "#0d0a16": "#09100c"}};const STARS={"cobalt": ["204,219,241", "138,172,222", "173,203,247"], "purple": ["215,205,240", "165,140,220", "195,175,245"], "black": ["222,222,222", "180,180,180", "210,210,210"], "grey": ["222,221,224", "179,177,183", "209,208,212"], "light": ["24,19,40", "24,19,40", "24,19,40"], "green": ["200,230,215", "140,190,165", "175,225,200"]};const ACC_AUTO={"cobalt": "#bcd3ff", "purple": "#d9c8ff", "green": "#bff5d9", "grey": "#e4e4e7", "black": "#fafafa", "light": "#5726c5"};const ACC_LIGHT={"lavender": "#5726c5", "pink": "#c52678", "sky": "#267cc5", "mint": "#26c572", "gold": "#c59b26"};const PREV={"cobalt": ["#0a0f16", "#bcd3ff"], "purple": ["#0d0a16", "#d9c8ff"], "black": ["#050505", "#fafafa"], "grey": ["#101010", "#e4e4e7"], "light": ["#ece9f5", "#5726c5"], "green": ["#09100c", "#bff5d9"]};
 let THEME_PREF = store.get('set_theme', 'cobalt');
 if (THEME_PREF !== 'random' && !THEMES.includes(THEME_PREF)) THEME_PREF = 'cobalt';
 const randomTheme = (not) => { const pool = THEMES.filter(t => t !== not); return pool[Math.random()*pool.length|0]; };
@@ -544,6 +566,7 @@ const GAMES = [];  // games come from the games/ folder (see GAMES FROM THE game
 const APPS = [
   {id:'games', name:'Games', icon:'gamepad', color:'#2563eb'},
   {id:'flash', name:'Flash player', icon:'bolt', color:'#e11d48'},
+  {id:'emulator', name:'Emulator', icon:'retro', color:'#7c3aed'},
   {id:'ai', name:'Cobalt AI', icon:'bot', color:'#6366f1'},
   {id:'chat', name:'Chat room', icon:'chat', color:'#0ea5e9'},
   {id:'music', name:'Music', icon:'music', color:'#ec4899'},
@@ -620,7 +643,7 @@ function newGame(){
 }
 function show(v){
   view = v;
-  for (const id of ['home','play','ai','music','chat','shop','profile','settings','games','flash']) $('#'+id).style.display = 'none';
+  for (const id of ['home','play','ai','music','chat','shop','profile','settings','games','flash','emulator']) $('#'+id).style.display = 'none';
   $('#'+v).style.display = v === 'play' ? 'block' : 'flex';
   $('#scroll').scrollTop = 0;
 }
@@ -959,6 +982,57 @@ sd.addEventListener('dragleave', () => sd.classList.remove('over'));
 sd.addEventListener('drop', e => { e.preventDefault(); sd.classList.remove('over'); playSwf(e.dataTransfer.files[0]); });
 $('#swfOther').onclick = () => { closeSwf(); swfNote(''); $('#swfFile').click(); };
 $('#swfFull').onclick = () => { const st = $('#swfStage'); try { (st.requestFullscreen || st.webkitRequestFullscreen).call(st); } catch(e){} };
+
+/* ---------------- EMULATOR (EmulatorJS) ---------------- */
+// Plays a ROM the visitor picks from their own device. Nothing is uploaded.
+const EJS_DATA = 'https://cdn.emulatorjs.org/stable/data/';
+const SYSTEMS = [
+  ['nes', 'NES / Famicom', 'nes fds unf unif'], ['snes', 'Super Nintendo', 'smc sfc fig swc bs gd3'],
+  ['n64', 'Nintendo 64', 'n64 z64 v64'], ['gb', 'Game Boy / Color', 'gb gbc dmg'], ['gba', 'Game Boy Advance', 'gba'],
+  ['nds', 'Nintendo DS', 'nds'], ['vb', 'Virtual Boy', 'vb vboy'], ['segaMS', 'Sega Master System', 'sms'],
+  ['segaMD', 'Sega Genesis / Mega Drive', 'md gen smd sgd 68k'], ['segaGG', 'Sega Game Gear', 'gg'],
+  ['psx', 'PlayStation', 'pbp chd'], ['atari2600', 'Atari 2600', 'a26'], ['atari7800', 'Atari 7800', 'a78'],
+  ['lynx', 'Atari Lynx', 'lnx'], ['pce', 'PC Engine / TurboGrafx-16', 'pce'], ['ngp', 'Neo Geo Pocket', 'ngp ngc'], ['ws', 'WonderSwan', 'ws wsc']
+];
+$('#romSys').innerHTML = '<option value="">Auto-detect</option>' + SYSTEMS.map(([c, n]) => `<option value="${c}">${n}</option>`).join('');
+const romNote = t => { $('#romNote').textContent = t; };
+let romUrl = null;
+function closeRom(){
+  const f = $('#romStage'); f.srcdoc = ''; f.classList.remove('on');
+  if (romUrl){ URL.revokeObjectURL(romUrl); romUrl = null; }
+  $('#romBar').style.display = 'none'; $('#romDrop').style.display = '';
+}
+function detectSystem(name){
+  const ext = (name.split('.').pop() || '').toLowerCase();
+  const hit = SYSTEMS.find(([, , exts]) => exts.split(' ').includes(ext));
+  return hit ? hit[0] : '';
+}
+function playRom(file){
+  if (!file) return;
+  if (file.size > 800 * 1048576){ romNote('That file is too big (over 800 MB).'); return; }
+  const core = $('#romSys').value || detectSystem(file.name);
+  if (!core){ romNote(`Couldn't tell which console "${file.name}" is for. Pick the system from the list, then choose the file again.`); return; }
+  closeRom();
+  romUrl = URL.createObjectURL(file);
+  const name = file.name.replace(/\.[^.]+$/, '');
+  const cfg = {core, url: romUrl, name, data: EJS_DATA, color: getComputedStyle(document.documentElement).getPropertyValue('--btn').trim() || '#2563eb'};
+  $('#romStage').srcdoc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>html,body{margin:0;height:100%;background:#000;overflow:hidden}#game{width:100%;height:100%}</style></head><body><div id="game"></div>
+<script>const c = ${JSON.stringify(cfg).replace(/</g, '\\u003c')};
+window.EJS_player = '#game'; window.EJS_core = c.core; window.EJS_gameUrl = c.url; window.EJS_gameName = c.name;
+window.EJS_pathtodata = c.data; window.EJS_startOnLoaded = true; window.EJS_color = c.color; window.EJS_backgroundColor = '#000000';
+<\/script><script src="${EJS_DATA}loader.js" onerror="document.body.innerHTML='<p style=&quot;color:#ccc;font:15px sans-serif;padding:20px&quot;>Couldn\\'t load the emulator. Check your connection and try again.</p>'"><\/script></body></html>`;
+  $('#romStage').classList.add('on');
+  $('#romDrop').style.display = 'none'; $('#romBar').style.display = '';
+  $('#romName').textContent = `${name} · ${SYSTEMS.find(s => s[0] === core)[1]}`;
+  romNote('Tip: the emulator has its own menu for save states, controls and settings.');
+}
+$('#romFile').addEventListener('change', e => { playRom(e.target.files[0]); e.target.value = ''; });
+const rd = $('#romDrop');
+rd.addEventListener('dragover', e => { e.preventDefault(); rd.classList.add('over'); });
+rd.addEventListener('dragleave', () => rd.classList.remove('over'));
+rd.addEventListener('drop', e => { e.preventDefault(); rd.classList.remove('over'); playRom(e.dataTransfer.files[0]); });
+$('#romOther').onclick = () => { closeRom(); $('#romFile').click(); };
+$('#romFull').onclick = () => { const st = $('#romStage'); try { (st.requestFullscreen || st.webkitRequestFullscreen).call(st); } catch(e){} };
 
 /* ---------------- ACCOUNTS / CHAT / SHOP / SETTINGS ---------------- */
 const EMOJIS = ['😀','😎','🤖','👽','🛸','🐸','🐱','🦊','🐼','🐙','🦖','🍕','🍓','🔥','⚡','🌙','⭐','🎮','🎧','💀','👻','🌵','🍄','🐝'];
