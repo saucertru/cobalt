@@ -3,11 +3,11 @@
 <head>
   <title>My Proxy</title>
   <style>
-    body { margin: 0; font-family: sans-serif; display: flex; flex-direction: column; height: 100vh; }
+    body { margin: 0; font-family: sans-serif; display: flex; flex-direction: column; height: 100vh; background: #111; color: white; }
     #bar { padding: 10px; background: #222; display: flex; gap: 10px; }
     input { flex: 1; padding: 8px; border-radius: 4px; border: none; }
     button { padding: 8px 16px; cursor: pointer; }
-    iframe { flex: 1; border: none; width: 100%; }
+    iframe { flex: 1; border: none; width: 100%; background: white; }
   </style>
 </head>
 <body>
@@ -17,25 +17,25 @@
   </div>
   <iframe id="proxy-frame"></iframe>
 
-  <script src="/scram/scramjet.all.js"></script>
+  <script src="https://unpkg.com"></script>
   <script type="module">
-    import { BareMuxConnection } from "/baremux/index.mjs";
+    import { BareMuxConnection } from "https://unpkg.com";
 
     // Start Scramjet
     const { ScramjetController } = $scramjetLoadController();
     const scramjet = new ScramjetController({
       files: {
-        wasm: "/scram/scramjet.wasm.wasm",
-        all: "/scram/scramjet.all.js",
-        sync: "/scram/scramjet.sync.js",
+        wasm: "https://unpkg.com",
+        all: "https://unpkg.com",
+        sync: "https://unpkg.com",
       },
     });
     await scramjet.init();
     await navigator.serviceWorker.register("/sw.js");
 
     // Connect to your Render engine
-    const connection = new BareMuxConnection("/baremux/bare.worker.js");
-    await connection.setTransport("/libcurl/index.mjs", [
+    const connection = new BareMuxConnection("https://unpkg.com");
+    await connection.setTransport("https://unpkg.com", [
       { wisp: "wss://://my-wisp-server-5rcr.onrender.com" }
     ]);
 
