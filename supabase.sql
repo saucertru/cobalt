@@ -42,7 +42,7 @@ create policy "delete own docs" on public.docs for delete
 create or replace function public.check_doc() returns trigger
 language plpgsql as $$
 begin
-  if pg_column_size(new.data) > 60000 then raise exception 'too big'; end if;
+  if pg_column_size(new.data) > 200000 then raise exception 'too big'; end if;
   if new.collection = 'profiles' then
     if coalesce(current_setting('cobalt.trusted', true), '') <> 'on' and not public.is_owner() then
       if tg_op = 'INSERT' then
@@ -57,6 +57,12 @@ begin
     end if;
     if coalesce(new.data->>'name', '') !~ '^[A-Za-z0-9_]{3,16}$' then raise exception 'bad username'; end if;
     if length(coalesce(new.data->>'bio', '')) > 160 then raise exception 'bio too long'; end if;
+    if length(coalesce(new.data->>'title', '')) > 24 then raise exception 'title too long'; end if;
+    if coalesce(new.data->>'pfp', '') <> '' and (length(new.data->>'pfp') > 60000
+       or new.data->>'pfp' !~ '^data:image/(png|jpeg|webp|gif);base64,[A-Za-z0-9+/=]+$') then raise exception 'bad profile picture'; end if;
+    if coalesce(new.data->>'bannerImg', '') <> '' and (length(new.data->>'bannerImg') > 120000
+       or new.data->>'bannerImg' !~ '^data:image/(png|jpeg|webp|gif);base64,[A-Za-z0-9+/=]+$') then raise exception 'bad banner'; end if;
+    if coalesce(new.data->>'pColor', '') !~ '^(#[0-9a-fA-F]{6})?$' or coalesce(new.data->>'pAccent', '') !~ '^(#[0-9a-fA-F]{6})?$' then raise exception 'bad colour'; end if;
   elsif new.collection = 'chat' then
     if jsonb_array_length(coalesce(new.data->'msgs', '[]'::jsonb)) > 40 then raise exception 'too many messages'; end if;
   elsif new.collection = 'requests' then

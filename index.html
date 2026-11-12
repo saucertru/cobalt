@@ -259,6 +259,13 @@ iframe.swfstage{border:0}
 .onb .themes{justify-content:center}
 .onb-nav{margin-top:22px}
 @media (max-width:820px){.status{font-size:13px;gap:8px}}
+.av img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block}
+.pcard .bn{overflow:hidden}
+.pcard .bn img{width:100%;height:100%;object-fit:cover;display:block}
+.ptitle{font-size:13px;font-weight:700;color:var(--dim);margin-top:3px;letter-spacing:.2px}
+.ctitle{font-size:11px;font-weight:600;color:var(--dim);background:var(--field);border:1px solid var(--line);border-radius:8px;padding:1px 7px;white-space:nowrap}
+.colpick{display:flex;align-items:center;gap:8px;background:var(--field);border:1px solid var(--line);border-radius:20px;padding:4px 6px 4px 12px;font-size:13.5px;font-weight:600;cursor:pointer}
+.colpick input{width:30px;height:26px;border:0;padding:0;background:none;cursor:pointer}
 /* purchasable effects */
 .fx-glow{text-shadow:0 0 6px currentColor,0 0 14px currentColor}
 .fx-rainbow{background:linear-gradient(90deg,#ff6b6b,#ffd166,#6ee7a8,#60a5fa,#c084fc,#ff6b6b);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent!important;animation:rb 3s linear infinite}
@@ -531,7 +538,7 @@ const ICONS = {
 const svg = (n, s=20) => `<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONS[n]}</svg>`;
 document.querySelectorAll('[data-i]').forEach(el => { el.innerHTML = svg(el.dataset.i, +(el.dataset.s || 20)); });
 
-const THEMES=["cobalt", "purple", "black", "grey", "light", "green"];const GAME_MAP={"cobalt": {"#231a3c": "#19273d", "#2f2548": "#243349", "#d6cfec": "#cedaed", "#0b0814": "#080d14", "#c4b5fd": "#b3d1ff", "#171126": "#101927", "#120a24": "#091425", "#7b5fc4": "#5c87c7", "#241c38": "#1b2739", "#151024": "#0f1825", "#f0ecfa": "#ecf2fa", "#cfc8e6": "#c7d4e7", "#a78bfa": "#88b7fd", "#130e22": "#0e1622", "#6a4fb0": "#4d75b2", "#1b1530": "#142031", "#07050c": "#05080c", "#e6e1f5": "#e1e9f5", "#0a0712": "#070b12", "#bdb4d8": "#b3c2d9", "#6366f1": "#5f9bf5", "#261d40": "#1c2b41", "#2a1a55": "#193156", "#2c2248": "#213149", "#0f0b1a": "#0b111a", "#8b5cf6": "#5899fa", "#1e1734": "#162235", "#d9c8ff": "#c8deff", "#2a2140": "#202d41", "#211a35": "#192536", "#0d0a16": "#0a0f16", "#24163f": "#152640", "#2563eb": "#2073f0", "#f6f3ff": "#f3f8ff", "#18122a": "#111b2b", "#120d20": "#0d1520", "#120c24": "#0b1525", "#3a2a66": "#284268", "#2a1f48": "#1e2f49", "#d0c9e6": "#c8d4e7", "#ece8f7": "#e8eef7", "#100c1c": "#0c121c", "#3a2e5c": "#2d405d", "#9a90b8": "#8fa0b9", "#2d1f52": "#1e3353"}, "purple": {}, "black": {"#231a3c": "#0d0d0d", "#2f2548": "#101010", "#d6cfec": "#dedede", "#0b0814": "#040404", "#c4b5fd": "#c4b5fd", "#171126": "#080808", "#120a24": "#070707", "#7b5fc4": "#929292", "#241c38": "#0d0d0d", "#151024": "#080808", "#f0ecfa": "#f3f3f3", "#cfc8e6": "#d7d7d7", "#a78bfa": "#a78bfa", "#130e22": "#070707", "#6a4fb0": "#808080", "#1b1530": "#0a0a0a", "#07050c": "#030303", "#e6e1f5": "#ebebeb", "#0a0712": "#040404", "#bdb4d8": "#c6c6c6", "#6366f1": "#6366f1", "#261d40": "#0e0e0e", "#2a1a55": "#111111", "#2c2248": "#101010", "#0f0b1a": "#060606", "#8b5cf6": "#8b5cf6", "#1e1734": "#0b0b0b", "#d9c8ff": "#e3e3e3", "#2a2140": "#0f0f0f", "#211a35": "#0c0c0c", "#0d0a16": "#050505", "#24163f": "#0d0d0d", "#2563eb": "#2563eb", "#f6f3ff": "#f9f9f9", "#18122a": "#090909", "#120d20": "#070707", "#120c24": "#070707", "#3a2a66": "#484848", "#2a1f48": "#0f0f0f", "#d0c9e6": "#d8d8d8", "#ece8f7": "#f0f0f0", "#100c1c": "#060606", "#3a2e5c": "#454545", "#9a90b8": "#a4a4a4", "#2d1f52": "#111111"}, "grey": {"#231a3c": "#2a2a2c", "#2f2548": "#363538", "#d6cfec": "#dddcdf", "#0b0814": "#0e0e0e", "#c4b5fd": "#c4b5fd", "#171126": "#1b1b1c", "#120a24": "#171618", "#7b5fc4": "#908e95", "#241c38": "#2a292b", "#151024": "#1a191b", "#f0ecfa": "#f3f3f3", "#cfc8e6": "#d6d6d8", "#a78bfa": "#a78bfa", "#130e22": "#181719", "#6a4fb0": "#7e7c83", "#1b1530": "#222223", "#07050c": "#080809", "#e6e1f5": "#ebeaec", "#0a0712": "#0c0c0d", "#bdb4d8": "#c5c5c7", "#6366f1": "#6366f1", "#261d40": "#2e2d30", "#2a1a55": "#37353a", "#2c2248": "#343436", "#0f0b1a": "#121213", "#8b5cf6": "#8b5cf6", "#1e1734": "#252427", "#d9c8ff": "#e3e2e5", "#2a2140": "#302f32", "#211a35": "#272728", "#0d0a16": "#101010", "#24163f": "#2a292c", "#2563eb": "#2563eb", "#f6f3ff": "#f9f9f9", "#18122a": "#1e1d1f", "#120d20": "#161617", "#120c24": "#181719", "#3a2a66": "#47464a", "#2a1f48": "#333235", "#d0c9e6": "#d7d6d9", "#ece8f7": "#efeff0", "#100c1c": "#141315", "#3a2e5c": "#444347", "#9a90b8": "#a3a3a5", "#2d1f52": "#38373a"}, "light": {}, "green": {"#231a3c": "#16291f", "#2f2548": "#24352c", "#d6cfec": "#cfdcd5", "#0b0814": "#08100c", "#c4b5fd": "#7cf7c4", "#171126": "#0f1a14", "#120a24": "#06130c", "#7b5fc4": "#5d8a74", "#241c38": "#18261e", "#151024": "#0e1712", "#f0ecfa": "#eaf3ee", "#cfc8e6": "#c3d2ca", "#a78bfa": "#4fd6a0", "#130e22": "#0d1712", "#6a4fb0": "#3f6b56", "#1b1530": "#13201a", "#07050c": "#050806", "#e6e1f5": "#dfe9e3", "#0a0712": "#060c09", "#bdb4d8": "#b4c4bb", "#6366f1": "#10b981", "#261d40": "#1b2c23", "#2a1a55": "#0d3322", "#2c2248": "#1f3529", "#0f0b1a": "#0b1410", "#8b5cf6": "#3fe0b0", "#1e1734": "#16261e", "#d9c8ff": "#bff5d9", "#2a2140": "#1c2a23", "#211a35": "#16241c", "#0d0a16": "#09100c", "#24163f": "#13291f", "#2563eb": "#2f9e6b", "#f6f3ff": "#f4f8f5", "#18122a": "#111b16", "#120d20": "#0c1611", "#120c24": "#0c1a14", "#3a2a66": "#25453a", "#2a1f48": "#1d3328", "#d0c9e6": "#c7d4cd", "#ece8f7": "#e6efe9", "#100c1c": "#0b1510", "#3a2e5c": "#2a4135", "#9a90b8": "#8aa597", "#2d1f52": "#1d3b2e"}};const STARS={"cobalt": ["204,219,241", "138,172,222", "173,203,247"], "purple": ["215,205,240", "165,140,220", "195,175,245"], "black": ["222,222,222", "180,180,180", "210,210,210"], "grey": ["222,221,224", "179,177,183", "209,208,212"], "light": ["24,19,40", "24,19,40", "24,19,40"], "green": ["200,230,215", "140,190,165", "175,225,200"]};const ACC_AUTO={"cobalt": "#bcd3ff", "purple": "#d9c8ff", "green": "#bff5d9", "grey": "#e4e4e7", "black": "#fafafa", "light": "#5726c5"};const ACC_LIGHT={"lavender": "#5726c5", "pink": "#c52678", "sky": "#267cc5", "mint": "#26c572", "gold": "#c59b26"};const PREV={"cobalt": ["#0a0f16", "#bcd3ff"], "purple": ["#0d0a16", "#d9c8ff"], "black": ["#050505", "#fafafa"], "grey": ["#101010", "#e4e4e7"], "light": ["#ece9f5", "#5726c5"], "green": ["#09100c", "#bff5d9"]};
+const THEMES=["cobalt", "purple", "black", "grey", "light", "green"];const GAME_MAP={"cobalt": {"#120a24": "#091425", "#6a4fb0": "#4d75b2", "#6366f1": "#5f9bf5", "#e6e1f5": "#e1e9f5", "#d6cfec": "#cedaed", "#120c24": "#0b1525", "#211a35": "#192536", "#2a1f48": "#1e2f49", "#2d1f52": "#1e3353", "#171126": "#101927", "#0d0a16": "#0a0f16", "#7b5fc4": "#5c87c7", "#24163f": "#152640", "#9a90b8": "#8fa0b9", "#8b5cf6": "#5899fa", "#0a0712": "#070b12", "#f6f3ff": "#f3f8ff", "#d9c8ff": "#c8deff", "#261d40": "#1c2b41", "#0b0814": "#080d14", "#f0ecfa": "#ecf2fa", "#c4b5fd": "#b3d1ff", "#231a3c": "#19273d", "#0f0b1a": "#0b111a", "#3a2e5c": "#2d405d", "#cfc8e6": "#c7d4e7", "#2a2140": "#202d41", "#100c1c": "#0c121c", "#1b1530": "#142031", "#d0c9e6": "#c8d4e7", "#2a1a55": "#193156", "#120d20": "#0d1520", "#07050c": "#05080c", "#2f2548": "#243349", "#bdb4d8": "#b3c2d9", "#3a2a66": "#284268", "#ece8f7": "#e8eef7", "#151024": "#0f1825", "#2563eb": "#2073f0", "#2c2248": "#213149", "#18122a": "#111b2b", "#130e22": "#0e1622", "#1e1734": "#162235", "#241c38": "#1b2739", "#a78bfa": "#88b7fd"}, "purple": {}, "black": {"#120a24": "#070707", "#6a4fb0": "#808080", "#6366f1": "#6366f1", "#e6e1f5": "#ebebeb", "#d6cfec": "#dedede", "#120c24": "#070707", "#211a35": "#0c0c0c", "#2a1f48": "#0f0f0f", "#2d1f52": "#111111", "#171126": "#080808", "#0d0a16": "#050505", "#7b5fc4": "#929292", "#24163f": "#0d0d0d", "#9a90b8": "#a4a4a4", "#8b5cf6": "#8b5cf6", "#0a0712": "#040404", "#f6f3ff": "#f9f9f9", "#d9c8ff": "#e3e3e3", "#261d40": "#0e0e0e", "#0b0814": "#040404", "#f0ecfa": "#f3f3f3", "#c4b5fd": "#c4b5fd", "#231a3c": "#0d0d0d", "#0f0b1a": "#060606", "#3a2e5c": "#454545", "#cfc8e6": "#d7d7d7", "#2a2140": "#0f0f0f", "#100c1c": "#060606", "#1b1530": "#0a0a0a", "#d0c9e6": "#d8d8d8", "#2a1a55": "#111111", "#120d20": "#070707", "#07050c": "#030303", "#2f2548": "#101010", "#bdb4d8": "#c6c6c6", "#3a2a66": "#484848", "#ece8f7": "#f0f0f0", "#151024": "#080808", "#2563eb": "#2563eb", "#2c2248": "#101010", "#18122a": "#090909", "#130e22": "#070707", "#1e1734": "#0b0b0b", "#241c38": "#0d0d0d", "#a78bfa": "#a78bfa"}, "grey": {"#120a24": "#171618", "#6a4fb0": "#7e7c83", "#6366f1": "#6366f1", "#e6e1f5": "#ebeaec", "#d6cfec": "#dddcdf", "#120c24": "#181719", "#211a35": "#272728", "#2a1f48": "#333235", "#2d1f52": "#38373a", "#171126": "#1b1b1c", "#0d0a16": "#101010", "#7b5fc4": "#908e95", "#24163f": "#2a292c", "#9a90b8": "#a3a3a5", "#8b5cf6": "#8b5cf6", "#0a0712": "#0c0c0d", "#f6f3ff": "#f9f9f9", "#d9c8ff": "#e3e2e5", "#261d40": "#2e2d30", "#0b0814": "#0e0e0e", "#f0ecfa": "#f3f3f3", "#c4b5fd": "#c4b5fd", "#231a3c": "#2a2a2c", "#0f0b1a": "#121213", "#3a2e5c": "#444347", "#cfc8e6": "#d6d6d8", "#2a2140": "#302f32", "#100c1c": "#141315", "#1b1530": "#222223", "#d0c9e6": "#d7d6d9", "#2a1a55": "#37353a", "#120d20": "#161617", "#07050c": "#080809", "#2f2548": "#363538", "#bdb4d8": "#c5c5c7", "#3a2a66": "#47464a", "#ece8f7": "#efeff0", "#151024": "#1a191b", "#2563eb": "#2563eb", "#2c2248": "#343436", "#18122a": "#1e1d1f", "#130e22": "#181719", "#1e1734": "#252427", "#241c38": "#2a292b", "#a78bfa": "#a78bfa"}, "light": {}, "green": {"#120a24": "#06130c", "#6a4fb0": "#3f6b56", "#6366f1": "#10b981", "#e6e1f5": "#dfe9e3", "#d6cfec": "#cfdcd5", "#120c24": "#0c1a14", "#211a35": "#16241c", "#2a1f48": "#1d3328", "#2d1f52": "#1d3b2e", "#171126": "#0f1a14", "#0d0a16": "#09100c", "#7b5fc4": "#5d8a74", "#24163f": "#13291f", "#9a90b8": "#8aa597", "#8b5cf6": "#3fe0b0", "#0a0712": "#060c09", "#f6f3ff": "#f4f8f5", "#d9c8ff": "#bff5d9", "#261d40": "#1b2c23", "#0b0814": "#08100c", "#f0ecfa": "#eaf3ee", "#c4b5fd": "#7cf7c4", "#231a3c": "#16291f", "#0f0b1a": "#0b1410", "#3a2e5c": "#2a4135", "#cfc8e6": "#c3d2ca", "#2a2140": "#1c2a23", "#100c1c": "#0b1510", "#1b1530": "#13201a", "#d0c9e6": "#c7d4cd", "#2a1a55": "#0d3322", "#120d20": "#0c1611", "#07050c": "#050806", "#2f2548": "#24352c", "#bdb4d8": "#b4c4bb", "#3a2a66": "#25453a", "#ece8f7": "#e6efe9", "#151024": "#0e1712", "#2563eb": "#2f9e6b", "#2c2248": "#1f3529", "#18122a": "#111b16", "#130e22": "#0d1712", "#1e1734": "#16261e", "#241c38": "#18261e", "#a78bfa": "#4fd6a0"}};const STARS={"cobalt": ["204,219,241", "138,172,222", "173,203,247"], "purple": ["215,205,240", "165,140,220", "195,175,245"], "black": ["222,222,222", "180,180,180", "210,210,210"], "grey": ["222,221,224", "179,177,183", "209,208,212"], "light": ["24,19,40", "24,19,40", "24,19,40"], "green": ["200,230,215", "140,190,165", "175,225,200"]};const ACC_AUTO={"cobalt": "#bcd3ff", "purple": "#d9c8ff", "green": "#bff5d9", "grey": "#e4e4e7", "black": "#fafafa", "light": "#5726c5"};const ACC_LIGHT={"lavender": "#5726c5", "pink": "#c52678", "sky": "#267cc5", "mint": "#26c572", "gold": "#c59b26"};const PREV={"cobalt": ["#0a0f16", "#bcd3ff"], "purple": ["#0d0a16", "#d9c8ff"], "black": ["#050505", "#fafafa"], "grey": ["#101010", "#e4e4e7"], "light": ["#ece9f5", "#5726c5"], "green": ["#09100c", "#bff5d9"]};
 let THEME_PREF = store.get('set_theme', 'cobalt');
 if (THEME_PREF !== 'random' && !THEMES.includes(THEME_PREF)) THEME_PREF = 'cobalt';
 const randomTheme = (not) => { const pool = THEMES.filter(t => t !== not); return pool[Math.random()*pool.length|0]; };
@@ -1118,11 +1125,15 @@ function equipped(p, cat){
   const it = shopItem(p && p.equip && p.equip[cat]);
   return it && it.cat === cat && Array.isArray(p.owned) && p.owned.includes(it.id) ? it : null;
 }
+// Uploaded pictures are stored as small data: URLs; only allow real image data (never anything a browser could run).
+const okImg = v => typeof v === 'string' && v.length < 120000 && /^data:image\/(png|jpeg|webp|gif);base64,[A-Za-z0-9+/=]+$/.test(v) ? v : '';
+const okHex = v => typeof v === 'string' && /^#[0-9a-fA-F]{6}$/.test(v) ? v : '';
+const utitle = p => p && typeof p.title === 'string' ? p.title.replace(/[\u0000-\u001f]/g, '').trim().slice(0, 24) : '';
 function avatar(p, size = 40){
   const e = p && EMOJIS.includes(p.avatar) ? p.avatar : '🙂';
   const c = p && AVCOLORS.includes(p.avColor) ? p.avColor : '#7c3aed';
-  const fr = equipped(p, 'frame');
-  return `<span class="av${fr ? ' fr-' + fr.id.slice(2) : ''}" style="width:${size}px;height:${size}px;background:${c};font-size:${Math.round(size*.52)}px">${e}</span>`;
+  const fr = equipped(p, 'frame'), pic = okImg(p && p.pfp);
+  return `<span class="av${fr ? ' fr-' + fr.id.slice(2) : ''}" style="width:${size}px;height:${size}px;background:${c};font-size:${Math.round(size*.52)}px">${pic ? `<img src="${pic}" alt="">` : e}</span>`;
 }
 const uname = p => p && typeof p.name === 'string' && p.name ? p.name.slice(0, 16) : 'Unknown';
 function nameHTML(p){
@@ -1131,12 +1142,15 @@ function nameHTML(p){
     (bd ? `<span class="bdg" title="${bd.name}">${bd.emoji}</span>` : '');
 }
 function pcard(p){
-  const bn = equipped(p, 'banner');
+  const bn = equipped(p, 'banner'), bimg = okImg(p && p.bannerImg);
+  const pc = okHex(p && p.pColor), ac = okHex(p && p.pAccent) || pc, title = utitle(p);
   const joined = p && p.joined ? new Date(p.joined).toLocaleDateString(undefined, {month:'short', year:'numeric'}) : '—';
   const bio = p && typeof p.bio === 'string' && p.bio.trim() ? p.bio.slice(0, 160) : 'No bio yet.';
-  return `<div class="pcard"><div class="bn"${bn ? ` style="background:${bn.val}"` : ''}></div><div class="pb">${avatar(p, 80)}
-    <div class="pnm">${nameHTML(p)}</div><div class="bio">${esc(bio)}</div>
-    <div class="pstats"><div><b class="gold">${num(p && p.coins)}</b>coins</div><div><b>${num(p && p.msgCount)}</b>messages</div><div><b>${joined}</b>joined</div></div>
+  const bnStyle = bimg ? '' : bn ? `background:${bn.val}` : pc ? `background:linear-gradient(120deg,${pc},${ac})` : '';
+  const cardStyle = pc ? `background:linear-gradient(180deg,${pc}40,transparent 220px),var(--panel);border-color:${ac}80` : '';
+  return `<div class="pcard"${cardStyle ? ` style="${cardStyle}"` : ''}><div class="bn"${bnStyle ? ` style="${bnStyle}"` : ''}>${bimg ? `<img src="${bimg}" alt="">` : ''}</div><div class="pb">${avatar(p, 80)}
+    <div class="pnm">${nameHTML(p)}</div>${title ? `<div class="ptitle"${ac ? ` style="color:${ac}"` : ''}>${esc(title)}</div>` : ''}<div class="bio">${esc(bio)}</div>
+    <div class="pstats"><div><b class="gold">${num(p && p.coins)}</b>coins</div><div><b${ac ? ` style="color:${ac}"` : ''}>${num(p && p.msgCount)}</b>messages</div><div><b>${joined}</b>joined</div></div>
   </div></div>`;
 }
 const gateHTML = () => `<div class="panel gate">Accounts, chat and the shop aren't set up on this copy of cobalt yet. The site owner needs to add their Supabase details (see supabase-config.js).</div>`;
@@ -1343,7 +1357,7 @@ function renderChatMsgs(force){
     const del = (m.uid === myId || owner) && m.id && !readOnly ? `<button class="cdel" data-del="${uid}|${esc(m.id)}" title="Delete message">${svg('trash', 15)}</button>` : '';
     html += `<div class="cm${cont ? ' cont' : ''}">` +
       (cont ? '<span class="avsp"></span>' : `<span data-prof="${uid}" style="cursor:pointer">${avatar(p, 38)}</span>`) +
-      `<div class="cbody">${cont ? '' : `<div class="chd"><span data-prof="${uid}">${nameHTML(p)}</span>${SET.ts ? `<span class="tm">${fmtTime(m.t)}</span>` : ''}</div>`}<div class="ctx">${esc(m.text)}</div></div>${del}</div>`;
+      `<div class="cbody">${cont ? '' : `<div class="chd"><span data-prof="${uid}">${nameHTML(p)}</span>${utitle(p) ? `<span class="ctitle">${esc(utitle(p))}</span>` : ''}${SET.ts ? `<span class="tm">${fmtTime(m.t)}</span>` : ''}</div>`}<div class="ctx">${esc(m.text)}</div></div>${del}</div>`;
     prev = m;
   }
   $('#cmsgs').innerHTML = html;
@@ -1377,10 +1391,18 @@ $('#cform').addEventListener('submit', e => { e.preventDefault(); const v = $('#
 function openProfile(uid){
   const p = profiles[uid];
   if (!p) return;
-  $('#mbox').innerHTML = pcard(p) + `<div style="text-align:center;margin-top:12px"><button class="btng" id="mclose">Close</button></div>`;
+  const mod = owner && uid !== myId && (okImg(p.pfp) || okImg(p.bannerImg) || utitle(p));
+  $('#mbox').innerHTML = pcard(p) + `<div style="text-align:center;margin-top:12px">${mod ? `<button class="btng danger" id="modImgs" data-uid="${esc(uid)}" style="margin-right:6px">Remove their pictures and title</button>` : ''}<button class="btng" id="mclose">Close</button></div>`;
   $('#modal').classList.add('show');
 }
-$('#modal').addEventListener('click', e => { if (e.target.id === 'modal' || e.target.id === 'mclose') $('#modal').classList.remove('show'); });
+$('#modal').addEventListener('click', async e => {
+  if (e.target.id === 'modal' || e.target.id === 'mclose') $('#modal').classList.remove('show');
+  if (e.target.id === 'modImgs'){
+    e.target.disabled = true;
+    const ok = await write('profiles/' + e.target.dataset.uid, r => r.update({pfp: '', bannerImg: '', title: ''}));
+    if (ok){ toast('Removed'); $('#modal').classList.remove('show'); }
+  }
+});
 document.addEventListener('keydown', e => { if (e.key === 'Escape') $('#modal').classList.remove('show'); });
 
 /* ---- shop ---- */
@@ -1474,12 +1496,17 @@ function buildProfile(key){
     bio: me && typeof me.bio === 'string' ? me.bio : '',
     avatar: EMOJIS.includes(src.avatar) ? src.avatar : EMOJIS[Math.random()*EMOJIS.length|0],
     avColor: AVCOLORS.includes(src.avColor) ? src.avColor : AVCOLORS[0],
-    equip: {...(src.equip || {})}
+    equip: {...(src.equip || {})},
+    title: utitle(src), pfp: okImg(src.pfp), bannerImg: okImg(src.bannerImg), pColor: okHex(src.pColor), pAccent: okHex(src.pAccent)
   };
   h += `<p class="sub">${key === 'create' ? 'Pick a username and an avatar. You get 50 coins to start.' : 'Change how you look in the chat room. Get more effects in the <a href="#shop">shop</a>.'}</p>
   <div class="grid2"><div id="pprev"></div><div class="panel">
     <div class="fld"><label for="pname">Username</label><input class="inp" id="pname" maxlength="16" placeholder="3–16 letters, numbers or _" autocomplete="off"></div>
-    ${key === 'edit' ? `<div class="fld"><label for="pbio">Bio</label><textarea class="inp" id="pbio" maxlength="160" placeholder="Say something about yourself"></textarea></div>` : ''}
+    ${key === 'edit' ? `<div class="fld"><label for="ptitle">Title</label><input class="inp" id="ptitle" maxlength="24" placeholder="e.g. Speedrunner, Cookie addict" autocomplete="off"></div>
+    <div class="fld"><label for="pbio">Bio</label><textarea class="inp" id="pbio" maxlength="160" placeholder="Say something about yourself"></textarea></div>
+    <div class="fld"><label>Profile picture</label><div class="row"><label class="btng">Upload picture<input type="file" id="pfpFile" accept="image/*" hidden></label><button class="btng" id="pfpDel">Remove</button></div><div class="d" style="color:var(--dim);font-size:12.5px">Replaces your emoji avatar. Square pictures look best.</div></div>
+    <div class="fld"><label>Banner</label><div class="row"><label class="btng">Upload banner<input type="file" id="bnFile" accept="image/*" hidden></label><button class="btng" id="bnDel">Remove</button></div><div class="d" style="color:var(--dim);font-size:12.5px">Shows across the top of your profile card. Wide pictures look best.</div></div>
+    <div class="fld"><label>Profile colours</label><div class="row"><label class="colpick">Card <input type="color" id="pColor"></label><label class="colpick">Accent <input type="color" id="pAccent"></label><button class="btng" id="pcReset">Reset</button></div></div>` : ''}
     <div class="fld"><label>Avatar</label><div class="emojis">${EMOJIS.map(e => `<button class="emo${e === draft.avatar ? ' sel' : ''}" data-emo="${e}">${e}</button>`).join('')}</div></div>
     <div class="fld"><label>Avatar colour</label><div class="row">${AVCOLORS.map(c => `<button class="sw${c === draft.avColor ? ' sel' : ''}" data-avc="${c}" style="background:${c}" title="${c}"></button>`).join('')}</div></div>
     ${key === 'edit' ? CATS.map(c => {
@@ -1491,29 +1518,61 @@ function buildProfile(key){
   b.innerHTML = h;
   $('#pname').value = draft.name;
   if ($('#pbio')) $('#pbio').value = draft.bio;
+  if ($('#ptitle')) $('#ptitle').value = draft.title;
+  if ($('#pColor')){ $('#pColor').value = draft.pColor || '#1e3a8a'; $('#pAccent').value = draft.pAccent || draft.pColor || '#60a5fa'; }
   updatePreview();
 }
 function updatePreview(){
   if (!draft || !$('#pprev')) return;
   const base = me || {coins: 50, msgCount: 0, joined: Date.now(), owned: [], equip: {}};
-  $('#pprev').innerHTML = pcard({...base, name: draft.name || 'username', bio: draft.bio, avatar: draft.avatar, avColor: draft.avColor, equip: draft.equip});
+  $('#pprev').innerHTML = pcard({...base, name: draft.name || 'username', bio: draft.bio, avatar: draft.avatar, avColor: draft.avColor, equip: draft.equip,
+    title: draft.title, pfp: draft.pfp, bannerImg: draft.bannerImg, pColor: draft.pColor, pAccent: draft.pAccent});
 }
 const perr = t => { $('#perr').textContent = t; };
 $('#profBody').addEventListener('input', e => {
   if (!draft) return;
   if (e.target.id === 'pname') draft.name = e.target.value;
   if (e.target.id === 'pbio') draft.bio = e.target.value;
+  if (e.target.id === 'ptitle') draft.title = e.target.value;
+  if (e.target.id === 'pColor'){ draft.pColor = e.target.value; if (!draft.pAccent) draft.pAccent = $('#pAccent').value; }
+  if (e.target.id === 'pAccent'){ draft.pAccent = e.target.value; if (!draft.pColor) draft.pColor = $('#pColor').value; }
   updatePreview();
 });
 $('#profBody').addEventListener('change', e => {
   const s = e.target.closest('[data-eq]'); if (s && draft){ draft.equip[s.dataset.eq] = s.value; updatePreview(); }
+  if ((e.target.id === 'pfpFile' || e.target.id === 'bnFile') && draft && e.target.files[0]){
+    const isPfp = e.target.id === 'pfpFile', f = e.target.files[0]; e.target.value = '';
+    perr('');
+    shrinkImage(f, isPfp ? 160 : 720, isPfp ? 160 : 240, isPfp ? 40000 : 90000)
+      .then(url => { draft[isPfp ? 'pfp' : 'bannerImg'] = url; updatePreview(); toast(isPfp ? 'Picture added. Press Save changes to keep it.' : 'Banner added. Press Save changes to keep it.'); })
+      .catch(err => perr(typeof err === 'string' ? err : "Couldn't use that image. Try another one."));
+  }
 });
+// Resize and crop an uploaded image in the browser so it stays small.
+async function shrinkImage(file, w, h, maxLen){
+  if (!/^image\//.test(file.type)) throw 'Pick an image file (PNG, JPG, WEBP or GIF).';
+  if (file.size > 15 * 1048576) throw 'That image is too big (over 15 MB).';
+  const bmp = await createImageBitmap(file);
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const x = c.getContext('2d');
+  const s = Math.max(w / bmp.width, h / bmp.height), dw = bmp.width * s, dh = bmp.height * s;
+  x.drawImage(bmp, (w - dw) / 2, (h - dh) / 2, dw, dh);
+  for (const q of [0.86, 0.76, 0.62, 0.48, 0.35]){
+    let url = c.toDataURL('image/webp', q);
+    if (!url.startsWith('data:image/webp')) url = c.toDataURL('image/jpeg', q);
+    if (url.length <= maxLen) return url;
+  }
+  throw "Couldn't make that image small enough. Try a simpler one.";
+}
 $('#profBody').addEventListener('click', e => {
   if (!draft) return;
   const em = e.target.closest('[data-emo]');
   if (em){ draft.avatar = em.dataset.emo; document.querySelectorAll('.emo').forEach(x => x.classList.toggle('sel', x === em)); updatePreview(); return; }
   const sw = e.target.closest('[data-avc]');
   if (sw){ draft.avColor = sw.dataset.avc; document.querySelectorAll('[data-avc]').forEach(x => x.classList.toggle('sel', x === sw)); updatePreview(); return; }
+  if (e.target.id === 'pfpDel'){ draft.pfp = ''; updatePreview(); return; }
+  if (e.target.id === 'bnDel'){ draft.bannerImg = ''; updatePreview(); return; }
+  if (e.target.id === 'pcReset'){ draft.pColor = ''; draft.pAccent = ''; $('#pColor').value = '#1e3a8a'; $('#pAccent').value = '#60a5fa'; updatePreview(); return; }
   if (e.target.id === 'psave') saveProfile();
 });
 async function saveProfile(){
@@ -1526,7 +1585,8 @@ async function saveProfile(){
   const creating = !me;
   const ok = creating
     ? await write('profiles/' + myId, r => r.set({name, bio: '', avatar: draft.avatar, avColor: draft.avColor, coins: 50, owned: [], equip: {}, joined: Date.now(), msgCount: 0, lastEarn: 0, lastDaily: '', lastDailyAt: 0}))
-    : await write('profiles/' + myId, r => r.update({name, bio: draft.bio.trim().slice(0, 160), avatar: draft.avatar, avColor: draft.avColor, equip: draft.equip}));
+    : await write('profiles/' + myId, r => r.update({name, bio: draft.bio.trim().slice(0, 160), avatar: draft.avatar, avColor: draft.avColor, equip: draft.equip,
+        title: draft.title.trim().slice(0, 24), pfp: okImg(draft.pfp), bannerImg: okImg(draft.bannerImg), pColor: okHex(draft.pColor), pAccent: okHex(draft.pAccent)}));
   if ($('#psave')) $('#psave').disabled = false;
   if (ok) toast(creating ? 'Welcome to cobalt! +50 coins' : 'Profile saved');
 }
