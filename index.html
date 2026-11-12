@@ -343,6 +343,18 @@ html.no-anim *,html.no-anim *::before,html.no-anim *::after{animation:none!impor
 .th i.tprev.rnd{padding:0;overflow:hidden;align-items:stretch}
 .tprev.rnd s{flex:1;display:block}
 .ocrown{display:inline-flex;align-items:center;filter:drop-shadow(0 0 4px rgba(255,209,102,.55));transform:translateY(-1px)}
+.ytwrap{display:none;margin-top:14px;border-radius:14px;overflow:hidden;aspect-ratio:16/9;background:#000;border:1px solid var(--line)}
+.ytwrap.on{display:block}
+.ytwrap iframe{width:100%;height:100%;display:block;border:0}
+.ytresults{display:flex;flex-direction:column;gap:4px;margin-top:10px}
+.ytres{display:flex;align-items:center;gap:12px;padding:6px;border-radius:12px}
+.ytres:hover{background:var(--p18122a)}
+.ytres img{width:64px;height:48px;object-fit:cover;border-radius:8px;flex-shrink:0;background:#000}
+.ytres .nm{flex:1;min-width:0;font-size:14px;line-height:1.35}
+.ytres .nm b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ytres .nm span{color:var(--dim);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.ytres .row{flex-shrink:0;gap:6px}
+.ytres .btnp,.ytres .btng{padding:6px 12px;font-size:13px}
 /* purchasable effects */
 .fx-glow{text-shadow:0 0 6px currentColor,0 0 14px currentColor}
 .fx-rainbow{background:linear-gradient(90deg,#ff6b6b,#ffd166,#6ee7a8,#60a5fa,#c084fc,#ff6b6b);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent!important;animation:rb 3s linear infinite}
@@ -493,7 +505,27 @@ html[data-theme=green]{--p07050c:#050806;--p0a0712:#060c09;--p0b0814:#08100c;--p
       </section>
       <section id="music" class="view">
         <h1 class="logo small">music</h1>
-        <div class="player" id="player">
+        <div class="tabsrow" id="musicTabs" style="justify-content:center"><button class="chip on" data-mtab="yt">YouTube Music</button><button class="chip" data-mtab="files">My files</button></div>
+        <div class="player" id="ytPanel">
+          <form class="search" id="ytForm" style="height:52px;box-shadow:none;width:100%"><span data-i="search"></span><input id="ytQ" placeholder="Search songs, or paste a YouTube / YouTube Music link" autocomplete="off"><button class="go" type="submit" title="Go" data-i="right"></button></form>
+          <p class="note" id="ytNote" style="margin:10px 0 0;text-align:left"></p>
+          <div class="ytresults" id="ytResults"></div>
+          <div class="ytwrap" id="ytWrap"><div id="ytPlayer"></div></div>
+          <div class="now" style="margin-top:14px">
+            <div style="min-width:0;flex:1">
+              <div class="t" id="ytTitle">Nothing playing</div>
+              <div class="s" id="ytSub">Search for a song or paste a link to start</div>
+            </div>
+          </div>
+          <div class="ctrls">
+            <button class="ib" id="ytPrev" title="Previous" data-i="prev" data-s="22"></button>
+            <button class="playb" id="ytPlay" title="Play" data-i="play" data-s="24"></button>
+            <button class="ib" id="ytNext" title="Next" data-i="next" data-s="22"></button>
+          </div>
+          <div class="addrow"><h3>UP NEXT</h3><button class="btng" id="ytClear">Clear</button></div>
+          <div class="plist" id="ytQueue"></div>
+        </div>
+        <div class="player" id="player" style="display:none">
           <div class="now">
             <div class="art" id="art" data-i="music" data-s="30"></div>
             <div style="min-width:0">
@@ -514,7 +546,7 @@ html[data-theme=green]{--p07050c:#050806;--p0a0712:#060c09;--p0b0814:#08100c;--p
           </div>
           <div class="plist" id="plist"></div>
         </div>
-        <p class="note">Songs play from your device and aren't uploaded anywhere. Music keeps playing while you switch tabs.</p>
+        <p class="note" id="musicNote">Music keeps playing while you switch to other pages.</p>
       </section>
       <section id="chat" class="view">
         <div class="chat">
@@ -1003,6 +1035,7 @@ document.querySelectorAll('.sug').forEach(b => b.onclick = () => send(b.textCont
 
 /* ---------------- MUSIC ---------------- */
 const audio = new Audio();
+let musicSrc = 'files'; // which player the top-bar mini player controls
 let tracks = [], cur = -1;
 const mmss = s => isFinite(s) ? Math.floor(s/60) + ':' + String(Math.floor(s%60)).padStart(2, '0') : '0:00';
 function renderTracks(){
@@ -1011,7 +1044,7 @@ function renderTracks(){
   ).join('') : `<div class="drop">Drop audio files here, or use <b>Add songs</b></div>`;
   const t = tracks[cur];
   $('#mtitle').textContent = t ? t.name : 'Nothing playing';
-  $('#miniT').textContent = t ? t.name : 'Nothing playing'; $('#mini').classList.toggle('on', !!t);
+  if (musicSrc !== 'yt'){ $('#miniT').textContent = t ? t.name : 'Nothing playing'; $('#mini').classList.toggle('on', !!t); }
   $('#msub').textContent = t ? `Track ${cur+1} of ${tracks.length}` : 'Add songs from your device to start';
 }
 function playIdx(i){
@@ -1039,12 +1072,12 @@ audio.addEventListener('timeupdate', () => {
   if (audio.duration) $('#mseek').value = audio.currentTime / audio.duration * 1000;
 });
 audio.addEventListener('ended', () => { if (cur < tracks.length - 1) playIdx(cur + 1); });
-const setPlayIcon = () => { const p = audio.paused; $('#mplay').innerHTML = svg(p ? 'play' : 'pause', 24); $('#miniPlay').innerHTML = svg(p ? 'play' : 'pause', 12); $('#art').classList.toggle('on', !p); };
-$('#miniPlay').onclick = () => $('#mplay').click();
-$('#miniPrev').onclick = () => { if (cur >= 0) $('#mprev').click(); };
-$('#miniNext').onclick = () => { if (cur >= 0) $('#mnext').click(); };
+const setPlayIcon = () => { const p = audio.paused; $('#mplay').innerHTML = svg(p ? 'play' : 'pause', 24); if (musicSrc !== 'yt') $('#miniPlay').innerHTML = svg(p ? 'play' : 'pause', 12); $('#art').classList.toggle('on', !p); };
+$('#miniPlay').onclick = () => (musicSrc === 'yt' ? $('#ytPlay') : $('#mplay')).click();
+$('#miniPrev').onclick = () => { if (musicSrc === 'yt') ytPrevTrack(); else if (cur >= 0) $('#mprev').click(); };
+$('#miniNext').onclick = () => { if (musicSrc === 'yt') ytNextTrack(); else if (cur >= 0) $('#mnext').click(); };
 $('#miniT').onclick = () => go('music');
-audio.addEventListener('play', setPlayIcon); audio.addEventListener('pause', setPlayIcon);
+audio.addEventListener('play', () => { if (musicSrc !== 'files'){ musicSrc = 'files'; renderTracks(); } setPlayIcon(); }); audio.addEventListener('pause', setPlayIcon);
 $('#plist').addEventListener('click', e => {
   const rm = e.target.closest('[data-rm]');
   if (rm){
@@ -1060,6 +1093,164 @@ pl.addEventListener('dragover', e => { e.preventDefault(); pl.classList.add('ove
 pl.addEventListener('dragleave', () => pl.classList.remove('over'));
 pl.addEventListener('drop', e => { e.preventDefault(); pl.classList.remove('over'); addFiles(e.dataTransfer.files); });
 renderTracks();
+
+/* ---------------- YOUTUBE MUSIC (official YouTube player) ---------------- */
+// Plays songs and playlists from YouTube / YouTube Music with YouTube's own embedded player.
+// Search uses the YouTube Data API key from site-config.js (youtubeKey). Pasting links works without a key.
+const YT_KEY = (SITE && typeof SITE.youtubeKey === 'string') ? SITE.youtubeKey.trim() : '';
+let ytApi = null, ytP = null, ytReady = false, ytCur = -1, ytList = null, ytPending = null;
+let ytQueue = store.get('yt_queue', []).filter(x => x && /^[\w-]{11}$/.test(x.id)).slice(0, 200);
+const ytSave = () => store.set('yt_queue', ytQueue);
+const ytNote = t => { $('#ytNote').textContent = t; };
+ytNote(YT_KEY ? 'Search YouTube Music, or paste a link to a song or playlist.' : 'Paste a link to a song or playlist from YouTube or YouTube Music.');
+if (!YT_KEY) $('#ytQ').placeholder = 'Paste a YouTube or YouTube Music link';
+
+function loadYT(){
+  if (ytApi) return ytApi;
+  ytApi = new Promise((res, rej) => {
+    if (window.YT && window.YT.Player) return res();
+    const prev = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = () => { if (prev) try { prev(); } catch(e){} res(); };
+    const sc = document.createElement('script'); sc.src = 'https://www.youtube.com/iframe_api';
+    sc.onerror = () => { ytApi = null; rej(); };
+    document.head.appendChild(sc);
+    setTimeout(() => { if (!(window.YT && window.YT.Player)){ ytApi = null; rej(); } }, 15000);
+  });
+  return ytApi;
+}
+function parseYT(str){
+  str = (str || '').trim();
+  if (/^[\w-]{11}$/.test(str)) return {v: str};
+  let u; try { u = new URL(str); } catch(e){ return null; }
+  const host = u.hostname.replace(/^(www|m)\./, '');
+  if (!/^(youtube\.com|music\.youtube\.com|youtu\.be|youtube-nocookie\.com)$/.test(host)) return null;
+  let v = host === 'youtu.be' ? u.pathname.slice(1, 12) : (u.searchParams.get('v') || (u.pathname.match(/^\/(?:shorts|embed|live)\/([\w-]{11})/) || [])[1]);
+  let list = u.searchParams.get('list');
+  if (v && !/^[\w-]{11}$/.test(v)) v = null;
+  if (list && !/^[\w-]{10,64}$/.test(list)) list = null;
+  return v || list ? {v, list} : null;
+}
+async function ensurePlayer(){
+  await loadYT();
+  if (ytP) return;
+  $('#ytWrap').classList.add('on');
+  await new Promise(res => {
+    ytP = new YT.Player('ytPlayer', {
+      width: '100%', height: '100%',
+      playerVars: {playsinline: 1, rel: 0, modestbranding: 1},
+      events: {
+        onReady: () => { ytReady = true; res(); },
+        onStateChange: ytState,
+        onError: () => { ytNote("That one can't be played here (the owner may have blocked embedding). Skipping."); setTimeout(ytNextTrack, 1200); }
+      }
+    });
+  });
+}
+function ytState(e){
+  const S = YT.PlayerState;
+  $('#ytPlay').innerHTML = svg(e.data === S.PLAYING ? 'pause' : 'play', 24);
+  if (e.data === S.PLAYING) musicSrc = 'yt';
+  if (musicSrc === 'yt') $('#miniPlay').innerHTML = svg(e.data === S.PLAYING ? 'pause' : 'play', 12);
+  if (e.data === S.PLAYING){
+    if (!audio.paused) audio.pause();
+    const d = ytP.getVideoData ? ytP.getVideoData() : null;
+    if (d && d.title){
+      $('#ytTitle').textContent = d.title; $('#ytSub').textContent = d.author || (ytList ? 'Playlist' : 'YouTube');
+      $('#miniT').textContent = d.title; $('#mini').classList.add('on');
+      if (!ytList && ytQueue[ytCur] && ytQueue[ytCur].id === d.video_id && ytQueue[ytCur].title !== d.title){
+        ytQueue[ytCur].title = d.title; ytQueue[ytCur].by = d.author || ''; ytSave(); renderYTQueue();
+      }
+    }
+  }
+  if (e.data === S.ENDED && !ytList) ytNextTrack();
+}
+async function ytPlayIdx(i){
+  if (!ytQueue.length) return;
+  ytCur = (i + ytQueue.length) % ytQueue.length; ytList = null;
+  renderYTQueue();
+  try { await ensurePlayer(); } catch(e){ ytNote("Couldn't load the YouTube player. Check your connection. (It doesn't work inside claude.ai.)"); return; }
+  ytP.loadVideoById(ytQueue[ytCur].id);
+}
+async function ytPlayList(list, startV){
+  ytList = list; ytCur = -1; renderYTQueue();
+  try { await ensurePlayer(); } catch(e){ ytNote("Couldn't load the YouTube player. Check your connection."); return; }
+  ytP.loadPlaylist({list, listType: 'playlist', index: 0});
+  if (startV) setTimeout(() => { try { const ids = ytP.getPlaylist() || []; const k = ids.indexOf(startV); if (k > 0) ytP.playVideoAt(k); } catch(e){} }, 1500);
+  $('#ytSub').textContent = 'Playlist';
+}
+function ytNextTrack(){ if (ytList && ytP){ ytP.nextVideo(); return; } if (ytQueue.length) ytPlayIdx(ytCur + 1); }
+function ytPrevTrack(){ if (ytList && ytP){ ytP.previousVideo(); return; } if (ytP && ytReady && ytP.getCurrentTime && ytP.getCurrentTime() > 3) ytP.seekTo(0, true); else if (ytQueue.length) ytPlayIdx(ytCur - 1); }
+function ytAdd(item, playNow){
+  const i = ytQueue.findIndex(x => x.id === item.id);
+  if (i >= 0){ if (playNow) ytPlayIdx(i); else toast('Already in Up next'); return; }
+  ytQueue.push({id: item.id, title: item.title || 'YouTube video', by: item.by || ''}); ytSave();
+  if (playNow || (!ytList && (ytCur < 0 || !ytP))) ytPlayIdx(ytQueue.length - 1); else { renderYTQueue(); toast('Added to Up next'); }
+}
+function renderYTQueue(){
+  $('#ytQueue').innerHTML = ytQueue.length ? ytQueue.map((t, i) =>
+    `<div class="track${i === ytCur && !ytList ? ' on' : ''}" data-yt="${i}"><span class="n">${i + 1}</span><span class="nm">${esc(t.title)}${t.by ? ` <span style="color:var(--dim)">· ${esc(t.by)}</span>` : ''}</span><span class="x" data-ytrm="${i}">${svg('x', 15)}</span></div>`
+  ).join('') : `<div class="drop">Songs you add show up here</div>`;
+}
+async function ytSearch(q){
+  if (!YT_KEY){ ytNote("That doesn't look like a YouTube link. Copy the link from the Share button on YouTube or YouTube Music."); return; }
+  ytNote('Searching…');
+  try {
+    const url = 'https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoEmbeddable=true&videoCategoryId=10&maxResults=10&q=' + encodeURIComponent(q) + '&key=' + encodeURIComponent(YT_KEY);
+    const r = await fetch(url); const j = await r.json();
+    if (!r.ok){
+      const reason = j && j.error && j.error.errors && j.error.errors[0] && j.error.errors[0].reason;
+      ytNote(reason === 'quotaExceeded' ? "Search is used up for today (YouTube's daily limit). Pasting links still works." : "Search isn't working right now. Pasting links still works.");
+      return;
+    }
+    const items = (j.items || []).filter(x => x.id && /^[\w-]{11}$/.test(x.id.videoId));
+    const dec = s => { const t = document.createElement('textarea'); t.innerHTML = s || ''; return t.value; };
+    ytNote(items.length ? '' : 'No songs found. Try different words.');
+    $('#ytResults').innerHTML = items.map(x => {
+      const th = x.snippet.thumbnails && (x.snippet.thumbnails.default || x.snippet.thumbnails.medium);
+      const title = dec(x.snippet.title), by = dec(x.snippet.channelTitle).replace(/ - Topic$/, '');
+      const thumb = th && /^https:\/\/i\.ytimg\.com\//.test(th.url) ? th.url : '';
+      return `<div class="ytres" data-id="${x.id.videoId}" data-title="${esc(title)}" data-by="${esc(by)}">${thumb ? `<img src="${esc(thumb)}" alt="" loading="lazy">` : ''}<div class="nm"><b>${esc(title)}</b><span>${esc(by)}</span></div><div class="row"><button class="btnp" data-ytplay>Play</button><button class="btng" data-ytadd>+ Up next</button></div></div>`;
+    }).join('');
+  } catch(e){ ytNote("Search isn't working right now. Check your connection."); }
+}
+$('#ytForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const q = $('#ytQ').value.trim(); if (!q) return;
+  const link = parseYT(q);
+  if (link){
+    $('#ytQ').value = ''; $('#ytResults').innerHTML = ''; ytNote('');
+    if (link.list && !/^RD/.test(link.list)) ytPlayList(link.list, link.v);
+    else ytAdd({id: link.v}, true);
+  } else ytSearch(q);
+});
+$('#ytResults').addEventListener('click', e => {
+  const row = e.target.closest('.ytres'); if (!row) return;
+  const item = {id: row.dataset.id, title: row.dataset.title, by: row.dataset.by};
+  if (e.target.closest('[data-ytplay]')) ytAdd(item, true);
+  if (e.target.closest('[data-ytadd]')) ytAdd(item, false);
+});
+$('#ytQueue').addEventListener('click', e => {
+  const rm = e.target.closest('[data-ytrm]');
+  if (rm){ const i = +rm.dataset.ytrm; ytQueue.splice(i, 1); if (i < ytCur) ytCur--; else if (i === ytCur) ytCur = -1; ytSave(); renderYTQueue(); return; }
+  const t = e.target.closest('[data-yt]'); if (t) ytPlayIdx(+t.dataset.yt);
+});
+$('#ytPlay').onclick = async () => {
+  if (!ytP){ if (ytQueue.length) ytPlayIdx(Math.max(0, ytCur)); return; }
+  const st = ytP.getPlayerState(); if (st === YT.PlayerState.PLAYING) ytP.pauseVideo(); else ytP.playVideo();
+};
+$('#ytNext').onclick = ytNextTrack;
+$('#ytPrev').onclick = ytPrevTrack;
+$('#ytClear').onclick = () => { ytQueue = []; ytCur = -1; ytSave(); renderYTQueue(); };
+// my-files player pauses YouTube when it starts, and the tabs switch between the two
+audio.addEventListener('play', () => { try { if (ytP && ytReady && ytP.getPlayerState() === YT.PlayerState.PLAYING) ytP.pauseVideo(); } catch(e){} });
+$('#musicTabs').addEventListener('click', e => {
+  const b = e.target.closest('[data-mtab]'); if (!b) return;
+  document.querySelectorAll('#musicTabs .chip').forEach(x => x.classList.toggle('on', x === b));
+  const yt = b.dataset.mtab === 'yt';
+  $('#ytPanel').style.display = yt ? '' : 'none'; $('#player').style.display = yt ? 'none' : '';
+  $('#musicNote').textContent = yt ? 'Music keeps playing while you switch to other pages.' : "Songs play from your device and aren't uploaded anywhere. Music keeps playing while you switch pages.";
+});
+renderYTQueue();
 
 /* ---------------- GAMES FROM THE games/ FOLDER ---------------- */
 // When the site is hosted from GitHub (Vercel), scripts/build-games.js lists every
