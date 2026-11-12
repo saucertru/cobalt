@@ -5,7 +5,9 @@
 //   games/<folder>/index.html      an HTML game
 //   games/<folder>/<something>.swf a Flash game (played with Ruffle; a player page is made for you)
 //   games/<something>.swf          a Flash game dropped straight into games/
-// Optional in a folder: game.json (name, description, controls, color, swf) and thumbnail.png/.jpg/.webp/.gif
+// Optional in a folder: game.json (name, description, controls, color, icon, entry, swf) and thumbnail.png/.jpg/.webp/.gif
+//   icon  = path of an image inside the folder to show on the game's card (e.g. "img/icon.png")
+//   entry = path of the game's main page if it isn't index.html at the top (found automatically one level down too)
 const fs = require('fs');
 const path = require('path');
 
@@ -68,7 +70,7 @@ function rufflePage(title, swfFile) {
 }
 
 const list = [];
-const add = (id, meta, fallbackName, folder, thumb) => {
+const add = (id, meta, fallbackName, folder, thumb, page = 'index.html') => {
   if (list.some(g => g.id === id)) { console.warn(`Skipped ${folder}: another game already uses the id "${id}"`); return; }
   list.push({
     id,
@@ -76,7 +78,7 @@ const add = (id, meta, fallbackName, folder, thumb) => {
     desc: String(meta.description || ''),
     help: String(meta.controls || ''),
     color: /^#[0-9a-fA-F]{6}$/.test(meta.color || '') ? meta.color : '#2563eb',
-    src: `games/${folder}/index.html`,
+    src: `games/${folder}/${page}`,
     thumb: thumb ? `games/${folder}/${thumb}` : ''
   });
 };
@@ -106,11 +108,19 @@ if (fs.existsSync(gamesDir)) {
       try { meta = JSON.parse(fs.readFileSync(metaFile, 'utf8')); }
       catch (e) { console.warn(`games/${entry}/game.json isn't valid JSON, using defaults`); }
     }
-    const thumb = ['thumbnail.png', 'thumbnail.jpg', 'thumbnail.jpeg', 'thumbnail.webp', 'thumbnail.gif']
+    const safe = rel => typeof rel === 'string' && rel && !rel.includes('..') && !path.isAbsolute(rel) && fs.existsSync(path.join(full, rel)) ? rel.replace(/\\/g, '/') : '';
+    const thumb = safe(meta.icon) || ['thumbnail.png', 'thumbnail.jpg', 'thumbnail.jpeg', 'thumbnail.webp', 'thumbnail.gif']
       .find(f => fs.existsSync(path.join(full, f)));
+    if (meta.icon && !safe(meta.icon)) console.warn(`games/${entry}: icon "${meta.icon}" not found`);
 
-    if (fs.existsSync(path.join(full, 'index.html'))) {
-      add(slug(entry), meta, entry, entry, thumb);
+    // main page: game.json "entry", else index.html at the top, else one folder down (e.g. Game_Source/index.html)
+    let page = safe(meta.entry) || (fs.existsSync(path.join(full, 'index.html')) ? 'index.html' : '');
+    if (!page) {
+      const sub = fs.readdirSync(full).filter(d => fs.statSync(path.join(full, d)).isDirectory() && fs.existsSync(path.join(full, d, 'index.html')));
+      if (sub.length === 1) page = sub[0] + '/index.html';
+    }
+    if (page) {
+      add(slug(entry), meta, entry, entry, thumb, page);
       continue;
     }
     // A folder with a Flash game in it
@@ -124,5 +134,6 @@ if (fs.existsSync(gamesDir)) {
     console.warn(`Skipped games/${entry}: it has no index.html or .swf file`);
   }
 }
+list.sort((a, b) => a.name.localeCompare(b.name, undefined, {numeric: true}));
 fs.writeFileSync(path.join(outGames, 'manifest.json'), JSON.stringify(list, null, 2));
 console.log(`Built dist/ with ${list.length} game(s): ${list.map(g => g.name).join(', ') || 'none'}`);

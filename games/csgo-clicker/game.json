@@ -1,0 +1,7 @@
+{
+  "name": "CS:GO Clicker",
+  "description": "Click to earn money and open cases.",
+  "controls": "Click to earn, then open cases and sell skins.",
+  "color": "#f59e0b",
+  "icon": "images/case1.png"
+}

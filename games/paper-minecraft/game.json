@@ -1,0 +1,7 @@
+{
+  "name": "Paper Minecraft",
+  "description": "A 2D take on Minecraft: mine, craft and build.",
+  "controls": "WASD to move, click to mine and place.",
+  "color": "#65a30d",
+  "icon": "paper-minecraft.png"
+}

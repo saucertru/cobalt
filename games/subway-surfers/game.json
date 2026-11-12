@@ -1,0 +1,7 @@
+{
+  "name": "Subway Surfers",
+  "description": "Dodge trains and run as far as you can.",
+  "controls": "Arrow keys to switch lanes, jump and roll.",
+  "color": "#f43f5e",
+  "icon": "img/subwaysurfers.webp"
+}

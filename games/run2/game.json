@@ -1,0 +1,7 @@
+{
+  "name": "Run 2",
+  "description": "Run and jump through tunnels floating in space.",
+  "controls": "Arrow keys to run, jump and switch walls.",
+  "color": "#0f766e",
+  "icon": "run-2-logo.jpg"
+}

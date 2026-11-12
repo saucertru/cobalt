@@ -1,0 +1,7 @@
+{
+  "name": "Slope",
+  "description": "Roll a ball down a never-ending neon slope.",
+  "controls": "Left and right arrows (or A and D) to steer.",
+  "color": "#10b981",
+  "icon": "slope4.jpeg"
+}

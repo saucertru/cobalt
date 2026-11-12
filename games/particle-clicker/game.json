@@ -1,0 +1,7 @@
+{
+  "name": "Particle Clicker",
+  "description": "Click to discover particles and grow your physics lab.",
+  "controls": "Click the detector, then hire and upgrade.",
+  "color": "#6366f1",
+  "icon": "assets/mobile/icon-72@2x.png"
+}

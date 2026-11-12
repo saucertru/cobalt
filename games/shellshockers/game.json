@@ -1,0 +1,7 @@
+{
+  "name": "Shell Shockers",
+  "description": "Online egg battles: crack the other team.",
+  "controls": "WASD to move, mouse to aim and shoot.",
+  "color": "#eab308",
+  "icon": "img/favicon.png"
+}

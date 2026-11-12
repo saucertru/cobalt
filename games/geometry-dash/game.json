@@ -1,0 +1,7 @@
+{
+  "name": "Geometry Dash",
+  "description": "Jump and fly through rhythm-based obstacle courses.",
+  "controls": "Click, Space or Up arrow to jump.",
+  "color": "#22c55e",
+  "icon": "splash.PNG"
+}

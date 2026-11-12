@@ -1,0 +1,7 @@
+{
+  "name": "Chrome Dino",
+  "description": "Jump over cacti in the endless desert runner.",
+  "controls": "Space or Up arrow to jump, Down to duck.",
+  "color": "#64748b",
+  "icon": "favicon.ico"
+}

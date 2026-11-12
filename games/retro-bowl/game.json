@@ -1,0 +1,7 @@
+{
+  "name": "Retro Bowl",
+  "description": "Run your own American football team and win the Retro Bowl.",
+  "controls": "Drag to throw passes, swipe to dodge.",
+  "color": "#2563eb",
+  "icon": "img/icon.jpg"
+}
