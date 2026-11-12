@@ -301,6 +301,7 @@ html.no-anim *,html.no-anim *::before,html.no-anim *::after{animation:none!impor
 .tprev em{display:block;width:85%;height:2px;border-radius:1px;opacity:.55}
 .th i.tprev.rnd{padding:0;overflow:hidden;align-items:stretch}
 .tprev.rnd s{flex:1;display:block}
+.ocrown{display:inline-flex;align-items:center;filter:drop-shadow(0 0 4px rgba(255,209,102,.55));transform:translateY(-1px)}
 /* purchasable effects */
 .fx-glow{text-shadow:0 0 6px currentColor,0 0 14px currentColor}
 .fx-rainbow{background:linear-gradient(90deg,#ff6b6b,#ffd166,#6ee7a8,#60a5fa,#c084fc,#ff6b6b);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent!important;animation:rb 3s linear infinite}
@@ -573,7 +574,7 @@ const ICONS = {
 const svg = (n, s=20) => `<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONS[n]}</svg>`;
 document.querySelectorAll('[data-i]').forEach(el => { el.innerHTML = svg(el.dataset.i, +(el.dataset.s || 20)); });
 
-const THEMES=["cobalt", "purple", "black", "grey", "light", "green"];const GAME_MAP={"cobalt": {"#2a2140": "#202d41", "#130e22": "#0e1622", "#9a90b8": "#8fa0b9", "#231a3c": "#19273d", "#2a1f48": "#1e2f49", "#1e1734": "#162235", "#1b1530": "#142031", "#151024": "#0f1825", "#6366f1": "#5f9bf5", "#100c1c": "#0c121c", "#3a2e5c": "#2d405d", "#0d0a16": "#0a0f16", "#ece8f7": "#e8eef7", "#d0c9e6": "#c8d4e7", "#2c2248": "#213149", "#0a0712": "#070b12", "#c4b5fd": "#b3d1ff", "#0b0814": "#080d14", "#a78bfa": "#88b7fd", "#2f2548": "#243349", "#3a2a66": "#284268", "#0f0b1a": "#0b111a", "#8b5cf6": "#5899fa", "#d9c8ff": "#c8deff", "#211a35": "#192536", "#18122a": "#111b2b", "#171126": "#101927", "#2a1a55": "#193156", "#07050c": "#05080c", "#120a24": "#091425", "#2d1f52": "#1e3353", "#261d40": "#1c2b41", "#f0ecfa": "#ecf2fa", "#120c24": "#0b1525", "#d6cfec": "#cedaed", "#241c38": "#1b2739", "#6a4fb0": "#4d75b2", "#2563eb": "#2073f0", "#120d20": "#0d1520", "#cfc8e6": "#c7d4e7", "#bdb4d8": "#b3c2d9", "#f6f3ff": "#f3f8ff", "#24163f": "#152640", "#e6e1f5": "#e1e9f5", "#7b5fc4": "#5c87c7"}, "purple": {}, "black": {"#2a2140": "#0f0f0f", "#130e22": "#070707", "#9a90b8": "#a4a4a4", "#231a3c": "#0d0d0d", "#2a1f48": "#0f0f0f", "#1e1734": "#0b0b0b", "#1b1530": "#0a0a0a", "#151024": "#080808", "#6366f1": "#6366f1", "#100c1c": "#060606", "#3a2e5c": "#454545", "#0d0a16": "#050505", "#ece8f7": "#f0f0f0", "#d0c9e6": "#d8d8d8", "#2c2248": "#101010", "#0a0712": "#040404", "#c4b5fd": "#c4b5fd", "#0b0814": "#040404", "#a78bfa": "#a78bfa", "#2f2548": "#101010", "#3a2a66": "#484848", "#0f0b1a": "#060606", "#8b5cf6": "#8b5cf6", "#d9c8ff": "#e3e3e3", "#211a35": "#0c0c0c", "#18122a": "#090909", "#171126": "#080808", "#2a1a55": "#111111", "#07050c": "#030303", "#120a24": "#070707", "#2d1f52": "#111111", "#261d40": "#0e0e0e", "#f0ecfa": "#f3f3f3", "#120c24": "#070707", "#d6cfec": "#dedede", "#241c38": "#0d0d0d", "#6a4fb0": "#808080", "#2563eb": "#2563eb", "#120d20": "#070707", "#cfc8e6": "#d7d7d7", "#bdb4d8": "#c6c6c6", "#f6f3ff": "#f9f9f9", "#24163f": "#0d0d0d", "#e6e1f5": "#ebebeb", "#7b5fc4": "#929292"}, "grey": {"#2a2140": "#302f32", "#130e22": "#181719", "#9a90b8": "#a3a3a5", "#231a3c": "#2a2a2c", "#2a1f48": "#333235", "#1e1734": "#252427", "#1b1530": "#222223", "#151024": "#1a191b", "#6366f1": "#6366f1", "#100c1c": "#141315", "#3a2e5c": "#444347", "#0d0a16": "#101010", "#ece8f7": "#efeff0", "#d0c9e6": "#d7d6d9", "#2c2248": "#343436", "#0a0712": "#0c0c0d", "#c4b5fd": "#c4b5fd", "#0b0814": "#0e0e0e", "#a78bfa": "#a78bfa", "#2f2548": "#363538", "#3a2a66": "#47464a", "#0f0b1a": "#121213", "#8b5cf6": "#8b5cf6", "#d9c8ff": "#e3e2e5", "#211a35": "#272728", "#18122a": "#1e1d1f", "#171126": "#1b1b1c", "#2a1a55": "#37353a", "#07050c": "#080809", "#120a24": "#171618", "#2d1f52": "#38373a", "#261d40": "#2e2d30", "#f0ecfa": "#f3f3f3", "#120c24": "#181719", "#d6cfec": "#dddcdf", "#241c38": "#2a292b", "#6a4fb0": "#7e7c83", "#2563eb": "#2563eb", "#120d20": "#161617", "#cfc8e6": "#d6d6d8", "#bdb4d8": "#c5c5c7", "#f6f3ff": "#f9f9f9", "#24163f": "#2a292c", "#e6e1f5": "#ebeaec", "#7b5fc4": "#908e95"}, "light": {}, "green": {"#2a2140": "#1c2a23", "#130e22": "#0d1712", "#9a90b8": "#8aa597", "#231a3c": "#16291f", "#2a1f48": "#1d3328", "#1e1734": "#16261e", "#1b1530": "#13201a", "#151024": "#0e1712", "#6366f1": "#10b981", "#100c1c": "#0b1510", "#3a2e5c": "#2a4135", "#0d0a16": "#09100c", "#ece8f7": "#e6efe9", "#d0c9e6": "#c7d4cd", "#2c2248": "#1f3529", "#0a0712": "#060c09", "#c4b5fd": "#7cf7c4", "#0b0814": "#08100c", "#a78bfa": "#4fd6a0", "#2f2548": "#24352c", "#3a2a66": "#25453a", "#0f0b1a": "#0b1410", "#8b5cf6": "#3fe0b0", "#d9c8ff": "#bff5d9", "#211a35": "#16241c", "#18122a": "#111b16", "#171126": "#0f1a14", "#2a1a55": "#0d3322", "#07050c": "#050806", "#120a24": "#06130c", "#2d1f52": "#1d3b2e", "#261d40": "#1b2c23", "#f0ecfa": "#eaf3ee", "#120c24": "#0c1a14", "#d6cfec": "#cfdcd5", "#241c38": "#18261e", "#6a4fb0": "#3f6b56", "#2563eb": "#2f9e6b", "#120d20": "#0c1611", "#cfc8e6": "#c3d2ca", "#bdb4d8": "#b4c4bb", "#f6f3ff": "#f4f8f5", "#24163f": "#13291f", "#e6e1f5": "#dfe9e3", "#7b5fc4": "#5d8a74"}};const STARS={"cobalt": ["204,219,241", "138,172,222", "173,203,247"], "purple": ["215,205,240", "165,140,220", "195,175,245"], "black": ["222,222,222", "180,180,180", "210,210,210"], "grey": ["222,221,224", "179,177,183", "209,208,212"], "light": ["24,19,40", "24,19,40", "24,19,40"], "green": ["200,230,215", "140,190,165", "175,225,200"]};const ACC_AUTO={"cobalt": "#bcd3ff", "purple": "#d9c8ff", "green": "#bff5d9", "grey": "#e4e4e7", "black": "#fafafa", "light": "#5726c5"};const ACC_LIGHT={"lavender": "#5726c5", "pink": "#c52678", "sky": "#267cc5", "mint": "#26c572", "gold": "#c59b26"};const PREV={"cobalt": ["#05080c", "#0f1825", "#bcd3ff", "#e8eef7"], "purple": ["#07050c", "#151024", "#d9c8ff", "#ece8f7"], "black": ["#030303", "#080808", "#fafafa", "#f0f0f0"], "grey": ["#080809", "#1a191b", "#e4e4e7", "#efeff0"], "light": ["#f5f3fa", "#e0dbef", "#5726c5", "#0c0817"], "green": ["#050806", "#0e1712", "#bff5d9", "#e6efe9"]};
+const THEMES=["cobalt", "purple", "black", "grey", "light", "green"];const GAME_MAP={"cobalt": {"#120a24": "#091425", "#2a1f48": "#1e2f49", "#151024": "#0f1825", "#9a90b8": "#8fa0b9", "#100c1c": "#0c121c", "#2563eb": "#2073f0", "#3a2a66": "#284268", "#2f2548": "#243349", "#d0c9e6": "#c8d4e7", "#bdb4d8": "#b3c2d9", "#e6e1f5": "#e1e9f5", "#120d20": "#0d1520", "#6a4fb0": "#4d75b2", "#1b1530": "#142031", "#d6cfec": "#cedaed", "#120c24": "#0b1525", "#cfc8e6": "#c7d4e7", "#2c2248": "#213149", "#0d0a16": "#0a0f16", "#d9c8ff": "#c8deff", "#241c38": "#1b2739", "#0b0814": "#080d14", "#171126": "#101927", "#0f0b1a": "#0b111a", "#f0ecfa": "#ecf2fa", "#2a1a55": "#193156", "#211a35": "#192536", "#231a3c": "#19273d", "#8b5cf6": "#5899fa", "#24163f": "#152640", "#261d40": "#1c2b41", "#7b5fc4": "#5c87c7", "#f6f3ff": "#f3f8ff", "#1e1734": "#162235", "#2d1f52": "#1e3353", "#6366f1": "#5f9bf5", "#18122a": "#111b2b", "#130e22": "#0e1622", "#07050c": "#05080c", "#ece8f7": "#e8eef7", "#a78bfa": "#88b7fd", "#c4b5fd": "#b3d1ff", "#2a2140": "#202d41", "#3a2e5c": "#2d405d", "#0a0712": "#070b12"}, "purple": {}, "black": {"#120a24": "#070707", "#2a1f48": "#0f0f0f", "#151024": "#080808", "#9a90b8": "#a4a4a4", "#100c1c": "#060606", "#2563eb": "#2563eb", "#3a2a66": "#484848", "#2f2548": "#101010", "#d0c9e6": "#d8d8d8", "#bdb4d8": "#c6c6c6", "#e6e1f5": "#ebebeb", "#120d20": "#070707", "#6a4fb0": "#808080", "#1b1530": "#0a0a0a", "#d6cfec": "#dedede", "#120c24": "#070707", "#cfc8e6": "#d7d7d7", "#2c2248": "#101010", "#0d0a16": "#050505", "#d9c8ff": "#e3e3e3", "#241c38": "#0d0d0d", "#0b0814": "#040404", "#171126": "#080808", "#0f0b1a": "#060606", "#f0ecfa": "#f3f3f3", "#2a1a55": "#111111", "#211a35": "#0c0c0c", "#231a3c": "#0d0d0d", "#8b5cf6": "#8b5cf6", "#24163f": "#0d0d0d", "#261d40": "#0e0e0e", "#7b5fc4": "#929292", "#f6f3ff": "#f9f9f9", "#1e1734": "#0b0b0b", "#2d1f52": "#111111", "#6366f1": "#6366f1", "#18122a": "#090909", "#130e22": "#070707", "#07050c": "#030303", "#ece8f7": "#f0f0f0", "#a78bfa": "#a78bfa", "#c4b5fd": "#c4b5fd", "#2a2140": "#0f0f0f", "#3a2e5c": "#454545", "#0a0712": "#040404"}, "grey": {"#120a24": "#171618", "#2a1f48": "#333235", "#151024": "#1a191b", "#9a90b8": "#a3a3a5", "#100c1c": "#141315", "#2563eb": "#2563eb", "#3a2a66": "#47464a", "#2f2548": "#363538", "#d0c9e6": "#d7d6d9", "#bdb4d8": "#c5c5c7", "#e6e1f5": "#ebeaec", "#120d20": "#161617", "#6a4fb0": "#7e7c83", "#1b1530": "#222223", "#d6cfec": "#dddcdf", "#120c24": "#181719", "#cfc8e6": "#d6d6d8", "#2c2248": "#343436", "#0d0a16": "#101010", "#d9c8ff": "#e3e2e5", "#241c38": "#2a292b", "#0b0814": "#0e0e0e", "#171126": "#1b1b1c", "#0f0b1a": "#121213", "#f0ecfa": "#f3f3f3", "#2a1a55": "#37353a", "#211a35": "#272728", "#231a3c": "#2a2a2c", "#8b5cf6": "#8b5cf6", "#24163f": "#2a292c", "#261d40": "#2e2d30", "#7b5fc4": "#908e95", "#f6f3ff": "#f9f9f9", "#1e1734": "#252427", "#2d1f52": "#38373a", "#6366f1": "#6366f1", "#18122a": "#1e1d1f", "#130e22": "#181719", "#07050c": "#080809", "#ece8f7": "#efeff0", "#a78bfa": "#a78bfa", "#c4b5fd": "#c4b5fd", "#2a2140": "#302f32", "#3a2e5c": "#444347", "#0a0712": "#0c0c0d"}, "light": {}, "green": {"#120a24": "#06130c", "#2a1f48": "#1d3328", "#151024": "#0e1712", "#9a90b8": "#8aa597", "#100c1c": "#0b1510", "#2563eb": "#2f9e6b", "#3a2a66": "#25453a", "#2f2548": "#24352c", "#d0c9e6": "#c7d4cd", "#bdb4d8": "#b4c4bb", "#e6e1f5": "#dfe9e3", "#120d20": "#0c1611", "#6a4fb0": "#3f6b56", "#1b1530": "#13201a", "#d6cfec": "#cfdcd5", "#120c24": "#0c1a14", "#cfc8e6": "#c3d2ca", "#2c2248": "#1f3529", "#0d0a16": "#09100c", "#d9c8ff": "#bff5d9", "#241c38": "#18261e", "#0b0814": "#08100c", "#171126": "#0f1a14", "#0f0b1a": "#0b1410", "#f0ecfa": "#eaf3ee", "#2a1a55": "#0d3322", "#211a35": "#16241c", "#231a3c": "#16291f", "#8b5cf6": "#3fe0b0", "#24163f": "#13291f", "#261d40": "#1b2c23", "#7b5fc4": "#5d8a74", "#f6f3ff": "#f4f8f5", "#1e1734": "#16261e", "#2d1f52": "#1d3b2e", "#6366f1": "#10b981", "#18122a": "#111b16", "#130e22": "#0d1712", "#07050c": "#050806", "#ece8f7": "#e6efe9", "#a78bfa": "#4fd6a0", "#c4b5fd": "#7cf7c4", "#2a2140": "#1c2a23", "#3a2e5c": "#2a4135", "#0a0712": "#060c09"}};const STARS={"cobalt": ["204,219,241", "138,172,222", "173,203,247"], "purple": ["215,205,240", "165,140,220", "195,175,245"], "black": ["222,222,222", "180,180,180", "210,210,210"], "grey": ["222,221,224", "179,177,183", "209,208,212"], "light": ["24,19,40", "24,19,40", "24,19,40"], "green": ["200,230,215", "140,190,165", "175,225,200"]};const ACC_AUTO={"cobalt": "#bcd3ff", "purple": "#d9c8ff", "green": "#bff5d9", "grey": "#e4e4e7", "black": "#fafafa", "light": "#5726c5"};const ACC_LIGHT={"lavender": "#5726c5", "pink": "#c52678", "sky": "#267cc5", "mint": "#26c572", "gold": "#c59b26"};const PREV={"cobalt": ["#05080c", "#0f1825", "#bcd3ff", "#e8eef7"], "purple": ["#07050c", "#151024", "#d9c8ff", "#ece8f7"], "black": ["#030303", "#080808", "#fafafa", "#f0f0f0"], "grey": ["#080809", "#1a191b", "#e4e4e7", "#efeff0"], "light": ["#f5f3fa", "#e0dbef", "#5726c5", "#0c0817"], "green": ["#050806", "#0e1712", "#bff5d9", "#e6efe9"]};
 let THEME_PREF = store.get('set_theme', 'cobalt');
 if (THEME_PREF !== 'random' && !THEMES.includes(THEME_PREF)) THEME_PREF = 'cobalt';
 const randomTheme = (not) => { const pool = THEMES.filter(t => t !== not); return pool[Math.random()*pool.length|0]; };
@@ -972,16 +973,76 @@ renderTracks();
 /* ---------------- GAMES FROM THE games/ FOLDER ---------------- */
 // When the site is hosted from GitHub (Vercel), scripts/build-games.js lists every
 // folder in games/ in games/manifest.json, and each one shows up here automatically.
-function frameGame(src){
+// Make games fill their frame (and the screen in fullscreen).
+// Unity games: stretch the Unity canvas to the frame; Unity redraws at the new size.
+// Games with "fit": true in game.json: scale a fixed-size canvas up to fit, keeping its shape.
+const UNITY_CSS = `html,body{margin:0!important;width:100%!important;height:100%!important;overflow:hidden!important;background:#000!important}
+.webgl-content,#gameContainer,#unity-container,#unityContainer{position:fixed!important;left:0!important;top:0!important;right:0!important;bottom:0!important;width:100%!important;height:100%!important;transform:none!important;margin:0!important}
+.webgl-content canvas,#gameContainer canvas,#unity-container canvas,#unityContainer canvas,#unity-canvas{width:100%!important;height:100%!important;display:block!important}
+.webgl-content .footer,#unity-footer,.webgl-content .logo,.webgl-content .fullscreen{display:none!important}`;
+function enhanceFrame(f, fit){
+  let d, w;
+  try { d = f.contentDocument; w = f.contentWindow; } catch(e){ return; }
+  if (!d || !d.head || d.__cobalt) return;
+  d.__cobalt = true;
+  const isUnity = !!(w.UnityLoader || w.createUnityInstance || d.querySelector('#unity-canvas, #unity-container, .webgl-content #gameContainer'));
+  if (isUnity && !fit){ const st = d.createElement('style'); st.textContent = UNITY_CSS; d.head.appendChild(st); }
+  // Phaser 2 games with scaling turned off (NO_SCALE): switch them to Phaser's own "fit to screen" mode,
+  // which keeps the shape and keeps clicks/touches in the right place.
+  const phaserFit = () => {
+    const P = w.Phaser, games = P && P.GAMES ? P.GAMES.filter(Boolean) : [];
+    let any = false;
+    for (const g of games){
+      if (!g.scale || !P.ScaleManager) continue;
+      any = true;
+      if (g.scale.scaleMode === P.ScaleManager.NO_SCALE || g.__cobaltFit){
+        if (!g.__cobaltFit){
+          g.__cobaltFit = true;
+          const st = d.createElement('style'); st.textContent = 'html,body{margin:0!important;padding:0!important;width:100%!important;height:100%!important;overflow:hidden!important;background:#000!important}'; d.head.appendChild(st);
+          const par = g.canvas && g.canvas.parentElement;
+          if (par && par !== d.body){ par.style.setProperty('width', '100%', 'important'); par.style.setProperty('height', '100%', 'important'); }
+        }
+        if (g.scale.scaleMode !== P.ScaleManager.SHOW_ALL){
+          g.scale.scaleMode = P.ScaleManager.SHOW_ALL; g.scale.pageAlignHorizontally = true; g.scale.pageAlignVertically = true;
+        }
+        try { g.scale.refresh(); } catch(e){}
+      }
+    }
+    return any;
+  };
+  let isPhaser = phaserFit();
+  if (!isUnity) { const pt = w.setInterval(() => { isPhaser = phaserFit() || isPhaser; }, 1000); w.addEventListener('resize', () => setTimeout(phaserFit, 50)); }
+  if (fit && !isPhaser){
+    const st = d.createElement('style'); st.textContent = 'html,body{margin:0!important;overflow:hidden!important;background:#000!important}'; d.head.appendChild(st);
+    const rule = d.createElement('style'); d.head.appendChild(rule);
+    const doFit = () => {
+      if (isPhaser) return;
+      let c = null, a = 0;
+      for (const x of d.querySelectorAll('canvas')){ const ar = x.width * x.height; if (ar > a && x.getClientRects().length){ a = ar; c = x; } }
+      if (!c) return;
+      if (!c.__base){ c.__base = [c.offsetWidth || c.width, c.offsetHeight || c.height]; c.setAttribute('data-cobalt-fit', ''); }
+      const [bw, bh] = c.__base, vw = w.innerWidth, vh = w.innerHeight, s = Math.min(vw / bw, vh / bh);
+      rule.textContent = `canvas[data-cobalt-fit]{position:fixed!important;margin:0!important;width:${bw * s}px!important;height:${bh * s}px!important;left:${(vw - bw * s) / 2}px!important;top:${(vh - bh * s) / 2}px!important}`;
+    };
+    w.addEventListener('resize', doFit); const t = w.setInterval(doFit, 1000); doFit();
+  }
+  if (isUnity || fit) [50, 400, 1200].forEach(ms => setTimeout(() => { try { w.dispatchEvent(new Event('resize')); } catch(e){} }, ms));
+}
+document.addEventListener('fullscreenchange', () => {
+  const f = $('#gframe');
+  if (f && f.style.display === 'block') [60, 350, 900].forEach(ms => setTimeout(() => { try { f.contentWindow.dispatchEvent(new Event('resize')); } catch(e){} }, ms));
+});
+function frameGame(src, fit){
   return () => {
     const f = $('#gframe');
+    f.onload = () => { enhanceFrame(f, fit); setTimeout(() => enhanceFrame(f, fit), 2500); };
     cv.style.display = 'none'; f.style.display = 'block'; f.src = src;
     $('.stage').classList.add('wide'); $('.bar').classList.add('wide');
     for (const id of ['#stScore','#stBest']) $(id).style.display = 'none';
     $('#fullBtn').style.display = '';
     setTimeout(() => { try { f.focus(); } catch(e){} }, 100);
     return { stop(){
-      f.src = 'about:blank'; f.style.display = 'none'; cv.style.display = '';
+      f.onload = null; f.src = 'about:blank'; f.style.display = 'none'; cv.style.display = '';
       $('.stage').classList.remove('wide'); $('.bar').classList.remove('wide');
       for (const id of ['#stScore','#stBest']) $(id).style.display = '';
       $('#fullBtn').style.display = 'none';
@@ -1002,7 +1063,7 @@ $('#fullBtn').onclick = e => { e.currentTarget.blur(); const f = $('#gframe'); t
       id: g.id, name: clean(g.name, 40) || g.id, desc: clean(g.desc, 90) || 'A game from the games folder.',
       icon: 'gamepad', color: /^#[0-9a-fA-F]{6}$/.test(g.color) ? g.color : '#7c3aed',
       help: clean(g.help, 140) || 'Click the game to start. Press Fullscreen for a bigger view.',
-      thumb: okPath(g.thumb) ? encodeURI(g.thumb) : '', src: encodeURI(g.src), make: frameGame(encodeURI(g.src))
+      thumb: okPath(g.thumb) ? encodeURI(g.thumb) : '', src: encodeURI(g.src), make: frameGame(encodeURI(g.src), !!g.fit)
     });
     added++;
   }
@@ -1185,10 +1246,13 @@ function avatar(p, size = 40){
   return `<span class="av${fr ? ' fr-' + fr.id.slice(2) : ''}" style="width:${size}px;height:${size}px;background:${c};font-size:${Math.round(size*.52)}px">${pic ? `<img src="${pic}" alt="">` : e}</span>`;
 }
 const uname = p => p && typeof p.name === 'string' && p.name ? p.name.slice(0, 16) : 'Unknown';
+// The site owner's profile gets a crown (owner = ownerUid in supabase-config.js).
+const OWNER_CROWN = `<span class="ocrown" title="Site owner"><svg viewBox="0 0 24 24" width="16" height="16"><path d="M3 8.5 7.5 12 12 5l4.5 7L21 8.5 19 18H5z" fill="#ffd166" stroke="#b7791f" stroke-width="1.2" stroke-linejoin="round"/><circle cx="12" cy="5" r="1.4" fill="#ffd166"/><circle cx="3" cy="8.5" r="1.3" fill="#ffd166"/><circle cx="21" cy="8.5" r="1.3" fill="#ffd166"/></svg></span>`;
+const isOwnerProfile = p => !!p && (p._owner === true || (!!EXT && !!EXT.ownerUid && profiles[EXT.ownerUid] === p));
 function nameHTML(p){
   const col = equipped(p, 'color'), fx = equipped(p, 'effect'), bd = equipped(p, 'badge');
   return `<span class="${fx ? 'fx-' + fx.id.slice(2) : ''}" style="color:${col ? col.val : 'var(--text)'}">${esc(uname(p))}</span>` +
-    (bd ? `<span class="bdg" title="${bd.name}">${bd.emoji}</span>` : '');
+    (isOwnerProfile(p) ? OWNER_CROWN : '') + (bd ? `<span class="bdg" title="${bd.name}">${bd.emoji}</span>` : '');
 }
 function pcard(p){
   const bn = equipped(p, 'banner'), bimg = okImg(p && p.bannerImg);
@@ -1581,7 +1645,7 @@ function updatePreview(){
   if (!draft || !$('#pprev')) return;
   const base = me || {coins: 50, msgCount: 0, joined: Date.now(), owned: [], equip: {}};
   $('#pprev').innerHTML = pcard({...base, name: draft.name || 'username', bio: draft.bio, avatar: draft.avatar, avColor: draft.avColor, equip: draft.equip,
-    title: draft.title, pfp: draft.pfp, bannerImg: draft.bannerImg, pColor: draft.pColor, pAccent: draft.pAccent});
+    title: draft.title, pfp: draft.pfp, bannerImg: draft.bannerImg, pColor: draft.pColor, pAccent: draft.pAccent, _owner: !!(EXT && EXT.ownerUid && myId === EXT.ownerUid)});
 }
 const perr = t => { $('#perr').textContent = t; };
 $('#profBody').addEventListener('input', e => {

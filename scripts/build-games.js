@@ -9,7 +9,9 @@
 //                                  (for .zip/.bin/.iso/.md ROMs, set "system" in game.json, e.g. "nes", "gba", "psx", "segaMD")
 // Optional in a folder: game.json (name, description, controls, color, icon, entry, swf) and thumbnail.png/.jpg/.webp/.gif
 //   icon  = path of an image inside the folder to show on the game's card (e.g. "img/icon.png")
-//   entry = path of the game's main page if it isn't index.html at the top (found automatically one level down too)
+//   entry = path of the game's main page if it isn't index.html at the top (a single .html/.htm at the top,
+//           or index.html one folder down, are found automatically)
+//   fit   = true to scale a fixed-size game up to fill its frame and fullscreen
 const fs = require('fs');
 const path = require('path');
 
@@ -119,7 +121,8 @@ const add = (id, meta, fallbackName, folder, thumb, page = 'index.html') => {
     help: String(meta.controls || ''),
     color: /^#[0-9a-fA-F]{6}$/.test(meta.color || '') ? meta.color : '#2563eb',
     src: `games/${folder}/${page}`,
-    thumb: thumb ? `games/${folder}/${thumb}` : ''
+    thumb: thumb ? `games/${folder}/${thumb}` : '',
+    fit: meta.fit === true
   });
 };
 
@@ -167,6 +170,11 @@ if (fs.existsSync(gamesDir)) {
 
     // main page: game.json "entry", else index.html at the top, else one folder down (e.g. Game_Source/index.html)
     let page = safe(meta.entry) || (fs.existsSync(path.join(full, 'index.html')) ? 'index.html' : '');
+    if (!page) {
+      // a single .html/.htm page at the top (e.g. bitlife.html, moto-x3m.htm)
+      const pages = fs.readdirSync(full).filter(f => /\.html?$/i.test(f) && fs.statSync(path.join(full, f)).isFile());
+      if (pages.length === 1) page = pages[0];
+    }
     if (!page) {
       const sub = fs.readdirSync(full).filter(d => fs.statSync(path.join(full, d)).isDirectory() && fs.existsSync(path.join(full, d, 'index.html')));
       if (sub.length === 1) page = sub[0] + '/index.html';
