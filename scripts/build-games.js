@@ -12,6 +12,8 @@
 //   entry = path of the game's main page if it isn't index.html at the top (a single .html/.htm at the top,
 //           or index.html one folder down, are found automatically)
 //   fit   = true to scale a fixed-size game up to fill its frame and fullscreen
+//   css   = extra CSS added inside the game's page (e.g. to change its size)
+//   hide  = CSS selectors of parts of the game's page to hide, e.g. "#banner, .ads"
 const fs = require('fs');
 const path = require('path');
 
@@ -122,7 +124,9 @@ const add = (id, meta, fallbackName, folder, thumb, page = 'index.html') => {
     color: /^#[0-9a-fA-F]{6}$/.test(meta.color || '') ? meta.color : '#2563eb',
     src: `games/${folder}/${page}`,
     thumb: thumb ? `games/${folder}/${thumb}` : '',
-    fit: meta.fit === true
+    fit: meta.fit === true,
+    css: typeof meta.css === 'string' ? meta.css.slice(0, 4000) : '',
+    hide: typeof meta.hide === 'string' ? meta.hide.slice(0, 500) : ''
   });
 };
 

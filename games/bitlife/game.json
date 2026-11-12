@@ -2,5 +2,7 @@
   "name": "BitLife",
   "description": "Live a whole life, one choice at a time.",
   "controls": "Tap or click to make choices.",
-  "color": "#0ea5e9"
+  "color": "#0ea5e9",
+  "css": "html{background:#0b0f16!important} html,body{width:50vh!important}",
+  "hide": "#listLink"
 }

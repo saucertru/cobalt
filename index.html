@@ -1262,13 +1262,29 @@ const UNITY_CSS = `html,body{margin:0!important;width:100%!important;height:100%
 .webgl-content,#gameContainer,#unity-container,#unityContainer{position:fixed!important;left:0!important;top:0!important;right:0!important;bottom:0!important;width:100%!important;height:100%!important;transform:none!important;margin:0!important}
 .webgl-content canvas,#gameContainer canvas,#unity-container canvas,#unityContainer canvas,#unity-canvas{width:100%!important;height:100%!important;display:block!important}
 .webgl-content .footer,#unity-footer,.webgl-content .logo,.webgl-content .fullscreen{display:none!important}`;
-function enhanceFrame(f, fit){
+function enhanceFrame(f, fit, css, hide){
   let d, w;
   try { d = f.contentDocument; w = f.contentWindow; } catch(e){ return; }
-  if (!d || !d.head || d.__cobalt) return;
+  if (!d || !d.head) return;
+  // custom CSS from the game's game.json ("css"), re-added if the game rewrites its page
+  if (css){
+    const old = d.getElementById('cobalt-css'), done = d.readyState === 'complete';
+    // add it, and add it once more after the page has completely finished loading (some games rewrite their page while loading)
+    if (!old || (!old.__final && done)){
+      if (old) old.remove();
+      const cs = d.createElement('style'); cs.id = 'cobalt-css'; cs.textContent = css; cs.__final = done;
+      (d.body || d.documentElement).appendChild(cs);
+      try { w.dispatchEvent(new Event('resize')); } catch(e){}
+    }
+  }
+  // parts of the game's page to hide, from game.json ("hide"), kept hidden even if the game redraws them
+  if (hide){ try { d.querySelectorAll(hide).forEach(el => { if (el.style.getPropertyValue('display') !== 'none') el.style.setProperty('display', 'none', 'important'); }); } catch(e){} }
+  if (d.__cobalt) return;
   d.__cobalt = true;
   const isUnity = !!(w.UnityLoader || w.createUnityInstance || d.querySelector('#unity-canvas, #unity-container, .webgl-content #gameContainer'));
-  if (isUnity && !fit){ const st = d.createElement('style'); st.textContent = UNITY_CSS; d.head.appendChild(st); }
+  // stretch Unity games to the frame, unless the page deliberately makes a narrower column (phone-style games)
+  const column = d.body && d.body.getBoundingClientRect().width < w.innerWidth * 0.9;
+  if (isUnity && !fit && !column){ const st = d.createElement('style'); st.textContent = UNITY_CSS; d.head.appendChild(st); }
   // Phaser 2 games with scaling turned off (NO_SCALE): switch them to Phaser's own "fit to screen" mode,
   // which keeps the shape and keeps clicks/touches in the right place.
   const phaserFit = () => {
@@ -1314,17 +1330,19 @@ document.addEventListener('fullscreenchange', () => {
   const f = $('#gframe');
   if (f && f.style.display === 'block') [60, 350, 900].forEach(ms => setTimeout(() => { try { f.contentWindow.dispatchEvent(new Event('resize')); } catch(e){} }, ms));
 });
-function frameGame(src, fit){
+let frameTimer = null;
+function frameGame(src, fit, css, hide){
   return () => {
     const f = $('#gframe');
-    f.onload = () => { enhanceFrame(f, fit); setTimeout(() => enhanceFrame(f, fit), 2500); };
+    f.onload = () => { enhanceFrame(f, fit, css, hide); setTimeout(() => enhanceFrame(f, fit, css, hide), 2500); };
+    clearInterval(frameTimer); frameTimer = setInterval(() => enhanceFrame(f, fit, css, hide), 700);
     cv.style.display = 'none'; f.style.display = 'block'; f.src = src;
     $('.stage').classList.add('wide'); $('.bar').classList.add('wide');
     for (const id of ['#stScore','#stBest']) $(id).style.display = 'none';
     $('#fullBtn').style.display = '';
     setTimeout(() => { try { f.focus(); } catch(e){} }, 100);
     return { stop(){
-      f.onload = null; f.src = 'about:blank'; f.style.display = 'none'; cv.style.display = '';
+      clearInterval(frameTimer); f.onload = null; f.src = 'about:blank'; f.style.display = 'none'; cv.style.display = '';
       $('.stage').classList.remove('wide'); $('.bar').classList.remove('wide');
       for (const id of ['#stScore','#stBest']) $(id).style.display = '';
       $('#fullBtn').style.display = 'none';
@@ -1345,7 +1363,7 @@ $('#fullBtn').onclick = e => { e.currentTarget.blur(); const f = $('#gframe'); t
       id: g.id, name: clean(g.name, 40) || g.id, desc: clean(g.desc, 90) || 'A game from the games folder.',
       icon: 'gamepad', color: /^#[0-9a-fA-F]{6}$/.test(g.color) ? g.color : '#7c3aed',
       help: clean(g.help, 140) || 'Click the game to start. Press Fullscreen for a bigger view.',
-      thumb: okPath(g.thumb) ? encodeURI(g.thumb) : '', src: encodeURI(g.src), make: frameGame(encodeURI(g.src), !!g.fit)
+      thumb: okPath(g.thumb) ? encodeURI(g.thumb) : '', src: encodeURI(g.src), make: frameGame(encodeURI(g.src), !!g.fit, typeof g.css === 'string' ? g.css.slice(0, 4000) : '', typeof g.hide === 'string' ? g.hide.slice(0, 500) : '')
     });
     added++;
   }
