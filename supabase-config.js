@@ -7,7 +7,7 @@ window.COBALT_SUPABASE = {
   url: "https://mcwygeyvhntgkaqijgnx.supabase.co",
   anonKey: "sb_publishable_3NASLlQhzHx2d1TYTEXviw_5NdOQhmb",
   // After you sign in on your site: Settings → Copy ID, paste it here AND into supabase.sql, then run supabase.sql again.
-  ownerUid: "",
+  ownerUid: "dae5f3b4-a537-4c93-92a3-2823762ff82c",
   // Set to true only after you turn on Google sign-in in Supabase (Authentication → Providers → Google).
   google: false
 };

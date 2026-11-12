@@ -16,11 +16,11 @@ alter table public.docs enable row level security;
 alter table public.docs replica identity full;
 
 -- 2. YOUR USER ID: on your site go to Settings → Copy ID, paste it below
---    (replace PASTE_YOUR_USER_ID), and run this file again.
+--    (replace dae5f3b4-a537-4c93-92a3-2823762ff82c), and run this file again.
 --    The owner can delete any chat message and see all game requests.
 create or replace function public.is_owner() returns boolean
 language sql stable as $$
-  select coalesce(auth.uid()::text = 'PASTE_YOUR_USER_ID', false)
+  select coalesce(auth.uid()::text = 'dae5f3b4-a537-4c93-92a3-2823762ff82c', false)
 $$;
 
 -- 3. Who can read and change what.
