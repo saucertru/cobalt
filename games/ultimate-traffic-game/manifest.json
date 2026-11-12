@@ -1,0 +1,33 @@
+{
+   "action": {
+      "default_icon": {
+         "128": "128.png",
+         "16": "icons/16.png",
+         "32": "icons/32.png",
+         "48": "icons/48.png"
+      }
+   },
+   "author": "gamebol",
+   "background": {
+      "service_worker": "background.js"
+   },
+   "content_security_policy": {
+      "extension_pages": "script-src 'self'; object-src 'self';"
+   },
+   "default_locale": "en",
+   "description": "__MSG_appDesc__",
+   "icons": {
+      "128": "128.png",
+      "16": "icons/16.png",
+      "32": "icons/32.png",
+      "48": "icons/48.png"
+   },
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAnHEYHEUuqFQGmsO2TTYGzhFuMYt+M5Fl9RZVdZgBE4gpXXqsqWP+IqeLwyAIRPRxwRNg+hf0qzn3F+lInYCCqFiJYaFcFxzSGRWODF1Fcl4CFy3Vohf85Igl2fsfqUkyovE5O+/DvfcRHuxI0jOP7aKy66IEtnLxU//rsJjONiO6qZfy/4cXNofr9chrxxGgVd1QZByGZ7/sqPfrvP4mwI7/37mXblq8S4qbsv2nj1sMvIa3D9i28xtBz3J7F6dJbU6CeoSFkCVD9lhCXuVeRxkT9t9Z3a/45ukTx31GzR1OQqySwco4obA9UaQlL9cpZBnXWJD39sD3Tx/RCPioLQIDAQAB",
+   "manifest_version": 3,
+   "name": "__MSG_appName__",
+   "sandbox": {
+      "pages": [ "Game_Source/index.html" ]
+   },
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "2.1"
+}
