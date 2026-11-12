@@ -20,8 +20,12 @@ const outGames = path.join(out, 'games');
 
 fs.rmSync(out, { recursive: true, force: true });
 fs.mkdirSync(outGames, { recursive: true });
-for (const f of ['index.html', 'supabase-config.js']) {
+for (const f of ['index.html', 'supabase-config.js', 'site-config.js']) {
   if (fs.existsSync(path.join(root, f))) fs.copyFileSync(path.join(root, f), path.join(out, f));
+}
+// images in the main folder (for the tab icon in site-config.js)
+for (const f of fs.readdirSync(root)) {
+  if (/\.(png|ico|svg|jpe?g|webp|gif)$/i.test(f) && fs.statSync(path.join(root, f)).isFile()) fs.copyFileSync(path.join(root, f), path.join(out, f));
 }
 
 const slug = s => s.toLowerCase().replace(/\.swf$/i, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'game';

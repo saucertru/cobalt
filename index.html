@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>cobalt</title>
+<link rel="icon" id="favicon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%232563eb'/%3E%3Ctext x='32' y='46' font-family='Georgia,serif' font-size='40' font-style='italic' text-anchor='middle' fill='white'%3Ec%3C/text%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
 <style>
 :root{--bg:var(--p07050c);--panel:var(--p0d0a16);--field:var(--p151024);--line:var(--p241c38);--text:var(--pece8f7);--dim:var(--p9a90b8);--mint:var(--pd9c8ff);--ink:var(--p120a24);--btn:var(--p7b5fc4)}
@@ -241,6 +242,23 @@ iframe.swfstage{border:0}
 .card .gicon,.card .ico{margin-bottom:12px}
 .card .ico{border-radius:14px}
 .gname .gicon{border-radius:9px}
+.status{display:flex;align-items:center;gap:14px;padding:0 8px 0 10px;color:var(--pcfc8e6);font-size:14px;font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums}
+.status span:empty{display:none}
+#batt{display:flex;align-items:center;gap:5px}
+.onb{position:fixed;inset:0;z-index:80;background:rgba(3,5,10,.72);backdrop-filter:blur(6px);display:none;place-items:center;padding:20px}
+.onb.show{display:grid}
+.onb-card{width:min(520px,100%);background:var(--panel);border:1px solid var(--line);border-radius:24px;padding:26px 26px 20px;box-shadow:0 30px 80px rgba(0,0,0,.55);max-height:92vh;overflow-y:auto}
+.onb-dots{display:flex;gap:6px;justify-content:center;margin-bottom:18px}
+.onb-dots i{width:8px;height:8px;border-radius:4px;background:var(--line);transition:.2s}
+.onb-dots i.on{width:22px;background:var(--mint)}
+.onb h2{font-family:Pacifico,cursive;font-weight:400;font-size:40px;margin:0 0 6px;text-align:center}
+.onb .lead{color:var(--dim);text-align:center;margin:0 0 20px;line-height:1.5}
+.onb-feats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.onb-feat{display:flex;gap:10px;align-items:center;background:var(--field);border:1px solid var(--line);border-radius:14px;padding:10px 12px;font-size:13.5px;font-weight:600}
+.onb-feat .ico{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;color:#fff;flex-shrink:0}
+.onb .themes{justify-content:center}
+.onb-nav{margin-top:22px}
+@media (max-width:820px){.status{font-size:13px;gap:8px}}
 /* purchasable effects */
 .fx-glow{text-shadow:0 0 6px currentColor,0 0 14px currentColor}
 .fx-rainbow{background:linear-gradient(90deg,#ff6b6b,#ffd166,#6ee7a8,#60a5fa,#c084fc,#ff6b6b);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent!important;animation:rb 3s linear infinite}
@@ -282,6 +300,7 @@ html[data-theme=green]{--p07050c:#050806;--p0a0712:#060c09;--p0b0814:#08100c;--p
   <button class="ib" id="tFwd" title="Forward" data-i="right"></button>
   <button class="ib" id="tReload" title="Reload" data-i="reload"></button>
   <label class="addr"><span data-i="home"></span><input id="addr" spellcheck="false" autocomplete="off"></label>
+  <div class="status"><span id="batt" title="Battery"></span><span id="clock"></span></div>
 </div>
 <div class="wrap">
   <aside>
@@ -449,10 +468,23 @@ html[data-theme=green]{--p07050c:#050806;--p0a0712:#060c09;--p0b0814:#08100c;--p
 </div>
 <div class="modal" id="modal"><div class="mbox" id="mbox"></div></div>
 <div class="toast" id="toast"></div>
+<div class="onb" id="onb" role="dialog" aria-modal="true" aria-label="Welcome to cobalt">
+  <div class="onb-card">
+    <div class="onb-dots" id="onbDots"></div>
+    <div id="onbBody"></div>
+    <div class="row onb-nav"><button class="btng" id="onbBack">Back</button><span style="flex:1"></span><button class="btng" id="onbSkip" style="border:0;background:none;color:var(--dim)">Skip</button><button class="btnp" id="onbNext">Next</button></div>
+  </div>
+</div>
 
+<script src="site-config.js"></script>
 <script src="supabase-config.js"></script>
 <script>
 const $ = s => document.querySelector(s);
+// Site name + tab icon: set them in site-config.js (see that file).
+const SITE = window.COBALT_SITE || {};
+const SITE_NAME = String(SITE.title || '').replace(/[<>]/g, '').trim().slice(0, 60) || 'cobalt';
+if (typeof SITE.icon === 'string' && SITE.icon && !/^\s*javascript:/i.test(SITE.icon)) document.getElementById('favicon').href = SITE.icon;
+document.title = SITE_NAME;
 const S = 400;
 const cv = $('#cv'), ctx = cv.getContext('2d');
 function fit(){ const d = window.devicePixelRatio || 1; cv.width = S*d; cv.height = S*d; ctx.setTransform(d,0,0,d,0,0); }
@@ -480,6 +512,7 @@ const ICONS = {
   gamepad:'<path d="M6 11h4M8 9v4"/><circle cx="15.5" cy="12" r=".9" fill="currentColor"/><circle cx="18" cy="10" r=".9" fill="currentColor"/><path d="M17.3 5H6.7a4 4 0 0 0-3.9 3.4L2 14.6a2.6 2.6 0 0 0 4.6 2.2L8 15h8l1.4 1.8a2.6 2.6 0 0 0 4.6-2.2l-.8-6.2A4 4 0 0 0 17.3 5z"/>',
   retro:'<rect x="2" y="6" width="20" height="12" rx="3"/><path d="M7 10v4M5 12h4"/><circle cx="15.5" cy="11" r="1" fill="currentColor"/><circle cx="18" cy="13.5" r="1" fill="currentColor"/>',
   bolt:'<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',
+  batt:'<rect x="2" y="7" width="18" height="10" rx="2"/><path d="M22 11v2"/>',
   hash:'<path d="M9 3v18M15 3v18M3 9h18M3 15h18"/>',
   bot:'<rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 4v4"/><circle cx="12" cy="3.5" r="1"/><path d="M9 13v1.5M15 13v1.5"/><path d="M2 13v3M22 13v3"/>',
   music:'<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
@@ -498,7 +531,7 @@ const ICONS = {
 const svg = (n, s=20) => `<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONS[n]}</svg>`;
 document.querySelectorAll('[data-i]').forEach(el => { el.innerHTML = svg(el.dataset.i, +(el.dataset.s || 20)); });
 
-const THEMES=["cobalt", "purple", "black", "grey", "light", "green"];const GAME_MAP={"cobalt": {"#151024": "#0f1825", "#bdb4d8": "#b3c2d9", "#07050c": "#05080c", "#3a2e5c": "#2d405d", "#120a24": "#091425", "#130e22": "#0e1622", "#0a0712": "#070b12", "#2d1f52": "#1e3353", "#120d20": "#0d1520", "#c4b5fd": "#b3d1ff", "#100c1c": "#0c121c", "#f6f3ff": "#f3f8ff", "#2563eb": "#2073f0", "#171126": "#101927", "#1e1734": "#162235", "#2a2140": "#202d41", "#d0c9e6": "#c8d4e7", "#0f0b1a": "#0b111a", "#d9c8ff": "#c8deff", "#ece8f7": "#e8eef7", "#261d40": "#1c2b41", "#cfc8e6": "#c7d4e7", "#120c24": "#0b1525", "#7b5fc4": "#5c87c7", "#241c38": "#1b2739", "#211a35": "#192536", "#9a90b8": "#8fa0b9", "#231a3c": "#19273d", "#a78bfa": "#88b7fd", "#2a1a55": "#193156", "#2c2248": "#213149", "#2a1f48": "#1e2f49", "#e6e1f5": "#e1e9f5", "#8b5cf6": "#5899fa", "#1b1530": "#142031", "#24163f": "#152640", "#18122a": "#111b2b", "#3a2a66": "#284268", "#2f2548": "#243349", "#6366f1": "#5f9bf5", "#0b0814": "#080d14", "#f0ecfa": "#ecf2fa", "#d6cfec": "#cedaed", "#6a4fb0": "#4d75b2", "#0d0a16": "#0a0f16"}, "purple": {}, "black": {"#151024": "#080808", "#bdb4d8": "#c6c6c6", "#07050c": "#030303", "#3a2e5c": "#454545", "#120a24": "#070707", "#130e22": "#070707", "#0a0712": "#040404", "#2d1f52": "#111111", "#120d20": "#070707", "#c4b5fd": "#c4b5fd", "#100c1c": "#060606", "#f6f3ff": "#f9f9f9", "#2563eb": "#2563eb", "#171126": "#080808", "#1e1734": "#0b0b0b", "#2a2140": "#0f0f0f", "#d0c9e6": "#d8d8d8", "#0f0b1a": "#060606", "#d9c8ff": "#e3e3e3", "#ece8f7": "#f0f0f0", "#261d40": "#0e0e0e", "#cfc8e6": "#d7d7d7", "#120c24": "#070707", "#7b5fc4": "#929292", "#241c38": "#0d0d0d", "#211a35": "#0c0c0c", "#9a90b8": "#a4a4a4", "#231a3c": "#0d0d0d", "#a78bfa": "#a78bfa", "#2a1a55": "#111111", "#2c2248": "#101010", "#2a1f48": "#0f0f0f", "#e6e1f5": "#ebebeb", "#8b5cf6": "#8b5cf6", "#1b1530": "#0a0a0a", "#24163f": "#0d0d0d", "#18122a": "#090909", "#3a2a66": "#484848", "#2f2548": "#101010", "#6366f1": "#6366f1", "#0b0814": "#040404", "#f0ecfa": "#f3f3f3", "#d6cfec": "#dedede", "#6a4fb0": "#808080", "#0d0a16": "#050505"}, "grey": {"#151024": "#1a191b", "#bdb4d8": "#c5c5c7", "#07050c": "#080809", "#3a2e5c": "#444347", "#120a24": "#171618", "#130e22": "#181719", "#0a0712": "#0c0c0d", "#2d1f52": "#38373a", "#120d20": "#161617", "#c4b5fd": "#c4b5fd", "#100c1c": "#141315", "#f6f3ff": "#f9f9f9", "#2563eb": "#2563eb", "#171126": "#1b1b1c", "#1e1734": "#252427", "#2a2140": "#302f32", "#d0c9e6": "#d7d6d9", "#0f0b1a": "#121213", "#d9c8ff": "#e3e2e5", "#ece8f7": "#efeff0", "#261d40": "#2e2d30", "#cfc8e6": "#d6d6d8", "#120c24": "#181719", "#7b5fc4": "#908e95", "#241c38": "#2a292b", "#211a35": "#272728", "#9a90b8": "#a3a3a5", "#231a3c": "#2a2a2c", "#a78bfa": "#a78bfa", "#2a1a55": "#37353a", "#2c2248": "#343436", "#2a1f48": "#333235", "#e6e1f5": "#ebeaec", "#8b5cf6": "#8b5cf6", "#1b1530": "#222223", "#24163f": "#2a292c", "#18122a": "#1e1d1f", "#3a2a66": "#47464a", "#2f2548": "#363538", "#6366f1": "#6366f1", "#0b0814": "#0e0e0e", "#f0ecfa": "#f3f3f3", "#d6cfec": "#dddcdf", "#6a4fb0": "#7e7c83", "#0d0a16": "#101010"}, "light": {}, "green": {"#151024": "#0e1712", "#bdb4d8": "#b4c4bb", "#07050c": "#050806", "#3a2e5c": "#2a4135", "#120a24": "#06130c", "#130e22": "#0d1712", "#0a0712": "#060c09", "#2d1f52": "#1d3b2e", "#120d20": "#0c1611", "#c4b5fd": "#7cf7c4", "#100c1c": "#0b1510", "#f6f3ff": "#f4f8f5", "#2563eb": "#2f9e6b", "#171126": "#0f1a14", "#1e1734": "#16261e", "#2a2140": "#1c2a23", "#d0c9e6": "#c7d4cd", "#0f0b1a": "#0b1410", "#d9c8ff": "#bff5d9", "#ece8f7": "#e6efe9", "#261d40": "#1b2c23", "#cfc8e6": "#c3d2ca", "#120c24": "#0c1a14", "#7b5fc4": "#5d8a74", "#241c38": "#18261e", "#211a35": "#16241c", "#9a90b8": "#8aa597", "#231a3c": "#16291f", "#a78bfa": "#4fd6a0", "#2a1a55": "#0d3322", "#2c2248": "#1f3529", "#2a1f48": "#1d3328", "#e6e1f5": "#dfe9e3", "#8b5cf6": "#3fe0b0", "#1b1530": "#13201a", "#24163f": "#13291f", "#18122a": "#111b16", "#3a2a66": "#25453a", "#2f2548": "#24352c", "#6366f1": "#10b981", "#0b0814": "#08100c", "#f0ecfa": "#eaf3ee", "#d6cfec": "#cfdcd5", "#6a4fb0": "#3f6b56", "#0d0a16": "#09100c"}};const STARS={"cobalt": ["204,219,241", "138,172,222", "173,203,247"], "purple": ["215,205,240", "165,140,220", "195,175,245"], "black": ["222,222,222", "180,180,180", "210,210,210"], "grey": ["222,221,224", "179,177,183", "209,208,212"], "light": ["24,19,40", "24,19,40", "24,19,40"], "green": ["200,230,215", "140,190,165", "175,225,200"]};const ACC_AUTO={"cobalt": "#bcd3ff", "purple": "#d9c8ff", "green": "#bff5d9", "grey": "#e4e4e7", "black": "#fafafa", "light": "#5726c5"};const ACC_LIGHT={"lavender": "#5726c5", "pink": "#c52678", "sky": "#267cc5", "mint": "#26c572", "gold": "#c59b26"};const PREV={"cobalt": ["#0a0f16", "#bcd3ff"], "purple": ["#0d0a16", "#d9c8ff"], "black": ["#050505", "#fafafa"], "grey": ["#101010", "#e4e4e7"], "light": ["#ece9f5", "#5726c5"], "green": ["#09100c", "#bff5d9"]};
+const THEMES=["cobalt", "purple", "black", "grey", "light", "green"];const GAME_MAP={"cobalt": {"#231a3c": "#19273d", "#2f2548": "#243349", "#d6cfec": "#cedaed", "#0b0814": "#080d14", "#c4b5fd": "#b3d1ff", "#171126": "#101927", "#120a24": "#091425", "#7b5fc4": "#5c87c7", "#241c38": "#1b2739", "#151024": "#0f1825", "#f0ecfa": "#ecf2fa", "#cfc8e6": "#c7d4e7", "#a78bfa": "#88b7fd", "#130e22": "#0e1622", "#6a4fb0": "#4d75b2", "#1b1530": "#142031", "#07050c": "#05080c", "#e6e1f5": "#e1e9f5", "#0a0712": "#070b12", "#bdb4d8": "#b3c2d9", "#6366f1": "#5f9bf5", "#261d40": "#1c2b41", "#2a1a55": "#193156", "#2c2248": "#213149", "#0f0b1a": "#0b111a", "#8b5cf6": "#5899fa", "#1e1734": "#162235", "#d9c8ff": "#c8deff", "#2a2140": "#202d41", "#211a35": "#192536", "#0d0a16": "#0a0f16", "#24163f": "#152640", "#2563eb": "#2073f0", "#f6f3ff": "#f3f8ff", "#18122a": "#111b2b", "#120d20": "#0d1520", "#120c24": "#0b1525", "#3a2a66": "#284268", "#2a1f48": "#1e2f49", "#d0c9e6": "#c8d4e7", "#ece8f7": "#e8eef7", "#100c1c": "#0c121c", "#3a2e5c": "#2d405d", "#9a90b8": "#8fa0b9", "#2d1f52": "#1e3353"}, "purple": {}, "black": {"#231a3c": "#0d0d0d", "#2f2548": "#101010", "#d6cfec": "#dedede", "#0b0814": "#040404", "#c4b5fd": "#c4b5fd", "#171126": "#080808", "#120a24": "#070707", "#7b5fc4": "#929292", "#241c38": "#0d0d0d", "#151024": "#080808", "#f0ecfa": "#f3f3f3", "#cfc8e6": "#d7d7d7", "#a78bfa": "#a78bfa", "#130e22": "#070707", "#6a4fb0": "#808080", "#1b1530": "#0a0a0a", "#07050c": "#030303", "#e6e1f5": "#ebebeb", "#0a0712": "#040404", "#bdb4d8": "#c6c6c6", "#6366f1": "#6366f1", "#261d40": "#0e0e0e", "#2a1a55": "#111111", "#2c2248": "#101010", "#0f0b1a": "#060606", "#8b5cf6": "#8b5cf6", "#1e1734": "#0b0b0b", "#d9c8ff": "#e3e3e3", "#2a2140": "#0f0f0f", "#211a35": "#0c0c0c", "#0d0a16": "#050505", "#24163f": "#0d0d0d", "#2563eb": "#2563eb", "#f6f3ff": "#f9f9f9", "#18122a": "#090909", "#120d20": "#070707", "#120c24": "#070707", "#3a2a66": "#484848", "#2a1f48": "#0f0f0f", "#d0c9e6": "#d8d8d8", "#ece8f7": "#f0f0f0", "#100c1c": "#060606", "#3a2e5c": "#454545", "#9a90b8": "#a4a4a4", "#2d1f52": "#111111"}, "grey": {"#231a3c": "#2a2a2c", "#2f2548": "#363538", "#d6cfec": "#dddcdf", "#0b0814": "#0e0e0e", "#c4b5fd": "#c4b5fd", "#171126": "#1b1b1c", "#120a24": "#171618", "#7b5fc4": "#908e95", "#241c38": "#2a292b", "#151024": "#1a191b", "#f0ecfa": "#f3f3f3", "#cfc8e6": "#d6d6d8", "#a78bfa": "#a78bfa", "#130e22": "#181719", "#6a4fb0": "#7e7c83", "#1b1530": "#222223", "#07050c": "#080809", "#e6e1f5": "#ebeaec", "#0a0712": "#0c0c0d", "#bdb4d8": "#c5c5c7", "#6366f1": "#6366f1", "#261d40": "#2e2d30", "#2a1a55": "#37353a", "#2c2248": "#343436", "#0f0b1a": "#121213", "#8b5cf6": "#8b5cf6", "#1e1734": "#252427", "#d9c8ff": "#e3e2e5", "#2a2140": "#302f32", "#211a35": "#272728", "#0d0a16": "#101010", "#24163f": "#2a292c", "#2563eb": "#2563eb", "#f6f3ff": "#f9f9f9", "#18122a": "#1e1d1f", "#120d20": "#161617", "#120c24": "#181719", "#3a2a66": "#47464a", "#2a1f48": "#333235", "#d0c9e6": "#d7d6d9", "#ece8f7": "#efeff0", "#100c1c": "#141315", "#3a2e5c": "#444347", "#9a90b8": "#a3a3a5", "#2d1f52": "#38373a"}, "light": {}, "green": {"#231a3c": "#16291f", "#2f2548": "#24352c", "#d6cfec": "#cfdcd5", "#0b0814": "#08100c", "#c4b5fd": "#7cf7c4", "#171126": "#0f1a14", "#120a24": "#06130c", "#7b5fc4": "#5d8a74", "#241c38": "#18261e", "#151024": "#0e1712", "#f0ecfa": "#eaf3ee", "#cfc8e6": "#c3d2ca", "#a78bfa": "#4fd6a0", "#130e22": "#0d1712", "#6a4fb0": "#3f6b56", "#1b1530": "#13201a", "#07050c": "#050806", "#e6e1f5": "#dfe9e3", "#0a0712": "#060c09", "#bdb4d8": "#b4c4bb", "#6366f1": "#10b981", "#261d40": "#1b2c23", "#2a1a55": "#0d3322", "#2c2248": "#1f3529", "#0f0b1a": "#0b1410", "#8b5cf6": "#3fe0b0", "#1e1734": "#16261e", "#d9c8ff": "#bff5d9", "#2a2140": "#1c2a23", "#211a35": "#16241c", "#0d0a16": "#09100c", "#24163f": "#13291f", "#2563eb": "#2f9e6b", "#f6f3ff": "#f4f8f5", "#18122a": "#111b16", "#120d20": "#0c1611", "#120c24": "#0c1a14", "#3a2a66": "#25453a", "#2a1f48": "#1d3328", "#d0c9e6": "#c7d4cd", "#ece8f7": "#e6efe9", "#100c1c": "#0b1510", "#3a2e5c": "#2a4135", "#9a90b8": "#8aa597", "#2d1f52": "#1d3b2e"}};const STARS={"cobalt": ["204,219,241", "138,172,222", "173,203,247"], "purple": ["215,205,240", "165,140,220", "195,175,245"], "black": ["222,222,222", "180,180,180", "210,210,210"], "grey": ["222,221,224", "179,177,183", "209,208,212"], "light": ["24,19,40", "24,19,40", "24,19,40"], "green": ["200,230,215", "140,190,165", "175,225,200"]};const ACC_AUTO={"cobalt": "#bcd3ff", "purple": "#d9c8ff", "green": "#bff5d9", "grey": "#e4e4e7", "black": "#fafafa", "light": "#5726c5"};const ACC_LIGHT={"lavender": "#5726c5", "pink": "#c52678", "sky": "#267cc5", "mint": "#26c572", "gold": "#c59b26"};const PREV={"cobalt": ["#0a0f16", "#bcd3ff"], "purple": ["#0d0a16", "#d9c8ff"], "black": ["#050505", "#fafafa"], "grey": ["#101010", "#e4e4e7"], "light": ["#ece9f5", "#5726c5"], "green": ["#09100c", "#bff5d9"]};
 let THEME_PREF = store.get('set_theme', 'cobalt');
 if (THEME_PREF !== 'random' && !THEMES.includes(THEME_PREF)) THEME_PREF = 'cobalt';
 const randomTheme = (not) => { const pool = THEMES.filter(t => t !== not); return pool[Math.random()*pool.length|0]; };
@@ -657,17 +690,17 @@ function route(){
     $('#gname').innerHTML = gameIcon(g, 32) + esc(g.name);
     $('#help').textContent = g.help;
     $('#bestv').textContent = store.get(bestKey(g.id), 0);
-    document.title = g.name + ' · cobalt';
+    document.title = g.name + ' · ' + SITE_NAME;
     newGame();
   } else {
     stopGame(); def = null;
     if (find(id)){
       openTab(id); show(id);
-      document.title = find(id).name + ' · cobalt';
+      document.title = find(id).name + ' · ' + SITE_NAME;
       if (id === 'ai') setTimeout(() => $('#ainput').focus(), 50);
       onView(id);
     } else {
-      show('home'); document.title = 'cobalt'; renderHome();
+      show('home'); document.title = SITE_NAME; renderHome();
     }
   }
   renderSide(); setAddr();
@@ -1069,7 +1102,8 @@ const SHOP = [
   {id:'bn-gold', cat:'banner', name:'Gold rush', price:250, val:'linear-gradient(120deg,#78350f,#f59e0b,#fde68a,#f59e0b)'},
 ];
 const ACCENTS = {lavender:'#d9c8ff', pink:'#ffcbe6', sky:'#c4e4ff', mint:'#bff5d9', gold:'#ffe8a8'};
-const SET = {bg: store.get('set_bg', true), ts: store.get('set_ts', true), accent: store.get('set_accent', 'auto')};
+const SET = {bg: store.get('set_bg', true), ts: store.get('set_ts', true), accent: store.get('set_accent', 'auto'),
+  clock: store.get('set_clock', true), clk24: store.get('set_clk24', false), batt: store.get('set_batt', true)};
 const THEME_NAMES = {cobalt:'Cobalt', purple:'Purple', black:'Black', grey:'Grey', light:'Light', green:'Green', random:'Random'};
 const accentOf = k => !ACCENTS[k] ? ACC_AUTO[THEME] : THEME === 'light' ? ACC_LIGHT[k] : ACCENTS[k];
 function applyAccent(){ document.documentElement.style.setProperty('--mint', accentOf(SET.accent)); }
@@ -1508,6 +1542,12 @@ let renderSettings = function(){
     <div class="tg"><div><div style="font-weight:600">Accent colour</div><div class="d">Used for highlights and buttons. The first one matches your theme.</div></div>
       <div class="row">${['auto', ...Object.keys(ACCENTS)].map(k => `<button class="sw${(ACCENTS[k] ? SET.accent === k : !ACCENTS[SET.accent]) ? ' sel' : ''}" data-acc="${k}" style="background:${accentOf(k)}" title="${k === 'auto' ? 'Theme default' : k}"></button>`).join('')}</div></div>
   </div>
+  <div class="panel"><h3>TOP BAR</h3>
+    ${tog('clock', 'Show clock', 'The time in the top-right corner.')}
+    ${tog('clk24', '24-hour time', 'Show 17:30 instead of 5:30 pm.')}
+    ${tog('batt', 'Show battery', 'Battery percentage, on devices and browsers that share it.')}
+  </div>
+  <div class="panel"><h3>WELCOME</h3><div class="tg"><div><div style="font-weight:600">Show the welcome screens again</div><div class="d">The intro you saw on your first visit.</div></div><button class="btng" id="replayOnb">Show</button></div></div>
   <div class="panel"><h3>CHAT</h3>${tog('ts', 'Show timestamps', 'Show the time next to each message.')}</div>
 `;
   if (EXT && extUser) h += `<div class="panel"><h3>SIGNED IN</h3><div class="tg"><div style="min-width:0"><div style="font-weight:600">${esc(extUser.email || 'Your account')}</div><div class="d">Your user ID: <code id="myUid">${esc(extUser.id)}</code>${owner ? ' · you are the site owner' : ''}</div></div><div class="row"><button class="btng" id="copyUid">Copy ID</button><button class="btng" id="signOut">Sign out</button></div></div>
@@ -1525,13 +1565,12 @@ $('#setBody').addEventListener('click', e => {
   if (t){
     const k = t.dataset.tog; SET[k] = !SET[k]; store.set('set_' + k, SET[k]);
     if (k === 'bg') SET.bg ? bgCtl.start() : bgCtl.stop();
+    if (k === 'clock' || k === 'clk24' || k === 'batt') updateStatus();
     renderSettings(); return;
   }
   const th = e.target.closest('[data-theme]');
   if (th){
-    THEME_PREF = th.dataset.theme; store.set('set_theme', THEME_PREF);
-    THEME = THEME_PREF === 'random' ? randomTheme(THEME) : THEME_PREF;
-    setThemeAttr(); applyAccent(); bgCtl.redraw(); renderSettings();
+    setTheme(th.dataset.theme); renderSettings();
     if (view === 'play' && def) newGame();
     return;
   }
@@ -1668,6 +1707,88 @@ $('#setBody').addEventListener('click', async e => {
     toast(error ? authMsg(error) : 'Password changed'); if (!error) $('#newPass').value = '';
   }
 });
+
+/* ---- theme helper (used by Settings and the welcome screens) ---- */
+function setTheme(t){
+  THEME_PREF = t; store.set('set_theme', t);
+  THEME = t === 'random' ? randomTheme(THEME) : t;
+  setThemeAttr(); applyAccent(); bgCtl.redraw();
+  if (view === 'play' && def) newGame();
+}
+
+/* ---- clock + battery in the top bar ---- */
+let battery = null;
+function updateStatus(){
+  const now = new Date();
+  $('#clock').textContent = SET.clock ? now.toLocaleTimeString(undefined, {hour: 'numeric', minute: '2-digit', hour12: !SET.clk24}) : '';
+  if (SET.batt && battery){
+    const pct = Math.round(battery.level * 100), w = Math.max(1, Math.round(14 * battery.level));
+    const col = battery.charging ? '#6ee7a8' : pct <= 20 ? '#ff8a8a' : 'currentColor';
+    $('#batt').innerHTML = `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="7" width="18" height="10" rx="2"/><path d="M22 11v2"/><rect x="4" y="9" width="${w}" height="6" rx="1" fill="${col}" stroke="none"/>${battery.charging ? '<path d="M12 8.5 9.5 12.5h3l-1 3" stroke="#0b1020" stroke-width="1.6"/>' : ''}</svg>${pct}%`;
+    $('#batt').title = battery.charging ? `Charging, ${pct}%` : `Battery ${pct}%`;
+  } else $('#batt').textContent = '';
+}
+setInterval(updateStatus, 1000);
+updateStatus();
+if (navigator.getBattery){
+  navigator.getBattery().then(b => {
+    battery = b;
+    ['levelchange', 'chargingchange'].forEach(ev => b.addEventListener(ev, updateStatus));
+    updateStatus();
+  }).catch(() => {});
+}
+
+/* ---- welcome screens (first visit) ---- */
+let onbStep = 0;
+const ONB_STEPS = 4;
+function onbHTML(step){
+  if (step === 0) return `<h2>cobalt</h2><p class="lead">Games, apps and friends, all in one place. Here's a quick tour.</p>
+    <div class="onb-feats">
+      ${[['games', 'Games', 'gamepad', '#2563eb'], ['flash', 'Flash & retro games', 'bolt', '#e11d48'], ['ai', 'Cobalt AI', 'bot', '#6366f1'],
+         ['chat', 'Chat room', 'chat', '#0ea5e9'], ['shop', 'Coins & shop', 'bag', '#f59e0b'], ['music', 'Music player', 'music', '#ec4899']]
+        .map(([, n, i, c]) => `<div class="onb-feat"><span class="ico" style="background:${c}">${svg(i, 17)}</span>${n}</div>`).join('')}
+    </div>`;
+  if (step === 1) return `<h2>pick a look</h2><p class="lead">Choose a theme. You can change it any time in Settings.</p>
+    <div class="themes">${[...THEMES, 'random'].map(t => `<button class="th${THEME_PREF === t ? ' on' : ''}" data-otheme="${t}"><i style="background:${t === 'random' ? `conic-gradient(${THEMES.map(x => PREV[x][1]).join(',')},${PREV[THEMES[0]][1]})` : `linear-gradient(135deg,${PREV[t][0]} 50%,${PREV[t][1]} 50%)`}"></i>${t === 'random' ? '🎲 ' : ''}${THEME_NAMES[t]}</button>`).join('')}</div>`;
+  if (step === 2){
+    let body;
+    if (dbState === 'off') body = `<p class="lead">Accounts aren't set up on this copy of cobalt yet, so you can skip this step. Everything else works without one.</p>`;
+    else if (me) body = `<p class="lead">You're all set: you're signed in as <b>${esc(uname(me))}</b>.</p>`;
+    else body = `<p class="lead">Make a free account to chat with others, earn coins, unlock profile effects in the shop and request games.</p>
+      <div style="text-align:center"><button class="btnp" id="onbAcct" style="padding:12px 26px">${needLogin ? 'Sign up or log in' : 'Create my account'}</button>
+      <div class="d" style="margin-top:10px;color:var(--dim);font-size:13px">Or press Next to do it later. It's under Profile in the sidebar.</div></div>`;
+    return `<h2>your account</h2>${body}`;
+  }
+  return `<h2>you're all set</h2><p class="lead">A few tips before you start:</p>
+    <div class="onb-feats" style="grid-template-columns:1fr">
+      <div class="onb-feat"><span class="ico" style="background:#2563eb">${svg('search', 17)}</span>Search a game's name on the home page and press Enter to play it.</div>
+      <div class="onb-feat"><span class="ico" style="background:#475569">${svg('gear', 17)}</span>The clock, battery, theme and more are in Settings.</div>
+      <div class="onb-feat"><span class="ico" style="background:#16a34a">${svg('plus', 17)}</span>Can't find a game? Use Request a game on the Games page.</div>
+    </div>`;
+}
+function renderOnb(){
+  $('#onbDots').innerHTML = Array.from({length: ONB_STEPS}, (_, i) => `<i class="${i === onbStep ? 'on' : ''}"></i>`).join('');
+  $('#onbBody').innerHTML = onbHTML(onbStep);
+  $('#onbBack').style.visibility = onbStep ? 'visible' : 'hidden';
+  $('#onbSkip').style.display = onbStep < ONB_STEPS - 1 ? '' : 'none';
+  $('#onbNext').textContent = onbStep === ONB_STEPS - 1 ? "Let's go" : 'Next';
+}
+function openOnb(){ onbStep = 0; renderOnb(); $('#onb').classList.add('show'); setTimeout(() => $('#onbNext').focus(), 50); }
+function closeOnb(){ $('#onb').classList.remove('show'); store.set('onboarded', true); }
+$('#onbNext').onclick = () => { if (onbStep < ONB_STEPS - 1){ onbStep++; renderOnb(); } else closeOnb(); };
+$('#onbBack').onclick = () => { if (onbStep > 0){ onbStep--; renderOnb(); } };
+$('#onbSkip').onclick = closeOnb;
+$('#onbBody').addEventListener('click', e => {
+  const t = e.target.closest('[data-otheme]');
+  if (t){ setTheme(t.dataset.otheme); renderOnb(); return; }
+  if (e.target.id === 'onbAcct'){ closeOnb(); location.hash = 'profile'; }
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && $('#onb').classList.contains('show')) closeOnb(); });
+$('#setBody').addEventListener('click', e => { if (e.target.id === 'replayOnb') openOnb(); });
+// re-render the account step if sign-in state changes while it's open
+const _renderSocial2 = renderSocial;
+renderSocial = function(){ _renderSocial2(); if ($('#onb').classList.contains('show') && onbStep === 2) renderOnb(); };
+if (!store.get('onboarded', false)) setTimeout(openOnb, 400);
 
 window.addEventListener('hashchange', route);
 route();
