@@ -31,6 +31,11 @@
   #rNew { color: #ffcf6e; font-weight: 800; margin: 10px 0 0; }
   #nogl { display: none; }
   /* ---- HUD ---- */
+  #live { position: absolute; top: 34%; left: 4vw; max-width: 46vw; opacity: 0; transform: translateX(-24px); transition: opacity .15s, transform .2s; }
+  #live.on { opacity: .9; transform: none; }
+  #liveName { font: italic 900 clamp(28px, 4.2vw, 54px) system-ui, sans-serif; line-height: 1; letter-spacing: -1.5px; text-transform: uppercase; color: #dfe9ff; text-shadow: 0 3px 0 rgba(15,20,50,.35), 0 6px 24px rgba(0,0,0,.4); }
+  #livePts { margin-top: 6px; font: italic 900 clamp(20px, 2.4vw, 30px) system-ui, sans-serif; color: #9fc0ff; }
+  #trick.show ~ #live, #live.hide { opacity: 0; }
   #hud::before { content: ""; position: absolute; inset: 0; pointer-events: none;
     background: radial-gradient(ellipse 420px 260px at 0 0, rgba(8,12,36,.38), transparent 70%), radial-gradient(ellipse 420px 300px at 100% 0, rgba(8,12,36,.38), transparent 70%),
       radial-gradient(ellipse 360px 300px at 0 100%, rgba(8,12,36,.38), transparent 70%), radial-gradient(ellipse 420px 300px at 100% 100%, rgba(8,12,36,.38), transparent 70%),
@@ -108,6 +113,7 @@
     <div class="lab">Score</div><div id="score">0</div>
     <div id="combo"></div><div id="comboBar"><div id="comboFill"></div></div>
   </div>
+  <div id="live"><div id="liveName"></div><div id="livePts"></div></div>
   <div id="trick"><div id="trickName"></div><div id="trickLine"><span id="trickPts"></span><span id="trickMult"></span></div><div id="trickGrade"></div></div>
   <div id="mini"><div id="miniWrap"><canvas id="miniMap" width="56" height="190"></canvas><i id="miniDot"></i></div><div id="dist">0 m</div><div id="left">1.2 km to go</div></div>
   <div id="speedBox"><div class="lab">Speed</div><div class="spd"><span id="speed">0</span><small>km/h</small></div><div id="prog"><div id="progFill"></div></div><div id="time">0:00.00</div></div>

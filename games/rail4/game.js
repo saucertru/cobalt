@@ -1265,8 +1265,16 @@ function countdownText(t) {
 
 // ---------- trick meters ----------
 const comboFill = $('comboFill');
+const live = $('live'), liveName = $('liveName'), livePts = $('livePts');
 function updateMeters() {
   comboFill.style.width = (state === 'play' && combo > 0 ? clamp(comboT / 3.2, 0, 1) * 100 : 0) + '%';
+  // while you're in the air, the trick you're doing builds up on the left
+  const t = state === 'play' && P.mode === 'air' && P.air > 0.15 ? trick() : null;
+  live.classList.toggle('on', !!t);
+  if (t) {
+    hud.trick.classList.remove('show');
+    liveName.textContent = t.name; livePts.textContent = '+' + t.pts.toLocaleString();
+  }
 }
 
 // ---------- game flow ----------
