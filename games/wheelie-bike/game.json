@@ -1,0 +1,7 @@
+{
+  "name": "Wheelie Bike",
+  "description": "Pull a wheelie and hold it as long as you can.",
+  "controls": "Arrow keys or WASD to pedal and balance.",
+  "color": "#f59e0b",
+  "icon": "icon.svg"
+}

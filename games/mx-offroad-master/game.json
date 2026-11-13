@@ -1,0 +1,7 @@
+{
+  "name": "MX Offroad Master",
+  "description": "Ride a dirt bike down mountain trails or free roam.",
+  "controls": "WASD to ride, Space front brake, S rear brake, C camera, R reset.",
+  "color": "#7c9a3a",
+  "icon": "icon.svg"
+}

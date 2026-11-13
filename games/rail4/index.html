@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rail4</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #1b1b3f; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color: #fff; user-select: none; }
+  #app, #app canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+  .hidden { display: none !important; }
+  .screen { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 5;
+    background: linear-gradient(180deg, rgba(27,27,70,.55), rgba(20,16,40,.82)); }
+  .card { width: min(460px, 90vw); max-height: 92vh; overflow-y: auto; box-sizing: border-box; padding: 24px 28px; border-radius: 18px; background: rgba(16,18,40,.82);
+    border: 1px solid rgba(255,255,255,.12); box-shadow: 0 20px 60px rgba(0,0,0,.45); text-align: center; backdrop-filter: blur(6px); }
+  .logo { font-size: 64px; font-weight: 900; font-style: italic; letter-spacing: -2px; line-height: 1; margin: 0 0 4px;
+    background: linear-gradient(90deg, #6ea2ff, #2f6fed 45%, #ff7a3d); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .tag { margin: 0 0 18px; opacity: .75; }
+  .keys { display: grid; font-size: 13px; grid-template-columns: auto 1fr; gap: 6px 14px; text-align: left; font-size: 14px; margin: 0 auto 20px; max-width: 360px; }
+  .keys b { display: inline-block; min-width: 20px; padding: 2px 7px; border-radius: 6px; background: rgba(255,255,255,.12); font-weight: 600; text-align: center; font-size: 12px; }
+  .btn { border: 0; border-radius: 12px; padding: 13px 34px; font: italic 800 18px system-ui, sans-serif; color: #fff; cursor: pointer;
+    background: linear-gradient(90deg, #2f6fed, #5a8cff); box-shadow: 0 6px 20px rgba(47,111,237,.45); transition: transform .12s; }
+  .btn:hover { transform: translateY(-2px); }
+  .small { font-size: 13px; opacity: .65; margin-top: 14px; }
+  #hud { position: fixed; inset: 0; pointer-events: none; z-index: 3; }
+  .tl, .tr { position: absolute; top: 14px; padding: 8px 14px; border-radius: 12px; background: rgba(14,16,36,.5); }
+  .tl { left: 14px; } .tr { right: 14px; text-align: right; }
+  #score { font: italic 900 30px system-ui, sans-serif; }
+  #combo { font-size: 13px; color: #ffb27d; min-height: 16px; }
+  #time { font: 700 20px ui-monospace, monospace; } #speed { font-size: 13px; opacity: .75; }
+  #prog { position: absolute; top: 18px; left: 50%; width: min(300px, 40vw); transform: translateX(-50%); height: 6px; border-radius: 4px; background: rgba(255,255,255,.2); overflow: hidden; }
+  #progFill { height: 100%; width: 0; background: linear-gradient(90deg, #2f6fed, #ff7a3d); }
+  #trick { position: absolute; top: 24%; left: 50%; transform: translate(-50%, 10px) scale(.9); text-align: center; opacity: 0; transition: opacity .25s, transform .25s; text-shadow: 0 3px 14px rgba(0,0,0,.45); }
+  #trick.show { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  #trickName { font: italic 900 38px system-ui, sans-serif; }
+  #trickPts { font: 800 20px system-ui, sans-serif; color: #ffcf6e; }
+  #trick.bad #trickName { color: #ff6b6b; } #trick.bad #trickPts { color: #ffd0d0; }
+  #bal { position: absolute; bottom: 70px; left: 50%; transform: translateX(-50%); width: 240px; height: 10px; border-radius: 6px;
+    background: linear-gradient(90deg, #ff5a5a, #ffd36e 30%, #5ee39a 50%, #ffd36e 70%, #ff5a5a); display: none; }
+  #balDot { position: absolute; top: -5px; width: 6px; height: 20px; margin-left: -3px; border-radius: 3px; background: #fff; box-shadow: 0 0 8px #000; }
+  #hint { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); font-size: 12px; opacity: .6; white-space: nowrap; }
+  .row { display: flex; justify-content: space-between; padding: 8px 2px; border-bottom: 1px solid rgba(255,255,255,.08); font-size: 15px; }
+  .row span:last-child { font-weight: 700; }
+  #rNew { color: #ffcf6e; font-weight: 800; margin: 10px 0 0; }
+  #nogl { display: none; }
+  .opts { margin: 0 0 18px; display: grid; gap: 8px; }
+  .opts .lab { font-size: 12px; opacity: .6; text-transform: uppercase; letter-spacing: 1px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+  .chip { border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.06); color: #fff; border-radius: 999px; padding: 6px 13px; font: 600 13px system-ui, sans-serif; cursor: pointer; transition: background .15s, border-color .15s; }
+  .chip:hover { background: rgba(255,255,255,.14); }
+  .chip.on { background: #2f6fed; border-color: #6ea2ff; }
+  .btn.ghost { background: rgba(255,255,255,.1); box-shadow: none; margin-left: 8px; }
+  #cine { position: fixed; inset: 0; z-index: 4; pointer-events: none; }
+  #cine.on { pointer-events: auto; cursor: pointer; }
+  #cine::before, #cine::after { content: ""; position: absolute; left: 0; right: 0; height: 0; background: #000; transition: height .6s ease; }
+  #cine::before { top: 0; } #cine::after { bottom: 0; }
+  #cine.on::before, #cine.on::after { height: 11vh; }
+  .cineText { position: absolute; left: 6vw; bottom: 15vh; opacity: 0; transform: translateY(12px); transition: opacity .8s .3s, transform .8s .3s; text-shadow: 0 4px 20px rgba(0,0,0,.5); }
+  #cine.on .cineText { opacity: 1; transform: none; }
+  #cineTitle { font: italic 900 64px system-ui, sans-serif; letter-spacing: -2px; }
+  #cineSub { font-size: 18px; opacity: .85; }
+  #skip { position: absolute; right: 3vw; bottom: 3.5vh; z-index: 1; font-size: 13px; color: rgba(255,255,255,.7); opacity: 0; transition: opacity .4s; }
+  #cine.on #skip { opacity: 1; }
+  #count { position: fixed; top: 38%; left: 50%; transform: translate(-50%,-50%) scale(.6); z-index: 4; font: italic 900 110px system-ui, sans-serif; opacity: 0; pointer-events: none; text-shadow: 0 6px 30px rgba(0,0,0,.45); }
+  #count.pop { animation: pop .9s ease-out forwards; }
+  @keyframes pop { 0% { opacity: 0; transform: translate(-50%,-50%) scale(1.6); } 25% { opacity: 1; transform: translate(-50%,-50%) scale(1); } 100% { opacity: 0; transform: translate(-50%,-50%) scale(.85); } }
+</style>
+<script type="importmap">{ "imports": { "three": "./three.module.js" } }</script>
+</head>
+<body>
+<div id="app"></div>
+
+<div id="hud" class="hidden">
+  <div class="tl"><div id="score">0</div><div id="combo"></div></div>
+  <div id="prog"><div id="progFill"></div></div>
+  <div class="tr"><div id="time">0:00.00</div><div id="speed">0 km/h</div></div>
+  <div id="trick"><div id="trickName"></div><div id="trickPts"></div></div>
+  <div id="bal"><div id="balDot"></div></div>
+  <div id="hint">Space pop · arrows spin/flip · Q/E cork · Shift grab · R restart · Esc pause</div>
+</div>
+
+<div id="cine"><div class="cineText"><div id="cineTitle"></div><div id="cineSub"></div></div><div id="skip">Click or press Space to skip</div></div>
+<div id="count"></div>
+
+<div id="menu" class="screen">
+  <div class="card">
+    <div class="logo">RAIL4</div>
+    <p class="tag">Drop into the park. Stomp the landing.</p>
+    <div class="keys">
+      <span><b>←</b> <b>→</b></span><span>Steer · spin in the air</span>
+      <span><b>↑</b> <b>↓</b></span><span>Tuck / brake · front / back flip</span>
+      <span><b>Q</b> <b>E</b></span><span>Cork roll in the air</span>
+      <span><b>Space</b></span><span>Hold and release to pop, hop on and off rails</span>
+      <span><b>Shift</b></span><span>Grab in the air</span>
+      <span><b>R</b> · <b>Esc</b></span><span>Restart · pause</span>
+    </div>
+    <div class="opts">
+      <div class="lab">Time of day</div><div class="chips" id="timeChips"></div>
+      <div class="lab">Weather</div><div class="chips" id="weatherChips"></div>
+    </div>
+    <button class="btn" id="dropIn">Drop in</button>
+    <div class="small">Land upright or forwards/backwards to stay on your feet. Best score: <span id="menuBest">0</span></div>
+  </div>
+</div>
+
+<div id="pause" class="screen hidden">
+  <div class="card"><div class="logo" style="font-size:44px">PAUSED</div><p class="tag">Press Esc or the button to keep riding.</p><button class="btn" id="resume">Resume</button></div>
+</div>
+
+<div id="results" class="screen hidden">
+  <div class="card">
+    <div class="logo" style="font-size:46px">RUN DONE</div>
+    <div class="row"><span>Score</span><span id="rScore">0</span></div>
+    <div class="row"><span>Time</span><span id="rTime">0:00</span></div>
+    <div class="row"><span>Best trick</span><span id="rTrick">—</span></div>
+    <div class="row"><span>Personal best</span><span id="rBest">0</span></div>
+    <p id="rNew">New personal best!</p>
+    <p></p>
+    <button class="btn" id="again">Ride again</button><button class="btn ghost" id="toMenu">Menu</button>
+  </div>
+</div>
+
+<div id="nogl" class="screen"><div class="card"><div class="logo" style="font-size:40px">RAIL4</div><p>Your browser couldn't start 3D graphics (WebGL), so Rail4 can't run here.</p></div></div>
+
+<script type="module" src="./game.js"></script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+{
+  "name": "Super Bike: The Champion",
+  "description": "Race motocross bikes around dirt tracks.",
+  "controls": "Arrow keys or WASD to ride.",
+  "color": "#dc2626",
+  "icon": "icon.svg"
+}

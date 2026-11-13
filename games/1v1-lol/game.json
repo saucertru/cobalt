@@ -1,0 +1,7 @@
+{
+  "name": "1v1.LOL",
+  "description": "Build-and-shoot battles: throw up walls and ramps to outplay your opponent.",
+  "controls": "WASD to move, mouse to aim and shoot; build keys are shown in game.",
+  "color": "#0f766e",
+  "icon": "icon.svg"
+}
