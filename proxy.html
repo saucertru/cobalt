@@ -34,7 +34,7 @@
     await navigator.serviceWorker.register("/sw.js");
 
     // Connect to your Render Wisp engine
-    const connection = new BareMuxConnection("/baremux/bare.worker.js");
+    const connection = new BareMuxConnection("/baremux/worker.js");
     await connection.setTransport("/libcurl/index.mjs", [
       { wisp: "wss://://my-wisp-server-5rcr.onrender.com" }
     ]);
