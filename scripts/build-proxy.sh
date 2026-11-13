@@ -1,5 +1,5 @@
 set -e
-npm install https://github.com @mercuryworkshop/bare-mux @mercuryworkshop/libcurl-transport --no-save
+npm install @mercuryworkshop/scramjet@2.0.0-alpha @mercuryworkshop/bare-mux @mercuryworkshop/libcurl-transport --no-save
 mkdir -p dist/scram dist/baremux dist/libcurl
 cp proxy.html sw.js dist/
 cp -r node_modules/@mercuryworkshop/scramjet/dist/* dist/scram/
