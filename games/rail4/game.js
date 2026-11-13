@@ -5,37 +5,83 @@ import * as THREE from 'three';
 // ---------- world constants ----------
 const SL = 0.32;                 // slope: metres dropped per metre travelled
 const G = 9.8;
-const LEN = 1200;                // course length (metres)
 const HALF_W = 40;               // half width of the groomed course
 const TAU = Math.PI * 2;
 const SIN_T = SL / Math.hypot(1, SL);
 const base = z => -SL * z;
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
-let seed = 4;
+let seed = 4;   // reset per map
 const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
 
-// ---------- course layout (same every run, so scores are fair) ----------
+// ---------- maps + course layout (fixed per map, so scores are fair) ----------
+let LEN = 1200;                  // course length of the current map (metres)
 const kickers = [], rails = [];
 const KS = {
   S: { w: 6, len: 5, hgt: 1.2 }, M: { w: 7, len: 7, hgt: 2.0 },
-  L: { w: 8, len: 9, hgt: 2.9 }, XL: { w: 10, len: 12, hgt: 3.8 },
+  L: { w: 8, len: 9, hgt: 2.9 }, XL: { w: 10, len: 12, hgt: 3.8 }, XXL: { w: 12, len: 15, hgt: 5 },
 };
 const addKicker = (s, x, z) => kickers.push({ ...KS[s], x, z, size: s });
 const addRail = (type, x, z, len) => rails.push({
   type, x, z1: z, z2: z + len, w: type === 'box' ? 0.7 : 0.12,
   hMin: type === 'box' ? 0.2 : 0.25, hMax: type === 'box' ? 0.6 : 0.9,
 });
-for (let i = 0, z = 70; z < LEN - 90; i++, z += 58) {
-  const j = () => (rnd() - 0.5) * 6;
-  switch (i % 5) {
-    case 0: addKicker('S', -16 + j(), z); addKicker('M', j(), z + 2); addKicker('L', 16 + j(), z + 4); break;
-    case 1: addRail('rail', -12 + j(), z, 14 + rnd() * 6); addRail('box', 9 + j(), z + 3, 12 + rnd() * 6); break;
-    case 2: addKicker('M', -11 + j(), z); addKicker('L', 12 + j(), z + 3); break;
-    case 3: addRail('box', j() * 0.5, z, 18 + rnd() * 6); addRail('rail', -19 + j() * 0.5, z + 4, 12); addRail('rail', 19 + j() * 0.5, z + 4, 12); break;
-    case 4: addKicker('XL', j() * 0.5, z); addKicker('S', -24 + j() * 0.5, z + 4); addKicker('S', 24 + j() * 0.5, z + 4); break;
-  }
-}
+const jit = (n = 6) => (rnd() - 0.5) * n;
+
+const MAPS = {
+  park: {
+    label: 'Sunset Park', len: 1200, seed: 4, pines: 900, villages: [[-10, 1], [-10, -1], [1210, 1]], lift: false,
+    gen() {
+      for (let i = 0, z = 70; z < LEN - 90; i++, z += 58) {
+        switch (i % 5) {
+          case 0: addKicker('S', -16 + jit(), z); addKicker('M', jit(), z + 2); addKicker('L', 16 + jit(), z + 4); break;
+          case 1: addRail('rail', -12 + jit(), z, 14 + rnd() * 6); addRail('box', 9 + jit(), z + 3, 12 + rnd() * 6); break;
+          case 2: addKicker('M', -11 + jit(), z); addKicker('L', 12 + jit(), z + 3); break;
+          case 3: addRail('box', jit(3), z, 18 + rnd() * 6); addRail('rail', -19 + jit(3), z + 4, 12); addRail('rail', 19 + jit(3), z + 4, 12); break;
+          case 4: addKicker('XL', jit(3), z); addKicker('S', -24 + jit(3), z + 4); addKicker('S', 24 + jit(3), z + 4); break;
+        }
+      }
+    },
+  },
+  village: {
+    label: 'Pine Village', len: 1300, seed: 11, pines: 1300, lift: true,
+    villages: [[-10, 1], [-10, -1], [330, 1], [460, -1], [760, 1], [900, -1], [1310, 1], [1310, -1]],
+    gen() {
+      for (let i = 0, z = 60; z < LEN - 90; i++, z += 64) {
+        switch (i % 4) {
+          case 0: addKicker('S', -10 + jit(), z); addKicker('M', 11 + jit(), z + 3); break;
+          case 1: addRail('rail', jit(4), z, 16 + rnd() * 8); addRail('box', -17 + jit(3), z + 2, 12); addRail('box', 17 + jit(3), z + 2, 12); break;
+          case 2: addKicker('L', jit(4), z); addKicker('S', -22 + jit(3), z + 6); addKicker('S', 22 + jit(3), z + 6); break;
+          case 3: addKicker('M', -14 + jit(), z); addRail('rail', 12 + jit(), z, 22); break;
+        }
+      }
+    },
+  },
+  bigair: {
+    label: 'Big Air', len: 950, seed: 23, pines: 1000, villages: [[-10, 1], [960, -1]], lift: true,
+    gen() {
+      for (let i = 0, z = 90; z < LEN - 110; i++, z += 105) {
+        addKicker(i % 2 ? 'XL' : 'XXL', jit(4), z);
+        addKicker('M', -24 + jit(3), z + 10); addKicker('M', 24 + jit(3), z + 10);
+        if (i % 2) { addRail('rail', -30 + jit(2), z + 40, 16); addRail('rail', 30 + jit(2), z + 40, 16); }
+      }
+    },
+  },
+  rails: {
+    label: 'Rail Garden', len: 1000, seed: 37, pines: 1000, villages: [[-10, -1], [480, 1], [1010, 1]], lift: false,
+    gen() {
+      for (let i = 0, z = 55; z < LEN - 80; i++, z += 46) {
+        switch (i % 4) {
+          case 0: addRail('rail', jit(3), z, 28); addRail('box', -14 + jit(2), z + 4, 14); addRail('box', 14 + jit(2), z + 4, 14); break;
+          case 1: for (const x of [-27, -9, 9, 27]) addRail(rnd() < 0.5 ? 'rail' : 'box', x + jit(2), z + rnd() * 6, 10 + rnd() * 6); break;
+          case 2: addKicker('S', jit(4), z); addRail('rail', -20 + jit(3), z, 20); addRail('rail', 20 + jit(3), z, 20); break;
+          case 3: addRail('box', -6 + jit(2), z, 22); addRail('box', 6 + jit(2), z + 6, 22); addKicker('M', -26 + jit(2), z + 4); break;
+        }
+      }
+    },
+  },
+};
+let currentMap = '';
 
 function kickerAdd(x, z) {
   let a = 0;
@@ -52,6 +98,7 @@ function groundNormal(x, z, out = new THREE.Vector3()) {
   return out.set(-(ground(x + e, z) - ground(x - e, z)), 2 * e, -(ground(x, z + e) - ground(x, z - e))).normalize();
 }
 const bank = x => { const a = Math.abs(x) - HALF_W - 2; return a > 0 ? a * a * 0.012 + a * 0.18 : 0; };
+const terrain = (x, z) => base(z) + bank(x) + (Math.abs(x) > HALF_W + 4 ? Math.sin(x * 0.21) * Math.sin(z * 0.13) * 1.2 : 0);
 
 // ---------- renderer / scene ----------
 const app = document.getElementById('app');
@@ -122,17 +169,49 @@ function textTex(text, bg, fg, w = 512, h = 128) {
   return t;
 }
 
-// ---------- ground ----------
+// ---------- course building (rebuilt whenever the map changes) ----------
 const snowMat = new THREE.MeshLambertMaterial({ color: '#f1f0ff', map: corduroy() });
-(function buildGround() {
-  const W = 400, z0 = -140, L = LEN + 460, xs = 100, zs = Math.ceil(L / 8);
+const lipMat = new THREE.MeshLambertMaterial({ color: '#ff7a3d' });
+const kickMat = new THREE.MeshLambertMaterial({ color: '#e7e8ff', map: snowMat.map, side: THREE.DoubleSide });
+const railMat = new THREE.MeshStandardMaterial({ color: '#c8d2e6', metalness: 0.8, roughness: 0.3 });
+const boxTopMat = new THREE.MeshStandardMaterial({ color: '#2f6fed', metalness: 0.3, roughness: 0.45 });
+const postMat = new THREE.MeshLambertMaterial({ color: '#3a3f55' });
+const woodMat = new THREE.MeshLambertMaterial({ color: '#7a4a2b' });
+const darkWoodMat = new THREE.MeshLambertMaterial({ color: '#4a2c19' });
+const stoneMat = new THREE.MeshLambertMaterial({ color: '#8d8a94', flatShading: true });
+const roofMat = new THREE.MeshLambertMaterial({ color: '#f7f7ff' });
+const glowMat = new THREE.MeshLambertMaterial({ color: '#ffd68a', emissive: '#ffb347', emissiveIntensity: 0.3 });
+const whiteMat = new THREE.MeshLambertMaterial({ color: '#ffffff', vertexColors: false });
+const UP = new THREE.Vector3(0, 1, 0), FWD = new THREE.Vector3(0, 0, 1);
+const course = new THREE.Group();
+scene.add(course);
+const lift = { chairs: null, cables: [], t: 0, len: 0, x: 0 };
+
+function clearCourse() {
+  course.traverse(o => { if (o.geometry) o.geometry.dispose(); });
+  course.clear();
+  kickers.length = 0; rails.length = 0; lift.chairs = null;
+}
+
+// helper: many copies of one part, placed with matrices
+function instanced(geo, mat, mats, { shadow = false, colors = null } = {}) {
+  const m = new THREE.InstancedMesh(geo, mat, Math.max(1, mats.length));
+  mats.forEach((mx, i) => { m.setMatrixAt(i, mx); if (colors) m.setColorAt(i, colors[i]); });
+  m.count = mats.length; m.castShadow = shadow; m.receiveShadow = true;
+  course.add(m);
+  return m;
+}
+const M4 = () => new THREE.Matrix4();
+const place = (x, y, z, ry = 0, s = 1) => M4().compose(new THREE.Vector3(x, y, z), new THREE.Quaternion().setFromAxisAngle(UP, ry), new THREE.Vector3(s, s, s));
+
+function buildGround() {
+  const W = 420, z0 = -160, L = LEN + 480, xs = 110, zs = Math.ceil(L / 8);
   const pos = [], uv = [], idx = [];
   for (let iz = 0; iz <= zs; iz++) {
     const z = z0 + iz * L / zs;
     for (let ix = 0; ix <= xs; ix++) {
       const x = -W / 2 + ix * W / xs;
-      const off = Math.abs(x) > HALF_W + 4 ? Math.sin(x * 0.21) * Math.sin(z * 0.13) * 1.2 : 0;
-      pos.push(x, base(z) + bank(x) + off, z);
+      pos.push(x, terrain(x, z), z);
       uv.push(x / 3, z / 3);
     }
   }
@@ -145,153 +224,372 @@ const snowMat = new THREE.MeshLambertMaterial({ color: '#f1f0ff', map: corduroy(
   g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
   g.setIndex(idx); g.computeVertexNormals();
   const m = new THREE.Mesh(g, snowMat); m.receiveShadow = true;
-  scene.add(m);
-})();
-
-// ---------- kickers ----------
-const lipMat = new THREE.MeshLambertMaterial({ color: '#ff7a3d' });
-const kickMat = new THREE.MeshLambertMaterial({ color: '#e7e8ff', map: snowMat.map, side: THREE.DoubleSide });
-for (const k of kickers) {
-  const N = 16, p = [];
-  const L = k.x - k.w / 2, R = k.x + k.w / 2;
-  const top = (t) => { const z = k.z + t * k.len; return [z, base(z) + k.hgt * Math.pow(t, 1.7)]; };
-  const quad = (a, b, c, d) => p.push(...a, ...b, ...c, ...a, ...c, ...d);
-  for (let i = 0; i < N; i++) {
-    const [z0, y0] = top(i / N), [z1, y1] = top((i + 1) / N);
-    quad([L, y0, z0], [L, y1, z1], [R, y1, z1], [R, y0, z0]);
-    quad([L, base(z0) - 0.1, z0], [L, base(z1) - 0.1, z1], [L, y1, z1], [L, y0, z0]);
-    quad([R, y0, z0], [R, y1, z1], [R, base(z1) - 0.1, z1], [R, base(z0) - 0.1, z0]);
-  }
-  const [zl, yl] = top(1);
-  quad([L, yl, zl], [R, yl, zl], [R, base(zl) - 0.1, zl], [L, base(zl) - 0.1, zl]);
-  const g = new THREE.BufferGeometry();
-  g.setAttribute('position', new THREE.Float32BufferAttribute(p, 3));
-  const uvs = []; for (let i = 0; i < p.length; i += 3) uvs.push(p[i] / 3, p[i + 2] / 3);
-  g.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
-  g.computeVertexNormals();
-  const m = new THREE.Mesh(g, kickMat); m.castShadow = m.receiveShadow = true;
-  scene.add(m);
-  const lip = new THREE.Mesh(new THREE.BoxGeometry(k.w + 0.02, 0.1, 0.35), lipMat);
-  lip.position.set(k.x, yl - 0.04, zl - 0.17); scene.add(lip);
-  for (const s of [-1, 1]) {
-    const flag = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.6, 6), lipMat);
-    flag.position.set(k.x + s * (k.w / 2 + 0.6), base(zl) + 0.8, zl); scene.add(flag);
-  }
+  course.add(m);
 }
 
-// ---------- rails and boxes ----------
-const railMat = new THREE.MeshStandardMaterial({ color: '#c8d2e6', metalness: 0.8, roughness: 0.3 });
-const boxTopMat = new THREE.MeshStandardMaterial({ color: '#2f6fed', metalness: 0.3, roughness: 0.45 });
-const postMat = new THREE.MeshLambertMaterial({ color: '#3a3f55' });
-const UP = new THREE.Vector3(0, 1, 0), FWD = new THREE.Vector3(0, 0, 1);
-for (const r of rails) {
-  const pts = [[r.z1, r.hMin], [r.z1 + 3, r.hMax], [r.z2, r.hMax]];
-  for (let s = 0; s < 2; s++) {
-    const a = new THREE.Vector3(r.x, base(pts[s][0]) + pts[s][1], pts[s][0]);
-    const b = new THREE.Vector3(r.x, base(pts[s + 1][0]) + pts[s + 1][1], pts[s + 1][0]);
-    const d = b.clone().sub(a); const len = d.length(); d.normalize();
-    const mid = a.clone().add(b).multiplyScalar(0.5);
-    let m;
-    if (r.type === 'rail') {
-      m = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, len, 10), railMat);
-      m.quaternion.setFromUnitVectors(UP, d); m.position.copy(mid).y -= 0.05;
-    } else {
-      m = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.12, len), boxTopMat);
-      m.quaternion.setFromUnitVectors(FWD, d); m.position.copy(mid).y -= 0.06;
+function buildKickers() {
+  for (const k of kickers) {
+    const N = 16, p = [];
+    const L = k.x - k.w / 2, R = k.x + k.w / 2;
+    const top = (t) => { const z = k.z + t * k.len; return [z, base(z) + k.hgt * Math.pow(t, 1.7)]; };
+    const quad = (a, b, c, d) => p.push(...a, ...b, ...c, ...a, ...c, ...d);
+    for (let i = 0; i < N; i++) {
+      const [z0, y0] = top(i / N), [z1, y1] = top((i + 1) / N);
+      quad([L, y0, z0], [L, y1, z1], [R, y1, z1], [R, y0, z0]);
+      quad([L, base(z0) - 0.1, z0], [L, base(z1) - 0.1, z1], [L, y1, z1], [L, y0, z0]);
+      quad([R, y0, z0], [R, y1, z1], [R, base(z1) - 0.1, z1], [R, base(z0) - 0.1, z0]);
     }
-    m.castShadow = true; scene.add(m);
-  }
-  for (let z = r.z1 + 1; z < r.z2; z += 2.5) {
-    const h = railTop(r, z) - base(z);
-    const post = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, h, 6), postMat);
-    post.position.set(r.x, base(z) + h / 2 - 0.05, z); post.castShadow = true; scene.add(post);
+    const [zl, yl] = top(1);
+    quad([L, yl, zl], [R, yl, zl], [R, base(zl) - 0.1, zl], [L, base(zl) - 0.1, zl]);
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(p, 3));
+    const uvs = []; for (let i = 0; i < p.length; i += 3) uvs.push(p[i] / 3, p[i + 2] / 3);
+    g.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+    g.computeVertexNormals();
+    const m = new THREE.Mesh(g, kickMat); m.castShadow = m.receiveShadow = true;
+    course.add(m);
+    const lip = new THREE.Mesh(new THREE.BoxGeometry(k.w + 0.02, 0.1, 0.35), lipMat);
+    lip.position.set(k.x, yl - 0.04, zl - 0.17); course.add(lip);
+    for (const s of [-1, 1]) {
+      const flag = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.6, 6), lipMat);
+      flag.position.set(k.x + s * (k.w / 2 + 0.6), base(zl) + 0.8, zl); course.add(flag);
+    }
   }
 }
 
-// ---------- trees, fences, gates ----------
-(function decor() {
-  const cone = new THREE.ConeGeometry(1.7, 5, 7);
-  const treeMat = new THREE.MeshLambertMaterial({ color: '#21515c', flatShading: true });
-  const capMat = new THREE.MeshLambertMaterial({ color: '#f7f6ff', flatShading: true });
-  const count = 700;
-  const trees = new THREE.InstancedMesh(cone, treeMat, count);
-  const caps = new THREE.InstancedMesh(new THREE.ConeGeometry(0.8, 1.6, 7), capMat, count);
-  const m = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), p = new THREE.Vector3();
-  for (let i = 0; i < count; i++) {
+function buildRails() {
+  const posts = [];
+  for (const r of rails) {
+    const pts = [[r.z1, r.hMin], [r.z1 + 3, r.hMax], [r.z2, r.hMax]];
+    for (let s = 0; s < 2; s++) {
+      const a = new THREE.Vector3(r.x, base(pts[s][0]) + pts[s][1], pts[s][0]);
+      const b = new THREE.Vector3(r.x, base(pts[s + 1][0]) + pts[s + 1][1], pts[s + 1][0]);
+      const d = b.clone().sub(a); const len = d.length(); d.normalize();
+      const mid = a.clone().add(b).multiplyScalar(0.5);
+      let m;
+      if (r.type === 'rail') {
+        m = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, len, 10), railMat);
+        m.quaternion.setFromUnitVectors(UP, d); m.position.copy(mid).y -= 0.05;
+      } else {
+        m = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.12, len), boxTopMat);
+        m.quaternion.setFromUnitVectors(FWD, d); m.position.copy(mid).y -= 0.06;
+      }
+      m.castShadow = true; course.add(m);
+    }
+    for (let z = r.z1 + 1; z < r.z2; z += 2.5) {
+      const h = railTop(r, z) - base(z);
+      posts.push(M4().compose(new THREE.Vector3(r.x, base(z) + h / 2 - 0.05, z), new THREE.Quaternion(), new THREE.Vector3(1, h, 1)));
+    }
+  }
+  instanced(new THREE.CylinderGeometry(0.05, 0.05, 1, 6), postMat, posts, { shadow: true });
+}
+
+// cosy chalets, grouped into little villages beside the run
+function buildVillages(map, blocked) {
+  const parts = { body: [], base: [], gable: [], roofL: [], roofR: [], chim: [], win: [], door: [], lampPost: [], lampBulb: [], fence: [] };
+  const local = (cm, x, y, z, rx = 0, ry = 0, rz = 0, sx = 1, sy = 1, sz = 1) =>
+    cm.clone().multiply(M4().compose(new THREE.Vector3(x, y, z), new THREE.Quaternion().setFromEuler(new THREE.Euler(rx, ry, rz)), new THREE.Vector3(sx, sy, sz)));
+  for (const [zc, side] of map.villages) {
+    const n = 5 + Math.floor(rnd() * 4);
+    for (let i = 0; i < n; i++) {
+      const x = side * (HALF_W + 12 + (i % 3) * 13 + jit(4));
+      const z = zc + (Math.floor(i / 3) - 1) * 16 + jit(5);
+      const w = 6 + rnd() * 3, d = 5 + rnd() * 2.5, h = 3.5 + rnd() * 1.5;
+      const y = terrain(x, z);
+      const ry = (side > 0 ? -Math.PI / 2 : Math.PI / 2) + jit(0.5);
+      const cm = place(x, y, z, ry);
+      blocked.push([x, z, Math.max(w, d) * 0.8]);
+      parts.base.push(local(cm, 0, -1.2, 0, 0, 0, 0, w + 0.5, 3, d + 0.5));
+      parts.body.push(local(cm, 0, 0.3 + h / 2, 0, 0, 0, 0, w, h, d));
+      const roofY = 0.3 + h, pitch = 0.62, half = w / 2 / Math.cos(pitch) + 0.5;
+      parts.gable.push(local(cm, 0, roofY, 0, 0, 0, 0, w, Math.tan(pitch) * w / 2, d));
+      parts.roofL.push(local(cm, -w / 4 - 0.12, roofY + Math.tan(pitch) * w / 4 + 0.15, 0, 0, 0, pitch, half, 0.32, d + 1.2));
+      parts.roofR.push(local(cm, w / 4 + 0.12, roofY + Math.tan(pitch) * w / 4 + 0.15, 0, 0, 0, -pitch, half, 0.32, d + 1.2));
+      parts.chim.push(local(cm, w * 0.22, roofY + 1.6, d * 0.15, 0, 0, 0, 0.7, 2.2, 0.7));
+      for (const wx of [-w * 0.28, w * 0.28]) parts.win.push(local(cm, wx, 0.3 + h * 0.55, d / 2 + 0.03, 0, 0, 0, 1.1, 1.1, 0.08));
+      parts.win.push(local(cm, 0, roofY + 0.7, d / 2 + 0.03, 0, 0, 0, 0.9, 0.9, 0.08));
+      for (const wz of [-d * 0.22, d * 0.22]) for (const sx of [-1, 1]) parts.win.push(local(cm, sx * (w / 2 + 0.03), 0.3 + h * 0.55, wz, 0, 0, 0, 0.08, 1, 1));
+      parts.door.push(local(cm, 0, 0.3 + 1.1, -d / 2 - 0.03, 0, 0, 0, 1.2, 2.2, 0.1));
+    }
+    for (let k = -2; k <= 2; k++) {            // lamps and a fence along the run edge
+      const lz = zc + k * 12, lx = side * (HALF_W + 3);
+      parts.lampPost.push(M4().compose(new THREE.Vector3(lx, terrain(lx, lz) + 2, lz), new THREE.Quaternion(), new THREE.Vector3(1, 1, 1)));
+      parts.lampBulb.push(M4().compose(new THREE.Vector3(lx, terrain(lx, lz) + 4.1, lz), new THREE.Quaternion(), new THREE.Vector3(1, 1, 1)));
+      parts.fence.push(M4().compose(new THREE.Vector3(side * (HALF_W + 4.5), terrain(side * (HALF_W + 4.5), lz + 6) + 0.6, lz + 6), new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.atan(SL)), new THREE.Vector3(1, 1, 1)));
+    }
+  }
+  const box = new THREE.BoxGeometry(1, 1, 1);
+  const tri = new THREE.Shape([new THREE.Vector2(-0.5, 0), new THREE.Vector2(0.5, 0), new THREE.Vector2(0, 1)]);
+  const gableGeo = new THREE.ExtrudeGeometry(tri, { depth: 1, bevelEnabled: false }); gableGeo.translate(0, 0, -0.5);
+  instanced(box, stoneMat, parts.base);
+  instanced(box, woodMat, parts.body, { shadow: true });
+  instanced(gableGeo, woodMat, parts.gable);
+  instanced(box, roofMat, parts.roofL, { shadow: true });
+  instanced(box, roofMat, parts.roofR, { shadow: true });
+  instanced(box, stoneMat, parts.chim);
+  instanced(box, glowMat, parts.win);
+  instanced(box, darkWoodMat, parts.door);
+  instanced(new THREE.CylinderGeometry(0.08, 0.1, 4, 6), postMat, parts.lampPost);
+  instanced(new THREE.SphereGeometry(0.28, 10, 8), glowMat, parts.lampBulb);
+  instanced(new THREE.BoxGeometry(0.12, 1.1, 11), darkWoodMat, parts.fence);
+}
+
+// layered pines with snow on top, plus rocks
+function buildForest(count, blocked) {
+  const trunk = [], t1 = [], t2 = [], t3 = [], cap = [], cols = [], rocks = [];
+  const greens = ['#1f4d45', '#24584c', '#1b4340', '#2b5e48', '#1d5157'].map(c => new THREE.Color(c));
+  let tries = 0;
+  while (trunk.length < count && tries++ < count * 4) {
     const side = rnd() < 0.5 ? -1 : 1;
-    const x = side * (HALF_W + 7 + Math.pow(rnd(), 0.7) * 140), z = -120 + rnd() * (LEN + 380);
-    const sc = 0.7 + rnd() * 1.1;
-    const y = base(z) + bank(x) + 2.3 * sc;
-    m.compose(p.set(x, y, z), q, s.set(sc, sc, sc)); trees.setMatrixAt(i, m);
-    m.compose(p.set(x, y + 1.85 * sc, z), q, s.set(sc, sc, sc)); caps.setMatrixAt(i, m);
+    const near = rnd() < 0.3;              // a denser line of trees right beside the run
+    const x = side * (HALF_W + (near ? 5 + rnd() * 8 : 8 + Math.pow(rnd(), 0.75) * 150));
+    const z = -150 + rnd() * (LEN + 420);
+    if (blocked.some(([bx, bz, r]) => Math.hypot(x - bx, z - bz) < r + 2.5)) continue;
+    if (lift.x && Math.abs(x - lift.x) < 6) continue;
+    const s = 0.65 + rnd() * 1.0, y = terrain(x, z), ry = rnd() * TAU;
+    trunk.push(place(x, y + 1.1 * s, z, ry, s));
+    t1.push(place(x, y + 2.7 * s, z, ry, s));
+    t2.push(place(x, y + 4.3 * s, z, ry + 0.4, s));
+    t3.push(place(x, y + 5.7 * s, z, ry + 0.8, s));
+    cap.push(place(x, y + 6.6 * s, z, ry, s));
+    cols.push(greens[Math.floor(rnd() * greens.length)]);
   }
-  trees.castShadow = true;
-  scene.add(trees, caps);
-
-  const poleGeo = new THREE.CylinderGeometry(0.06, 0.06, 1.3, 5);
-  const n = Math.ceil((LEN + 60) / 10) * 2;
-  const poles = new THREE.InstancedMesh(poleGeo, new THREE.MeshLambertMaterial({ color: '#ffffff' }), n);
-  let i = 0;
-  for (let z = -20; z < LEN + 40 && i < n - 1; z += 10) for (const sd of [-1, 1]) {
-    m.compose(p.set(sd * HALF_W, base(z) + 0.65, z), q, s.set(1, 1, 1));
-    poles.setMatrixAt(i, m); poles.setColorAt(i, new THREE.Color((z / 10) % 2 ? '#ff7a3d' : '#2f6fed')); i++;
+  for (let i = 0; i < 160; i++) {
+    const side = rnd() < 0.5 ? -1 : 1, x = side * (HALF_W + 6 + rnd() * 120), z = -140 + rnd() * (LEN + 380);
+    const s = 0.6 + rnd() * 2.2;
+    rocks.push(M4().compose(new THREE.Vector3(x, terrain(x, z) + s * 0.3, z), new THREE.Quaternion().setFromEuler(new THREE.Euler(rnd() * 3, rnd() * 3, 0)), new THREE.Vector3(s, s * 0.7, s)));
   }
-  poles.count = i;
-  scene.add(poles);
+  const pineMat = new THREE.MeshLambertMaterial({ color: '#ffffff', flatShading: true });
+  instanced(new THREE.CylinderGeometry(0.28, 0.4, 2.2, 6), darkWoodMat, trunk);
+  instanced(new THREE.ConeGeometry(2.3, 3.1, 8), pineMat, t1, { shadow: true, colors: cols });
+  instanced(new THREE.ConeGeometry(1.8, 2.7, 8), pineMat, t2, { shadow: true, colors: cols });
+  instanced(new THREE.ConeGeometry(1.2, 2.3, 8), pineMat, t3, { colors: cols });
+  instanced(new THREE.ConeGeometry(0.7, 1.0, 8), new THREE.MeshLambertMaterial({ color: '#f8f8ff', flatShading: true }), cap);
+  instanced(new THREE.DodecahedronGeometry(1, 0), stoneMat, rocks, { shadow: true });
+}
 
+// a working chairlift up the side of the hill
+function buildLift() {
+  const x = lift.x = -(HALF_W + 16);
+  const z0 = -60, z1 = LEN + 60, towers = [];
+  const top = z => terrain(x, z) + 11;
+  for (let z = z0; z <= z1; z += 55) {
+    towers.push(M4().compose(new THREE.Vector3(x, terrain(x, z) + 5.5, z), new THREE.Quaternion(), new THREE.Vector3(1, 1, 1)));
+  }
+  instanced(new THREE.CylinderGeometry(0.35, 0.5, 11, 8), postMat, towers, { shadow: true });
+  instanced(new THREE.BoxGeometry(4.2, 0.35, 0.5), postMat, towers.map(m => m.clone().multiply(M4().makeTranslation(0, 5.4, 0))));
+  for (const off of [-1.8, 1.8]) {
+    const pts = [];
+    for (let z = z0; z <= z1; z += 55) pts.push(new THREE.Vector3(x + off, top(z), z));
+    const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineBasicMaterial({ color: '#2a2d3d' }));
+    course.add(line);
+  }
+  lift.len = z1 - z0; lift.z0 = z0; lift.top = top;
+  const chair = new THREE.Group();
+  const seat = new THREE.BoxGeometry(1.4, 0.15, 0.6); seat.translate(0, -2.2, 0);
+  const back = new THREE.BoxGeometry(1.4, 0.7, 0.12); back.translate(0, -1.85, -0.28);
+  const hanger = new THREE.CylinderGeometry(0.04, 0.04, 2.2, 5); hanger.translate(0, -1.1, 0);
+  const n = 46;
+  lift.chairs = [seat, back, hanger].map((g, i) => {
+    const m = new THREE.InstancedMesh(g, i === 2 ? postMat : boxTopMat, n);
+    m.castShadow = true; course.add(m); return m;
+  });
+  lift.n = n;
+}
+function updateLift(dt) {
+  if (!lift.chairs) return;
+  lift.t = (lift.t + dt * 2.2) % (lift.len * 2);
+  const m = M4(), p = new THREE.Vector3(), q = new THREE.Quaternion(), s = new THREE.Vector3(1, 1, 1);
+  for (let i = 0; i < lift.n; i++) {
+    const d = (lift.t + i * (lift.len * 2 / lift.n)) % (lift.len * 2);
+    const goingUp = d > lift.len;
+    const z = goingUp ? lift.z0 + lift.len - (d - lift.len) : lift.z0 + d;
+    p.set(lift.x + (goingUp ? -1.8 : 1.8), lift.top(z), z);
+    q.setFromAxisAngle(UP, goingUp ? Math.PI : 0);
+    m.compose(p, q, s);
+    for (const c of lift.chairs) c.setMatrixAt(i, m);
+  }
+  for (const c of lift.chairs) c.instanceMatrix.needsUpdate = true;
+}
+
+function buildDecor() {
+  const n = Math.ceil((LEN + 60) / 10) * 2, mats = [], cols = [];
+  for (let z = -20; z < LEN + 40; z += 10) for (const sd of [-1, 1]) {
+    mats.push(place(sd * HALF_W, base(z) + 0.65, z));
+    cols.push(new THREE.Color((Math.round(z / 10)) % 2 ? '#ff7a3d' : '#2f6fed'));
+  }
+  instanced(new THREE.CylinderGeometry(0.06, 0.06, 1.3, 5), whiteMat, mats.slice(0, n), { colors: cols.slice(0, n) });
   const gate = (z, text, bg) => {
     const post = new THREE.CylinderGeometry(0.25, 0.25, 7, 8);
     for (const sd of [-1, 1]) {
-      const pm = new THREE.Mesh(post, postMat); pm.position.set(sd * 13, base(z) + 3.5, z); pm.castShadow = true; scene.add(pm);
+      const pm = new THREE.Mesh(post, postMat); pm.position.set(sd * 13, base(z) + 3.5, z); pm.castShadow = true; course.add(pm);
     }
     const tex = textTex(text, bg, '#ffffff', 1024, 128);
     for (const ry of [0, Math.PI]) {     // two faces so the text reads the right way from both sides
       const banner = new THREE.Mesh(new THREE.PlaneGeometry(26, 3.2), new THREE.MeshBasicMaterial({ map: tex }));
-      banner.position.set(0, base(z) + 6.2, z); banner.rotation.y = ry; scene.add(banner);
+      banner.position.set(0, base(z) + 6.2, z); banner.rotation.y = ry; course.add(banner);
     }
   };
   gate(-2, 'RAIL4', '#2f6fed');
   gate(LEN, 'FINISH', '#ff7a3d');
-})();
+}
+
+function buildCourse(id) {
+  if (!MAPS[id]) id = 'park';
+  if (id === currentMap) return;
+  currentMap = id;
+  const map = MAPS[id];
+  clearCourse();
+  LEN = map.len; seed = map.seed;
+  map.gen();
+  lift.x = 0;
+  const blocked = [];
+  buildGround(); buildKickers(); buildRails();
+  if (map.lift) buildLift();
+  buildVillages(map, blocked);
+  buildForest(map.pines, blocked);
+  buildDecor();
+}
 
 // ---------- the rider (original low-poly skier) ----------
+function canvasTex(w, h, draw) {
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  draw(c.getContext('2d'), w, h);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4;
+  return t;
+}
 function makeRider() {
-  const lam = c => new THREE.MeshLambertMaterial({ color: c });
-  const box = (w, h, d, mat) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat); m.castShadow = true; return m; };
-  const jacket = lam('#2f6fed'), pants = lam('#22283a'), ski = lam('#ff7a3d'), helmet = lam('#f4f4fa'), dark = lam('#1a1d29');
-  const goggles = new THREE.MeshStandardMaterial({ color: '#ffc94a', metalness: 0.7, roughness: 0.2 });
+  const std = (o) => new THREE.MeshStandardMaterial({ roughness: 0.75, metalness: 0, ...o });
+  // jacket: two-tone panels, chest stripe, zip, pocket and a small R4 badge
+  const jacketTex = canvasTex(128, 128, (g, w, h) => {
+    g.fillStyle = '#2f6fed'; g.fillRect(0, 0, w, h);
+    g.fillStyle = '#1f4fc0'; g.fillRect(0, h * 0.72, w, h * 0.28);
+    g.fillStyle = '#ff7a3d'; g.fillRect(0, h * 0.2, w, h * 0.09);
+    g.fillStyle = '#ffd2b0'; g.fillRect(0, h * 0.29, w, h * 0.02);
+    g.fillStyle = '#16233f'; g.fillRect(w / 2 - 2, 0, 4, h);
+    g.strokeStyle = 'rgba(0,0,0,.35)'; g.lineWidth = 2; g.strokeRect(w * 0.6, h * 0.5, w * 0.25, h * 0.14);
+    g.fillStyle = '#fff'; g.font = 'italic 900 16px system-ui, sans-serif'; g.fillText('R4', w * 0.14, h * 0.48);
+    for (let i = 0; i < 260; i++) { g.fillStyle = `rgba(0,0,0,${Math.random() * 0.06})`; g.fillRect(Math.random() * w, Math.random() * h, 2, 2); }
+  });
+  const sleeveTex = canvasTex(64, 64, (g, w, h) => {
+    g.fillStyle = '#2f6fed'; g.fillRect(0, 0, w, h);
+    g.fillStyle = '#ff7a3d'; g.fillRect(0, h * 0.35, w, h * 0.08);
+    g.fillStyle = '#1f4fc0'; g.fillRect(0, h * 0.8, w, h * 0.2);
+  });
+  const pantsTex = canvasTex(64, 128, (g, w, h) => {
+    g.fillStyle = '#262c40'; g.fillRect(0, 0, w, h);
+    g.fillStyle = '#323a55'; g.fillRect(0, h * 0.42, w, h * 0.16);
+    g.strokeStyle = 'rgba(255,255,255,.12)'; g.lineWidth = 2;
+    g.beginPath(); g.moveTo(w / 2, 0); g.lineTo(w / 2, h); g.stroke();
+    g.fillStyle = '#ff7a3d'; g.fillRect(0, h * 0.9, w, h * 0.04);
+  });
+  const skiTex = canvasTex(32, 256, (g, w, h) => {
+    const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, '#ff9a4a'); gr.addColorStop(1, '#ff5e3a');
+    g.fillStyle = gr; g.fillRect(0, 0, w, h);
+    g.strokeStyle = '#1d2236'; g.lineWidth = 3;
+    g.beginPath(); for (let y = 30; y < h - 30; y += 16) { g.lineTo(y % 32 ? 6 : w - 6, y); } g.stroke();
+    g.fillStyle = '#1d2236'; g.fillRect(0, 0, 3, h); g.fillRect(w - 3, 0, 3, h);
+    g.save(); g.translate(w / 2 + 5, h * 0.78); g.rotate(-Math.PI / 2); g.fillStyle = '#fff'; g.font = 'italic 900 15px system-ui, sans-serif'; g.fillText('RAIL4', 0, 0); g.restore();
+  });
+  const goggleTex = canvasTex(64, 16, (g, w, h) => {
+    const gr = g.createLinearGradient(0, 0, w, h); gr.addColorStop(0, '#ff6ad5'); gr.addColorStop(0.5, '#ffb347'); gr.addColorStop(1, '#5ad1ff');
+    g.fillStyle = gr; g.fillRect(0, 0, w, h);
+    g.fillStyle = 'rgba(255,255,255,.55)'; g.fillRect(6, 3, 18, 3);
+  });
+
+  const jacket = std({ map: jacketTex }), sleeve = std({ map: sleeveTex }), pants = std({ map: pantsTex });
+  const ski = std({ map: skiTex, roughness: 0.4 }), skiBase = std({ color: '#1d2236' });
+  const helmet = std({ color: '#f4f5fb', roughness: 0.35 }), helmetStripe = std({ color: '#2f6fed', roughness: 0.35 });
+  const dark = std({ color: '#191c27' }), grey = std({ color: '#9aa3b5', metalness: 0.6, roughness: 0.35 });
+  const goggles = new THREE.MeshStandardMaterial({ map: goggleTex, metalness: 0.8, roughness: 0.15, emissive: '#331a33', emissiveMap: goggleTex, emissiveIntensity: 0.25 });
+  const gaiter = std({ color: '#ff7a3d' }), glove = std({ color: '#20242f', roughness: 0.9 });
+  const mesh = (geo, mat) => { const m = new THREE.Mesh(geo, mat); m.castShadow = true; return m; };
 
   const root = new THREE.Group();
   const pivot = new THREE.Group(); pivot.position.y = 0.95; root.add(pivot);
   const body = new THREE.Group(); body.position.y = -0.95; pivot.add(body);
 
+  const skis = [];
   for (const sx of [-0.16, 0.16]) {
-    const s = box(0.12, 0.035, 1.75, ski); s.position.set(sx, 0.02, 0.05); body.add(s);
-    const tip = box(0.12, 0.035, 0.25, ski); tip.position.set(sx, 0.07, 0.98); tip.rotation.x = -0.45; body.add(tip);
-    const tail = box(0.12, 0.035, 0.2, ski); tail.position.set(sx, 0.06, -0.86); tail.rotation.x = 0.4; body.add(tail);
-    const boot = box(0.15, 0.2, 0.3, dark); boot.position.set(sx, 0.13, 0.02); body.add(boot);
+    const sg = new THREE.Group(); sg.position.set(sx, 0, 0); body.add(sg);
+    const deck = mesh(new THREE.BoxGeometry(0.11, 0.03, 1.7), [skiBase, skiBase, ski, skiBase, skiBase, skiBase]); deck.position.set(0, 0.02, 0.05); sg.add(deck);
+    const tip = mesh(new THREE.BoxGeometry(0.11, 0.03, 0.26), ski); tip.position.set(0, 0.075, 0.99); tip.rotation.x = -0.5; sg.add(tip);
+    const tail = mesh(new THREE.BoxGeometry(0.11, 0.03, 0.22), ski); tail.position.set(0, 0.065, -0.89); tail.rotation.x = 0.45; sg.add(tail);
+    const bind = mesh(new THREE.BoxGeometry(0.1, 0.05, 0.36), grey); bind.position.set(0, 0.055, 0.02); sg.add(bind);
+    skis.push(sg);
+    const boot = mesh(new THREE.BoxGeometry(0.15, 0.22, 0.3), dark); boot.position.set(sx, 0.16, 0.02); body.add(boot);
+    for (const by of [0.11, 0.19]) { const b = mesh(new THREE.BoxGeometry(0.155, 0.025, 0.12), grey); b.position.set(sx, by, 0.09); body.add(b); }
   }
   const legs = new THREE.Group(); body.add(legs);
-  for (const sx of [-0.15, 0.15]) { const l = box(0.17, 0.62, 0.2, pants); l.position.set(sx, 0.52, 0); legs.add(l); }
+  for (const sx of [-0.14, 0.14]) {
+    const l = mesh(new THREE.CapsuleGeometry(0.095, 0.48, 4, 10), pants); l.position.set(sx, 0.55, 0); legs.add(l);
+  }
   const torso = new THREE.Group(); torso.position.y = 0.86; body.add(torso);
-  const chest = box(0.48, 0.6, 0.3, jacket); chest.position.y = 0.3; torso.add(chest);
-  const stripe = box(0.5, 0.08, 0.32, ski); stripe.position.y = 0.42; torso.add(stripe);
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.17, 14, 10), helmet); head.position.y = 0.78; head.castShadow = true; torso.add(head);
-  const gog = box(0.28, 0.08, 0.06, goggles); gog.position.set(0, 0.77, 0.15); torso.add(gog);
-  const arms = [];
+  const chest = mesh(new THREE.BoxGeometry(0.48, 0.6, 0.3), [sleeve, sleeve, jacket, jacket, jacket, jacket]); chest.position.y = 0.3; torso.add(chest);
+  const hem = mesh(new THREE.BoxGeometry(0.5, 0.1, 0.32), sleeve); hem.position.y = 0.02; torso.add(hem);
+  const hood = mesh(new THREE.SphereGeometry(0.2, 12, 8, 0, TAU, 0, Math.PI / 2), jacket); hood.position.set(0, 0.6, -0.12); hood.rotation.x = -0.5; torso.add(hood);
+  const neck = mesh(new THREE.CylinderGeometry(0.11, 0.13, 0.14, 12), gaiter); neck.position.y = 0.66; torso.add(neck);
+  const head = mesh(new THREE.SphereGeometry(0.17, 18, 12), helmet); head.position.y = 0.8; torso.add(head);
+  const ridge = mesh(new THREE.BoxGeometry(0.06, 0.03, 0.3), helmetStripe); ridge.position.set(0, 0.965, 0); torso.add(ridge);
+  const strap = mesh(new THREE.CylinderGeometry(0.175, 0.175, 0.055, 18, 1, true), dark); strap.position.y = 0.78; torso.add(strap);
+  const gog = mesh(new THREE.BoxGeometry(0.27, 0.085, 0.07), goggles); gog.position.set(0, 0.78, 0.15); torso.add(gog);
+  const arms = [], poles = [];
   for (const sx of [-1, 1]) {
     const sh = new THREE.Group(); sh.position.set(sx * 0.3, 0.55, 0); torso.add(sh);
-    const a = box(0.12, 0.56, 0.13, jacket); a.position.y = -0.27; sh.add(a);
-    const hand = box(0.12, 0.1, 0.12, dark); hand.position.y = -0.58; sh.add(hand);
-    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 1.15, 5), postMat);
-    pole.position.set(0, -0.6, 0.05); pole.rotation.x = 1.25; pole.castShadow = true; sh.add(pole);
+    const a = mesh(new THREE.CapsuleGeometry(0.065, 0.42, 4, 10), sleeve); a.position.y = -0.27; sh.add(a);
+    const hand = mesh(new THREE.BoxGeometry(0.12, 0.12, 0.13), glove); hand.position.y = -0.58; sh.add(hand);
+    const pole = new THREE.Group(); pole.position.set(0, -0.6, 0.05); pole.rotation.x = 1.25; sh.add(pole);
+    const shaft = mesh(new THREE.CylinderGeometry(0.012, 0.012, 1.15, 6), grey); pole.add(shaft);
+    const grip = mesh(new THREE.CylinderGeometry(0.022, 0.022, 0.16, 8), dark); grip.position.y = 0.5; pole.add(grip);
+    const basket = mesh(new THREE.TorusGeometry(0.045, 0.01, 5, 12), dark); basket.position.y = -0.48; basket.rotation.x = Math.PI / 2; pole.add(basket);
     sh.rotation.set(-0.35, 0, sx * 0.25);
-    arms.push(sh);
+    arms.push(sh); poles.push(pole);
   }
-  return { root, pivot, legs, torso, arms };
+  return { root, pivot, legs, torso, arms, skis, poles };
 }
 const rider = makeRider();
 scene.add(rider.root);
+
+// ---------- yard sale: skis and poles fly off when you bail ----------
+const debris = [];
+function yardSale() {
+  const v = P.vel.clone(); if (!v.lengthSq()) v.set(Math.sin(P.hd) * P.speed, 0, Math.cos(P.hd) * P.speed);
+  rider.root.updateMatrixWorld(true);
+  for (const part of [...rider.skis, ...rider.poles]) {
+    const obj = part.clone();
+    part.matrixWorld.decompose(obj.position, obj.quaternion, obj.scale);
+    scene.add(obj);
+    debris.push({
+      obj, life: 9,
+      vel: new THREE.Vector3(v.x * (0.5 + Math.random() * 0.5) + (Math.random() - 0.5) * 5, Math.max(1, v.y * 0.3) + 2 + Math.random() * 4, v.z * (0.5 + Math.random() * 0.5) + (Math.random() - 0.5) * 3),
+      spin: new THREE.Vector3((Math.random() - 0.5) * 18, (Math.random() - 0.5) * 18, (Math.random() - 0.5) * 18),
+      flat: rider.skis.includes(part),
+    });
+    part.visible = false;
+  }
+}
+function regear() { for (const part of [...rider.skis, ...rider.poles]) part.visible = true; }
+function clearDebris() { for (const d of debris) scene.remove(d.obj); debris.length = 0; regear(); }
+const dq = new THREE.Quaternion(), de = new THREE.Euler();
+function updateDebris(dt) {
+  for (let i = debris.length - 1; i >= 0; i--) {
+    const d = debris[i];
+    d.vel.y -= G * dt;
+    d.obj.position.addScaledVector(d.vel, dt);
+    dq.setFromEuler(de.set(d.spin.x * dt, d.spin.y * dt, d.spin.z * dt));
+    d.obj.quaternion.premultiply(dq);
+    const gy = ground(d.obj.position.x, d.obj.position.z) + 0.03;
+    if (d.obj.position.y < gy) {             // bounce, then skid to a stop
+      d.obj.position.y = gy;
+      if (d.vel.y < 0) d.vel.y *= -0.3;
+      d.vel.x *= 0.82; d.vel.z *= 0.82; d.spin.multiplyScalar(0.6);
+      if (d.vel.length() < 1.2) { d.vel.set(0, 0, 0); d.spin.set(0, 0, 0); }
+    }
+    d.life -= dt;
+    if (d.life < 0) { scene.remove(d.obj); debris.splice(i, 1); }
+  }
+}
+
 
 // ---------- snow spray ----------
 const SPRAY = 260;
@@ -426,6 +724,7 @@ function land(h) {
 }
 
 function crash() {
+  yardSale();
   P.mode = 'crash'; P.crashT = 1.6; combo = 0; comboT = 0;
   P.speed = Math.hypot(P.vel.x, P.vel.z) * 0.55;
   if (P.vel.x || P.vel.z) P.hd = Math.atan2(P.vel.x, P.vel.z);
@@ -541,6 +840,7 @@ function stepCrash(dt) {
   P.crashT -= dt;
   if (P.crashT <= 0) {
     P.mode = 'ground'; P.speed = 5; P.hd = 0; P.sw = false; P.spin = P.flip = P.roll = 0;
+    regear();
     P.pos.y = ground(P.pos.x, P.pos.z); P.lastVy = -SL * P.speed;
   }
 }
@@ -673,6 +973,7 @@ function applyEnv(time, weather) {
   sun.visible = W.grey < 0.5;
   stars.visible = T.night && W.grey < 0.5;
   headlamp.intensity = T.night ? 14 : 0;
+  glowMat.emissiveIntensity = T.night ? 1.8 : time === 'dawn' ? 0.7 : 0.25;
   flakes.visible = W.flakes > 0;
   flakeGeo.setDrawRange(0, W.flakes);
   flakes.material.size = weather === 'blizzard' ? 0.13 : 0.17;
@@ -682,22 +983,26 @@ function applyEnv(time, weather) {
 }
 
 // menu choices ("random" picks a new one every run)
-let choice = { time: 'sunset', weather: 'clear' };
+let choice = { map: 'park', time: 'sunset', weather: 'clear' };
 try { Object.assign(choice, JSON.parse(localStorage.getItem('rail4_env') || '{}')); } catch (e) { }
 const pick = (key, table) => choice[key] === 'random' ? Object.keys(table)[Math.floor(Math.random() * Object.keys(table).length)] : (table[choice[key]] ? choice[key] : Object.keys(table)[0]);
-function applyChoice() { applyEnv(pick('time', TIMES), pick('weather', WEATHERS)); }
+function applyChoice(newMap) {
+  if (newMap) { buildCourse(pick('map', MAPS)); resetRider(); }
+  applyEnv(pick('time', TIMES), pick('weather', WEATHERS));
+}
 function buildChips(id, key, table) {
   const box = document.getElementById(id);
   const opts = [...Object.entries(table).map(([k, v]) => [k, v.label]), ['random', 'Random']];
+  const isMap = key === 'map';
   for (const [k, label] of opts) {
     const b = document.createElement('button');
     b.className = 'chip'; b.textContent = label; b.dataset.k = k;
-    b.onclick = () => { choice[key] = k; refreshChips(); applyChoice(); };
+    b.onclick = () => { choice[key] = k; refreshChips(); applyChoice(isMap); };
     box.appendChild(b);
   }
 }
 function refreshChips() {
-  for (const [id, key] of [['timeChips', 'time'], ['weatherChips', 'weather']])
+  for (const [id, key] of [['mapChips', 'map'], ['timeChips', 'time'], ['weatherChips', 'weather']])
     for (const b of document.getElementById(id).children) b.classList.toggle('on', b.dataset.k === choice[key]);
 }
 
@@ -760,6 +1065,12 @@ function updateCamera(dt) {
   const dist = 7.2 + Math.min(P.speed, 30) * 0.05;
   camPos.set(P.pos.x - camDir.x * dist, P.pos.y + 3.1, P.pos.z - camDir.z * dist);
   camPos.y = Math.max(camPos.y, ground(camPos.x, camPos.z) + 1.4);
+  const ty = P.pos.y + 1;
+  for (const f of [0.2, 0.4, 0.6, 0.8]) {   // rise so a kicker never blocks the view of the rider
+    const mx = camPos.x + (P.pos.x - camPos.x) * f, mz = camPos.z + (P.pos.z - camPos.z) * f;
+    const need = (ground(mx, mz) + 0.4 - ty * f) / (1 - f);
+    if (need > camPos.y) camPos.y = need;
+  }
   camera.position.lerp(camPos, 1 - Math.exp(-dt * 6));
   lookAt.set(P.pos.x + camDir.x * 5, P.pos.y + 0.9, P.pos.z + camDir.z * 5);
   camera.lookAt(lookAt);
@@ -803,18 +1114,42 @@ function countdownText(t) {
   }
 }
 
+// ---------- trick meters ----------
+const meter = { box: $('meter'), name: $('mName'), land: $('mLand'), combo: $('comboFill'),
+  bars: { spin: $('mSpin'), flip: $('mFlip'), cork: $('mCork'), grab: $('mGrab') },
+  vals: { spin: $('vSpin'), flip: $('vFlip'), cork: $('vCork'), grab: $('vGrab') } };
+function updateMeters() {
+  meter.combo.style.width = (state === 'play' && combo > 0 ? clamp(comboT / 3.2, 0, 1) * 100 : 0) + '%';
+  const on = state === 'play' && P.mode === 'air' && P.air > 0.12;
+  meter.box.classList.toggle('on', on);
+  if (!on) return;
+  const set = (k, frac, txt) => { meter.bars[k].style.width = clamp(frac, 0, 1) * 100 + '%'; meter.vals[k].textContent = txt; };
+  const sp = Math.abs(P.spin), fl = Math.abs(P.flip), ro = Math.abs(P.roll);
+  set('spin', (sp % Math.PI) / Math.PI, Math.round(sp / Math.PI) * 180 + '°');
+  set('flip', (fl % TAU) / TAU, '×' + Math.round(fl / TAU));
+  set('cork', (ro % TAU) / TAU, '×' + Math.round(ro / TAU));
+  set('grab', P.grabT / 2, P.grabT > 0.25 ? P.grabName : '—');
+  const t = trick();
+  meter.name.textContent = t ? `${t.name}  +${t.pts}` : '';
+  const ok = upright();
+  meter.land.textContent = ok ? 'READY TO LAND' : 'KEEP ROTATING';
+  meter.land.classList.toggle('bad', !ok);
+}
+
 // ---------- game flow ----------
 function show(id, on) { $(id).classList.toggle('hidden', !on); }
 function startRun(skipCutscene) {
+  clearDebris();
   resetRider(); score = 0; combo = 0; comboT = 0; runTime = 0; bestTrick = { name: '', pts: 0 };
   paused = false;
-  applyChoice();
+  applyChoice(choice.map === 'random');
+  resetRider();
   show('menu', false); show('results', false); show('pause', false); show('hud', false);
   camDir.set(0, 0, 1);
   if (skipCutscene) beginCountdown();
   else {
     state = 'intro'; introT = 0; buildIntro();
-    cine(true, 'RAIL4', `${TIMES[env.time].label} · ${WEATHERS[env.weather].label}`, true);
+    cine(true, MAPS[currentMap].label, `${TIMES[env.time].label} · ${WEATHERS[env.weather].label}`, true);
   }
   window.focus();
 }
@@ -855,10 +1190,11 @@ $('toMenu').onclick = () => { state = 'menu'; resetRider(); show('results', fals
 $('resume').onclick = () => togglePause();
 $('cine').onclick = skipIntro;
 $('menuBest').textContent = getBest().toLocaleString();
+buildChips('mapChips', 'map', MAPS);
 buildChips('timeChips', 'time', TIMES);
 buildChips('weatherChips', 'weather', WEATHERS);
 refreshChips();
-applyChoice();
+applyChoice(true);
 
 addEventListener('resize', () => {
   renderer.setSize(innerWidth, innerHeight);
@@ -898,6 +1234,9 @@ function frame(now) {
     updateSpray(dt);
     updateCamera(dt);
     updateFlakes(dt);
+    updateLift(dt);
+    updateDebris(dt);
+    updateMeters();
     updateHud(dt);
   }
   sunLight.position.copy(P.pos).add(SUN_OFF);
@@ -909,4 +1248,4 @@ function frame(now) {
   renderer.render(scene, camera);
 }
 requestAnimationFrame(frame);
-window.__rail4 = { P, K, get state() { return state; }, get score() { return score; }, startRun, skipIntro, applyEnv, kickers, rails, ground };
+window.__rail4 = { crash, buildCourse, get map() { return currentMap; }, P, K, get state() { return state; }, get score() { return score; }, startRun, skipIntro, applyEnv, kickers, rails, ground };

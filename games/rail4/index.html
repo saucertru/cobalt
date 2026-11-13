@@ -42,6 +42,20 @@
   .row span:last-child { font-weight: 700; }
   #rNew { color: #ffcf6e; font-weight: 800; margin: 10px 0 0; }
   #nogl { display: none; }
+  #comboBar { margin-top: 5px; width: 140px; height: 5px; border-radius: 3px; background: rgba(255,255,255,.15); overflow: hidden; }
+  #comboFill { height: 100%; width: 0; background: linear-gradient(90deg, #ffb27d, #ff7a3d); }
+  #meter { position: absolute; left: 50%; bottom: 96px; transform: translate(-50%, 14px); width: 290px; padding: 10px 14px 12px; border-radius: 14px;
+    background: rgba(14,16,36,.55); backdrop-filter: blur(4px); opacity: 0; transition: opacity .15s, transform .15s; }
+  #meter.on { opacity: 1; transform: translate(-50%, 0); }
+  #mName { font: italic 900 17px system-ui, sans-serif; text-align: center; min-height: 21px; margin-bottom: 6px; color: #ffcf6e; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .mrow { display: grid; grid-template-columns: 42px 1fr 74px; align-items: center; gap: 8px; font-size: 11px; margin: 3px 0; }
+  .mrow span { opacity: .7; letter-spacing: 1px; font-weight: 700; }
+  .mrow b { text-align: right; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bar { height: 7px; border-radius: 4px; background: rgba(255,255,255,.14); overflow: hidden; }
+  .bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #2f6fed, #8fb4ff); }
+  #mGrab { background: linear-gradient(90deg, #ff7a3d, #ffcf6e); }
+  #mLand { margin-top: 7px; text-align: center; font: 800 12px system-ui, sans-serif; letter-spacing: 1.5px; color: #5ee39a; }
+  #mLand.bad { color: #ff6b6b; }
   .opts { margin: 0 0 18px; display: grid; gap: 8px; }
   .opts .lab { font-size: 12px; opacity: .6; text-transform: uppercase; letter-spacing: 1px; }
   .chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
@@ -70,7 +84,15 @@
 <div id="app"></div>
 
 <div id="hud" class="hidden">
-  <div class="tl"><div id="score">0</div><div id="combo"></div></div>
+  <div class="tl"><div id="score">0</div><div id="combo"></div><div id="comboBar"><div id="comboFill"></div></div></div>
+  <div id="meter">
+    <div id="mName"></div>
+    <div class="mrow"><span>SPIN</span><div class="bar"><i id="mSpin"></i></div><b id="vSpin">0°</b></div>
+    <div class="mrow"><span>FLIP</span><div class="bar"><i id="mFlip"></i></div><b id="vFlip">×0</b></div>
+    <div class="mrow"><span>CORK</span><div class="bar"><i id="mCork"></i></div><b id="vCork">×0</b></div>
+    <div class="mrow"><span>GRAB</span><div class="bar"><i id="mGrab"></i></div><b id="vGrab">—</b></div>
+    <div id="mLand">READY TO LAND</div>
+  </div>
   <div id="prog"><div id="progFill"></div></div>
   <div class="tr"><div id="time">0:00.00</div><div id="speed">0 km/h</div></div>
   <div id="trick"><div id="trickName"></div><div id="trickPts"></div></div>
@@ -94,6 +116,7 @@
       <span><b>R</b> · <b>Esc</b></span><span>Restart · pause</span>
     </div>
     <div class="opts">
+      <div class="lab">Map</div><div class="chips" id="mapChips"></div>
       <div class="lab">Time of day</div><div class="chips" id="timeChips"></div>
       <div class="lab">Weather</div><div class="chips" id="weatherChips"></div>
     </div>
