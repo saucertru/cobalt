@@ -1,6 +1,6 @@
 {
   "name": "Rail4",
-  "description": "Original 3D freeski park: kickers, rails, corks and grabs, with weather and time of day.",
+  "description": "Original 3D freeski game: 4 maps, kickers, rails, corks and grabs, weather and time of day.",
   "controls": "Arrows steer and spin/flip, Q/E cork, hold Space to pop, Shift to grab.",
   "color": "#2f6fed",
   "icon": "icon.svg"
