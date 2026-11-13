@@ -1264,25 +1264,9 @@ function countdownText(t) {
 }
 
 // ---------- trick meters ----------
-const meter = { box: $('meter'), name: $('mName'), land: $('mLand'), combo: $('comboFill'),
-  bars: { spin: $('mSpin'), flip: $('mFlip'), cork: $('mCork'), grab: $('mGrab') },
-  vals: { spin: $('vSpin'), flip: $('vFlip'), cork: $('vCork'), grab: $('vGrab') } };
+const comboFill = $('comboFill');
 function updateMeters() {
-  meter.combo.style.width = (state === 'play' && combo > 0 ? clamp(comboT / 3.2, 0, 1) * 100 : 0) + '%';
-  const on = state === 'play' && P.mode === 'air' && P.air > 0.12;
-  meter.box.classList.toggle('on', on);
-  if (!on) return;
-  const set = (k, frac, txt) => { meter.bars[k].style.width = clamp(frac, 0, 1) * 100 + '%'; meter.vals[k].textContent = txt; };
-  const sp = Math.abs(P.spin), fl = Math.abs(P.flip), ro = Math.abs(P.roll);
-  set('spin', (sp % Math.PI) / Math.PI, Math.round(sp / Math.PI) * 180 + '°');
-  set('flip', (fl % TAU) / TAU, '×' + Math.round(fl / TAU));
-  set('cork', (ro % TAU) / TAU, '×' + Math.round(ro / TAU));
-  set('grab', P.grabT / 2, P.grabT > 0.25 ? P.grabName : '—');
-  const t = trick();
-  meter.name.textContent = t ? `${t.name}  +${t.pts}` : '';
-  const ok = upright();
-  meter.land.textContent = ok ? 'READY TO LAND' : 'KEEP ROTATING';
-  meter.land.classList.toggle('bad', !ok);
+  comboFill.style.width = (state === 'play' && combo > 0 ? clamp(comboT / 3.2, 0, 1) * 100 : 0) + '%';
 }
 
 // ---------- game flow ----------

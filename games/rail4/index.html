@@ -74,18 +74,6 @@
 
   #comboBar { margin-top: 5px; width: 140px; height: 5px; border-radius: 3px; background: rgba(255,255,255,.15); overflow: hidden; }
   #comboFill { height: 100%; width: 0; background: linear-gradient(90deg, #ffb27d, #ff7a3d); }
-  #meter { position: absolute; left: 50%; bottom: 96px; transform: translate(-50%, 14px); width: 290px; padding: 10px 14px 12px; border-radius: 14px;
-    background: rgba(14,16,36,.55); backdrop-filter: blur(4px); opacity: 0; transition: opacity .15s, transform .15s; }
-  #meter.on { opacity: 1; transform: translate(-50%, 0); }
-  #mName { font: italic 900 17px system-ui, sans-serif; text-align: center; min-height: 21px; margin-bottom: 6px; color: #ffcf6e; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .mrow { display: grid; grid-template-columns: 42px 1fr 74px; align-items: center; gap: 8px; font-size: 11px; margin: 3px 0; }
-  .mrow span { opacity: .7; letter-spacing: 1px; font-weight: 700; }
-  .mrow b { text-align: right; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .bar { height: 7px; border-radius: 4px; background: rgba(255,255,255,.14); overflow: hidden; }
-  .bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #2f6fed, #8fb4ff); }
-  #mGrab { background: linear-gradient(90deg, #ff7a3d, #ffcf6e); }
-  #mLand { margin-top: 7px; text-align: center; font: 800 12px system-ui, sans-serif; letter-spacing: 1.5px; color: #5ee39a; }
-  #mLand.bad { color: #ff6b6b; }
   .opts { margin: 0 0 18px; display: grid; gap: 8px; }
   .opts .lab { font-size: 12px; opacity: .6; text-transform: uppercase; letter-spacing: 1px; }
   .chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
@@ -123,14 +111,6 @@
   <div id="trick"><div id="trickName"></div><div id="trickLine"><span id="trickPts"></span><span id="trickMult"></span></div><div id="trickGrade"></div></div>
   <div id="mini"><div id="miniWrap"><canvas id="miniMap" width="56" height="190"></canvas><i id="miniDot"></i></div><div id="dist">0 m</div><div id="left">1.2 km to go</div></div>
   <div id="speedBox"><div class="lab">Speed</div><div class="spd"><span id="speed">0</span><small>km/h</small></div><div id="prog"><div id="progFill"></div></div><div id="time">0:00.00</div></div>
-  <div id="meter">
-    <div id="mName"></div>
-    <div class="mrow"><span>SPIN</span><div class="bar"><i id="mSpin"></i></div><b id="vSpin">0°</b></div>
-    <div class="mrow"><span>FLIP</span><div class="bar"><i id="mFlip"></i></div><b id="vFlip">×0</b></div>
-    <div class="mrow"><span>CORK</span><div class="bar"><i id="mCork"></i></div><b id="vCork">×0</b></div>
-    <div class="mrow"><span>GRAB</span><div class="bar"><i id="mGrab"></i></div><b id="vGrab">—</b></div>
-    <div id="mLand">READY TO LAND</div>
-  </div>
   <div id="bal"><div id="balDot"></div></div>
   <div id="hint">Space pop · arrows spin/flip · Q/E cork · Shift+arrow grabs · G/F/V grabs · Shift+←/→ butter · R restart</div>
 </div>
