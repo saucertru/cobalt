@@ -39,8 +39,9 @@
     // Connect BareMux to your Render Wisp engine
     const connection = new BareMuxConnection("/baremux/worker.js");
     await connection.setTransport("/libcurl/index.mjs", [
-      { wisp: WISP_URL }
+       { websocket: WISP_URL }
     ]);
+
 
     // Handle the Go button and Enter key
     function go() {
