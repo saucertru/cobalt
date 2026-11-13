@@ -22,18 +22,6 @@
   .btn:hover { transform: translateY(-2px); }
   .small { font-size: 13px; opacity: .65; margin-top: 14px; }
   #hud { position: fixed; inset: 0; pointer-events: none; z-index: 3; }
-  .tl, .tr { position: absolute; top: 14px; padding: 8px 14px; border-radius: 12px; background: rgba(14,16,36,.5); }
-  .tl { left: 14px; } .tr { right: 14px; text-align: right; }
-  #score { font: italic 900 30px system-ui, sans-serif; }
-  #combo { font-size: 13px; color: #ffb27d; min-height: 16px; }
-  #time { font: 700 20px ui-monospace, monospace; } #speed { font-size: 13px; opacity: .75; }
-  #prog { position: absolute; top: 18px; left: 50%; width: min(300px, 40vw); transform: translateX(-50%); height: 6px; border-radius: 4px; background: rgba(255,255,255,.2); overflow: hidden; }
-  #progFill { height: 100%; width: 0; background: linear-gradient(90deg, #2f6fed, #ff7a3d); }
-  #trick { position: absolute; top: 24%; left: 50%; transform: translate(-50%, 10px) scale(.9); text-align: center; opacity: 0; transition: opacity .25s, transform .25s; text-shadow: 0 3px 14px rgba(0,0,0,.45); }
-  #trick.show { opacity: 1; transform: translate(-50%, 0) scale(1); }
-  #trickName { font: italic 900 38px system-ui, sans-serif; }
-  #trickPts { font: 800 20px system-ui, sans-serif; color: #ffcf6e; }
-  #trick.bad #trickName { color: #ff6b6b; } #trick.bad #trickPts { color: #ffd0d0; }
   #bal { position: absolute; bottom: 70px; left: 50%; transform: translateX(-50%); width: 240px; height: 10px; border-radius: 6px;
     background: linear-gradient(90deg, #ff5a5a, #ffd36e 30%, #5ee39a 50%, #ffd36e 70%, #ff5a5a); display: none; }
   #balDot { position: absolute; top: -5px; width: 6px; height: 20px; margin-left: -3px; border-radius: 3px; background: #fff; box-shadow: 0 0 8px #000; }
@@ -42,6 +30,48 @@
   .row span:last-child { font-weight: 700; }
   #rNew { color: #ffcf6e; font-weight: 800; margin: 10px 0 0; }
   #nogl { display: none; }
+  /* ---- HUD ---- */
+  #hud::before { content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse 420px 260px at 0 0, rgba(8,12,36,.38), transparent 70%), radial-gradient(ellipse 420px 300px at 100% 0, rgba(8,12,36,.38), transparent 70%),
+      radial-gradient(ellipse 360px 300px at 0 100%, rgba(8,12,36,.38), transparent 70%), radial-gradient(ellipse 420px 300px at 100% 100%, rgba(8,12,36,.38), transparent 70%),
+      radial-gradient(ellipse 600px 260px at 0 45%, rgba(8,12,36,.22), transparent 70%); }
+  #hud > * { text-shadow: 0 2px 10px rgba(0,0,0,.35); }
+  #hud .lab { font: italic 800 13px system-ui, sans-serif; letter-spacing: 2px; text-transform: uppercase; color: #9fc0ff; }
+  .big { font-family: system-ui, sans-serif; font-style: italic; font-weight: 900; letter-spacing: -1px; text-shadow: 0 3px 0 rgba(15,20,50,.35), 0 6px 24px rgba(0,0,0,.35); }
+  #mapTag { position: absolute; top: 22px; left: 26px; }
+  #mapName { font: italic 900 26px system-ui, sans-serif; letter-spacing: -.5px; text-shadow: 0 3px 16px rgba(0,0,0,.4); border-left: 5px solid #ff7a3d; padding-left: 10px; line-height: 1; }
+  #mapEnv { margin: 5px 0 0 15px; font: 700 12px system-ui, sans-serif; letter-spacing: 1.5px; text-transform: uppercase; opacity: .75; }
+  #scoreBox { position: absolute; top: 18px; right: 26px; text-align: right; }
+  #pauseBtn { pointer-events: auto; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; margin-bottom: 14px; padding: 7px 12px; border-radius: 10px;
+    border: 1px solid rgba(255,255,255,.25); background: rgba(10,14,34,.45); color: #fff; font: 800 13px system-ui, sans-serif; letter-spacing: 1px; text-transform: uppercase; }
+  #pauseBtn .ico { font-size: 11px; } #pauseBtn kbd { font: 700 10px system-ui; padding: 2px 5px; border-radius: 4px; background: rgba(255,255,255,.85); color: #111; }
+  #score { font: italic 900 64px system-ui, sans-serif; line-height: .95; letter-spacing: -2px; text-shadow: 0 4px 0 rgba(15,20,50,.35), 0 8px 26px rgba(0,0,0,.35); }
+  #combo { font: italic 800 15px system-ui, sans-serif; color: #ffb27d; min-height: 18px; margin-top: 2px; }
+  #comboBar { margin: 4px 0 0 auto; width: 150px; height: 4px; border-radius: 3px; background: rgba(255,255,255,.15); overflow: hidden; }
+  #comboFill { height: 100%; width: 0; background: linear-gradient(90deg, #ff7a3d, #ffcf6e); margin-left: auto; }
+  #trick { position: absolute; top: 34%; left: 4vw; transform: translateX(-30px); opacity: 0; transition: opacity .2s, transform .25s cubic-bezier(.2,1.4,.4,1); max-width: 46vw; }
+  #trick.show { opacity: 1; transform: none; }
+  #trickName { font: italic 900 clamp(38px, 6vw, 76px) system-ui, sans-serif; line-height: .95; letter-spacing: -2px; text-transform: uppercase; text-shadow: 0 4px 0 rgba(15,20,50,.35), 0 8px 30px rgba(0,0,0,.4); }
+  #trickLine { margin-top: 6px; display: flex; align-items: baseline; gap: 14px; }
+  #trickPts { font: italic 900 clamp(28px, 3.6vw, 46px) system-ui, sans-serif; letter-spacing: -1px; text-shadow: 0 3px 0 rgba(15,20,50,.35); }
+  #trickMult { font: italic 800 20px system-ui, sans-serif; color: #9fc0ff; text-transform: uppercase; }
+  #trickGrade { margin-top: 4px; font: italic 900 24px system-ui, sans-serif; text-transform: uppercase; }
+  #trickGrade b { color: #5ee39a; margin-left: 8px; } #trickGrade.ok b { color: #9fc0ff; }
+  #trick.bad #trickName { color: #ff6b6b; } #trick.bad #trickPts { font-size: 22px; color: #ffd0d0; }
+  #mini { position: absolute; left: 26px; bottom: 26px; }
+  #miniWrap { position: relative; width: 56px; height: 190px; margin-bottom: 10px; }
+  #miniDot { position: absolute; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: #fff; border: 3px solid #2f6fed; box-shadow: 0 0 10px rgba(255,255,255,.8); left: 28px; top: 8px; }
+  #dist { font: italic 900 28px system-ui, sans-serif; letter-spacing: -1px; text-shadow: 0 3px 14px rgba(0,0,0,.4); }
+  #left { font: italic 800 12px system-ui, sans-serif; letter-spacing: 1.5px; text-transform: uppercase; opacity: .75; }
+  #speedBox { position: absolute; right: 26px; bottom: 26px; text-align: left; width: 190px; }
+  .spd { display: flex; align-items: baseline; gap: 8px; }
+  #speed { font: italic 900 92px system-ui, sans-serif; line-height: .9; letter-spacing: -4px; text-shadow: 0 5px 0 rgba(15,20,50,.35), 0 8px 30px rgba(0,0,0,.35); }
+  .spd small { font: italic 900 18px system-ui, sans-serif; text-transform: uppercase; }
+  #prog { margin-top: 10px; height: 5px; border-radius: 3px; background: rgba(255,255,255,.22); overflow: hidden; }
+  #progFill { height: 100%; width: 0; background: linear-gradient(90deg, #2f6fed, #ff7a3d); }
+  #time { margin-top: 8px; text-align: right; font: italic 900 24px system-ui, sans-serif; letter-spacing: -.5px; font-variant-numeric: tabular-nums; }
+  #hint { bottom: 8px !important; }
+
   #comboBar { margin-top: 5px; width: 140px; height: 5px; border-radius: 3px; background: rgba(255,255,255,.15); overflow: hidden; }
   #comboFill { height: 100%; width: 0; background: linear-gradient(90deg, #ffb27d, #ff7a3d); }
   #meter { position: absolute; left: 50%; bottom: 96px; transform: translate(-50%, 14px); width: 290px; padding: 10px 14px 12px; border-radius: 14px;
@@ -84,7 +114,15 @@
 <div id="app"></div>
 
 <div id="hud" class="hidden">
-  <div class="tl"><div id="score">0</div><div id="combo"></div><div id="comboBar"><div id="comboFill"></div></div></div>
+  <div id="mapTag"><div id="mapName">SUNSET PARK</div><div id="mapEnv">Sunset · Clear</div></div>
+  <div id="scoreBox">
+    <button id="pauseBtn"><span class="ico">❚❚</span> Pause <kbd>Esc</kbd></button>
+    <div class="lab">Score</div><div id="score">0</div>
+    <div id="combo"></div><div id="comboBar"><div id="comboFill"></div></div>
+  </div>
+  <div id="trick"><div id="trickName"></div><div id="trickLine"><span id="trickPts"></span><span id="trickMult"></span></div><div id="trickGrade"></div></div>
+  <div id="mini"><div id="miniWrap"><canvas id="miniMap" width="56" height="190"></canvas><i id="miniDot"></i></div><div id="dist">0 m</div><div id="left">1.2 km to go</div></div>
+  <div id="speedBox"><div class="lab">Speed</div><div class="spd"><span id="speed">0</span><small>km/h</small></div><div id="prog"><div id="progFill"></div></div><div id="time">0:00.00</div></div>
   <div id="meter">
     <div id="mName"></div>
     <div class="mrow"><span>SPIN</span><div class="bar"><i id="mSpin"></i></div><b id="vSpin">0°</b></div>
@@ -93,11 +131,8 @@
     <div class="mrow"><span>GRAB</span><div class="bar"><i id="mGrab"></i></div><b id="vGrab">—</b></div>
     <div id="mLand">READY TO LAND</div>
   </div>
-  <div id="prog"><div id="progFill"></div></div>
-  <div class="tr"><div id="time">0:00.00</div><div id="speed">0 km/h</div></div>
-  <div id="trick"><div id="trickName"></div><div id="trickPts"></div></div>
   <div id="bal"><div id="balDot"></div></div>
-  <div id="hint">Space pop · arrows spin/flip · Q/E cork · Shift grab · R restart · Esc pause</div>
+  <div id="hint">Space pop · arrows spin/flip · Q/E cork · Shift+arrow grabs · G/F/V grabs · Shift+←/→ butter · R restart</div>
 </div>
 
 <div id="cine"><div class="cineText"><div id="cineTitle"></div><div id="cineSub"></div></div><div id="skip">Click or press Space to skip</div></div>
@@ -112,7 +147,10 @@
       <span><b>↑</b> <b>↓</b></span><span>Tuck / brake · front / back flip</span>
       <span><b>Q</b> <b>E</b></span><span>Cork roll in the air</span>
       <span><b>Space</b></span><span>Hold and release to pop, hop on and off rails</span>
-      <span><b>Shift</b></span><span>Grab in the air</span>
+      <span><b>Shift</b> + <b>←↑→↓</b></span><span>Grabs: Safety, Mute, Japan, Tip, Tail</span>
+      <span><b>G</b> <b>F</b> <b>V</b></span><span>Truck Driver · Daffy · Spread Eagle</span>
+      <span><b>Shift</b> + <b>←</b>/<b>→</b></span><span>On the snow: butter spins</span>
+      <span><b>↑</b> <b>↓</b> on rails</span><span>Nose / tail press</span>
       <span><b>R</b> · <b>Esc</b></span><span>Restart · pause</span>
     </div>
     <div class="opts">
