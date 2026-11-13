@@ -1,0 +1,7 @@
+{
+  "name": "Clash of Vikings",
+  "description": "Command a Viking army and defend your base in lane battles.",
+  "controls": "Mouse to pick units and upgrades.",
+  "color": "#991b1b",
+  "icon": "icon.svg"
+}

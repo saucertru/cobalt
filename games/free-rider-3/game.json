@@ -1,0 +1,7 @@
+{
+  "name": "Free Rider 3",
+  "description": "Ride a bike over hand-drawn line tracks.",
+  "controls": "Arrow keys to ride and lean, Z to turn around.",
+  "color": "#64748b",
+  "icon": "icon.svg"
+}

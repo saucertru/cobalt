@@ -1,0 +1,7 @@
+{
+  "name": "Basket Bros",
+  "description": "Fast arcade basketball: dunk, block and shoot against friends or the CPU.",
+  "controls": "Arrow keys or WASD to move and jump, shoot key shown in game.",
+  "color": "#f97316",
+  "icon": "icon.svg"
+}
