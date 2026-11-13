@@ -1,4 +1,4 @@
 {
-  "buildCommand": "npm install @mercuryworkshop/scramjet@2.0.67-alpha.2 @mercuryworkshop/bare-mux @mercuryworkshop/libcurl-transport && node scripts/build-games.js && mkdir -p dist/scram dist/baremux dist/libcurl && cp proxy.html sw.js dist/ && cp node_modules/@mercuryworkshop/scramjet/dist/* dist/scram/ && cp node_modules/@mercuryworkshop/bare-mux/dist/* dist/baremux/ && cp node_modules/@mercuryworkshop/libcurl-transport/dist/* dist/libcurl/",
+  "buildCommand": "node scripts/build-games.js && bash scripts/build-proxy.sh",
   "outputDirectory": "dist"
 }
